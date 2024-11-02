@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: data-ingestion-service
+
+  kafka:
+    producer:
+      bootstrap-server: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+websocket:
+  url:
+    asset: "wss://ws.coincap.io/prices?assets=ALL"
+
+api:
+  client:
+    base_url: api.coincap.io/v2
+
+rate:
+  limit:
+    max-requests: 200
+
+data:
+  raw:
+    market: "raw_market"
