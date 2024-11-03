@@ -13,9 +13,9 @@ import java.time.Duration;
 @Configuration
 public class ScheduledApiClientConfig {
 
-    @Value("${client.api.base_url}")
+    @Value("${coincap.rest.api.base_url}")
     private String base_url;
-    @Value("${rate.limit.max-requests}")
+    @Value("${rate-limit.max-requests}")
     private int maxRequests;
 
     @Bean

@@ -6,20 +6,18 @@ spring:
     producer:
       bootstrap-server: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-websocket:
-  url:
-    asset: "wss://ws.coincap.io/prices?assets=ALL"
+coincap:
+  websocket:
+    url:
+      asset: "wss://ws.coincap.io/prices?assets=ALL"
+  rest:
+    api:
+      base_url: api.coincap.io/v2
 
-api:
-  client:
-    base_url: api.coincap.io/v2
-
-rate:
-  limit:
+rate-limit:
     max-requests: 200
 
-data:
-  raw:
-    market: "raw_market"
+raw-data:
+  market: "raw_market"

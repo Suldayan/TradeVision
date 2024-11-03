@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaProducerService {
 
-    @Value("${topics.raw.market}")
+    @Value("${raw-data.market}")
     private String marketTopic;
 
     private final KafkaTemplate<String, MarketResponseModel> kafkaTemplate;
