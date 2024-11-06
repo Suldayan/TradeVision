@@ -4,6 +4,7 @@ import com.example.data_ingestion_service.model.MarketModel;
 import com.example.data_ingestion_service.service.DataFilterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bucket;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -65,7 +66,8 @@ public class ScheduledRestClient<T> {
     * fetches the data from the coin cap api with an expected response of json
     * @Returns a generic of R to generalize the 3 data models being worked with
     * */
-    @Retry(name = "ScheduledRestClient")
+    @Retry(name = "fetchDataRetry")
+    @CircuitBreaker(name = "fetchDataBreaker")
     public <R> R fetchData(String dataType, Class<R> responseType) {
         log.info("Fetching data of type: {}", responseType);
         return restClient.get()

@@ -27,11 +27,28 @@ raw-data:
 resilience4j:
   retry:
     instances:
-      ScheduledRestClient:
+      fetchDataRetry:
         maxRetryAttempts: 6
         waitDuration: 1s
         enableExponentialBackoff: true
         exponentialBackoffMultiplier: 2
         retryExceptions:
           - java.lang.ResponseStatusException
+  circuitbreaker:
+    instances:
+      fetchDataBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        eventConsumerBufferSize: 10
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: '*'
+
 
