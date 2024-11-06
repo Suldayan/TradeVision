@@ -12,12 +12,13 @@ coincap:
   websocket:
     url:
       asset: "wss://ws.coincap.io/prices?assets=ALL"
-  rest:
-    api:
-      base_url: api.coincap.io/v2
+  rest-api:
+    base_url: api.coincap.io/v2
 
-rate-limit:
+limits:
     max-requests: 200
+    max-retries: 3
+    refresh-rate: 1
 
 raw-data:
   market: "raw_market"

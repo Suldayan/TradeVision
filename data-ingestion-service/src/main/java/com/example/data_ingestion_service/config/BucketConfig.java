@@ -6,30 +6,23 @@ import io.github.bucket4j.Refill;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 
 @Configuration
-public class ScheduledApiClientConfig {
+public class BucketConfig {
 
-    @Value("${coincap.rest.api.base_url}")
-    private String base_url;
-    @Value("${rate-limit.max-requests}")
-    private int maxRequests;
+    @Value("${limits.max-requests}")
+    private int MAX_REQUESTS;
 
-    @Bean
-    public WebClient webClientBuilder() {
-        return WebClient.builder()
-                .baseUrl(base_url)
-                .build();
-    }
+    @Value("${limits.refresh-rate}")
+    private int REFRESH_RATE;
 
     @Bean
     public Bandwidth limit() {
         return Bandwidth
-                .classic(maxRequests,
-                        Refill.greedy(maxRequests, Duration.ofMinutes(1)));
+                .classic(MAX_REQUESTS,
+                        Refill.greedy(MAX_REQUESTS, Duration.ofMinutes(REFRESH_RATE)));
     }
 
     @Bean
