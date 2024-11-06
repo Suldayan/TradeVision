@@ -41,7 +41,6 @@ public class ScheduledRestClient<T> {
     @SuppressWarnings("unchecked")
     public void defineTypeModelMap() {
         dataTypeToModel.put("market", (Class<T>) MarketModel.class);
-        // Add any other data type to model mappings here
     }
 
     /*
