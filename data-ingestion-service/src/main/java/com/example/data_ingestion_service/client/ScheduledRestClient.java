@@ -4,12 +4,15 @@ import com.example.data_ingestion_service.model.MarketModel;
 import com.example.data_ingestion_service.service.DataFilterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bucket;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -62,6 +65,7 @@ public class ScheduledRestClient<T> {
     * fetches the data from the coin cap api with an expected response of json
     * @Returns a generic of R to generalize the 3 data models being worked with
     * */
+    @Retry(name = "ScheduledRestClient")
     public <R> R fetchData(String dataType, Class<R> responseType) {
         log.info("Fetching data of type: {}", responseType);
         return restClient.get()
@@ -69,7 +73,8 @@ public class ScheduledRestClient<T> {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange((request, response) -> {
                     if (response.getStatusCode().is5xxServerError()) {
-                        // TODO: add retrying
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                "A 5xx server occurred, retrying the function");
                     }
                     return convertResponse(response, responseType);
                 });

@@ -22,3 +22,16 @@ limits:
 
 raw-data:
   market: "raw_market"
+  candle: "raw_candle"
+
+resilience4j:
+  retry:
+    instances:
+      ScheduledRestClient:
+        maxRetryAttempts: 6
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.lang.ResponseStatusException
+
