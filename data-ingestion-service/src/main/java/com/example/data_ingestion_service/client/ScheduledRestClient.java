@@ -49,7 +49,7 @@ public class ScheduledRestClient<T> {
     * */
     @Scheduled(fixedRate = 1000)
     @Retry(name = "manageFetch")
-    @CircuitBreaker(name = "manageFetch", fallbackMethod = "fallbackMethod") //TODO: configure fallback
+    @CircuitBreaker(name = "manageFetch", fallbackMethod = "manageFetchFallbackMethod") //TODO: configure fallback
     public void manageFetch() {
         dataTypeToModel.entrySet().stream()
                 .map(entry -> CompletableFuture
@@ -62,6 +62,14 @@ public class ScheduledRestClient<T> {
                             return null;
                         }))
                 .forEach(CompletableFuture::join);
+    }
+
+    /*
+    * Fallback method for the manageFetch function after all retries have been exhausted
+    * */
+    public void manageFetchFallbackResponse(Exception e) throws Exception {
+        throw new Exception(String.format("Circuit falling back due to multiple failures::%s",
+                e.getMessage()));
     }
 
     /*
@@ -105,10 +113,5 @@ public class ScheduledRestClient<T> {
             throw new IOException(String.format("Failed to convert response of type::%s, %s",
                     responseType, e.getMessage()));
         }
-    }
-
-    public void fallbackResponse(Exception e) throws Exception {
-        throw new Exception(String.format("Circuit falling back due to multiple failures::%s",
-                e.getMessage()));
     }
 }

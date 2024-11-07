@@ -37,6 +37,16 @@ resilience4j:
           - java.lang.ResponseStatusException
           - java.io.IOException
 
+      sendData:
+        maxRetryAttempts: 3
+        waitDuration: 500ms
+        retryExceptions:
+          - org.apache.kafka.common.errors.TimeoutException
+          - org.apache.kafka.common.errors.NetworkException
+        ignoreExceptions:
+          - org.apache.kafka.common.errors.AuthorizationException
+          - org.apache.kafka.common.errors.InvalidTopicException
+
   circuitbreaker:
     instances:
       manageFetch:
@@ -50,6 +60,15 @@ resilience4j:
         eventConsumerBufferSize: 10
         ignoreExceptions:
           - org.springframework.web.client.HttpClientErrorException
+
+      sendData:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
 
     management:
       endpoints:

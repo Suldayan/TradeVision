@@ -1,6 +1,8 @@
 package com.example.data_ingestion_service.service;
 
 import com.example.data_ingestion_service.model.MarketResponseModel;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,6 @@ public class DataFilterService<T> {
         }
     }
 
-    //TODO: add a retry method for sending data to kafka producer
     /*
     * Filters out responses that contain the same state as the last fetched data
     * It only sends data that have been changed and updates the last state
