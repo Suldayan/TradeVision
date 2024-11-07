@@ -1,12 +1,15 @@
 package com.example.data_ingestion_service.service;
 
+import com.example.data_ingestion_service.model.MarketResponseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 @Service
 @Slf4j
@@ -14,18 +17,47 @@ public class DataFilterService<T> {
 
     private final KafkaProducerService<T> producerService;
     private final AtomicReference<Object> previousModelState;
+    private List<String> topics;
 
-    public DataFilterService(KafkaProducerService<T> producerService,
-                             @Value("${limits.max-retries}") int maxRetries) {
+    @Value("${raw-data.market}")
+    private String marketTopic;
+
+    @Value("${raw-data.candle")
+    private String candleTopic;
+
+    public DataFilterService(KafkaProducerService<T> producerService) {
         this.producerService = producerService;
+        this.topics = new ArrayList<>();
         this.previousModelState = new AtomicReference<>();
     }
 
+    public void topics() {
+        topics = List.of(
+                marketTopic,
+                candleTopic);
+    }
+
+    public void addTopicToData(T response) {
+        CompletableFuture.runAsync(() -> {
+            if (response instanceof MarketResponseModel) {
+                producerService.sendData(topics.getFirst(), response);
+            }
+        }).exceptionally(throwable -> {
+            log.error(String.format("Unable to add topic to response::%s", throwable.getMessage()));
+            return null;
+        });
+    }
+
+    //TODO: add a retry method for sending data to kafka producer
+    /*
+    * Filters out responses that contain the same state as the last fetched data
+    * It only sends data that have been changed and updates the last state
+    * */
     public void filter(T response) {
         try {
             if (!response.equals(previousModelState.get())) {
                 previousModelState.set(response);
-                producerService.sendData(response);
+                addTopicToData(response);
             }
 
             log.info("Data is unchanged as of: {}", LocalDateTime.now());

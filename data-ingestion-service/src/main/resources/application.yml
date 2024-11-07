@@ -34,6 +34,7 @@ resilience4j:
         exponentialBackoffMultiplier: 2
         retryExceptions:
           - java.lang.ResponseStatusException
+
   circuitbreaker:
     instances:
       fetchDataBreaker:
@@ -44,6 +45,9 @@ resilience4j:
         waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
         eventConsumerBufferSize: 10
+        recordExceptions:
+          - java.lang.ResponseStatusException
+          - java.lang.TimeoutException
 
     management:
       endpoints:

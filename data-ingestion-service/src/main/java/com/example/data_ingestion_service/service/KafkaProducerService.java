@@ -12,16 +12,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaProducerService<T> {
 
-    @Value("${raw-data.market}")
-    private String marketTopic;
-
     private final KafkaTemplate<String, T> kafkaTemplate;
 
-    public void sendData(T data) {
+    public void sendData(String topic, T data) {
         log.info("Sending data to consumer");
 
         try {
-            kafkaTemplate.send(marketTopic, data)
+            kafkaTemplate.send(topic, data)
                     .whenComplete((result, ex) -> {
                         if (ex == null) {
                             log.info("Data successfully sent to topic {} at partition {} with offset {}",

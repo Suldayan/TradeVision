@@ -44,7 +44,8 @@ public class ScheduledRestClient<T> {
     }
 
     /*
-    *
+    * Asynchronously uses the data type model as input for the fetchData function and runs the returned
+    * data through a filter, determining whether the data should be passed or not
     * */
     @Scheduled(fixedRate = 1000)
     public void scheduleFetch() {
@@ -62,11 +63,11 @@ public class ScheduledRestClient<T> {
     }
 
     /*
-    * fetches the data from the coin cap api with an expected response of json
+    * Fetches the data from the coin cap api with an expected response of json
     * @Returns a generic of R to generalize the 3 data models being worked with
+    * TODO: configure a fallback method for retry and circuit breaker
+    *  TODO: configure a Timeout Exception to be thrown for another way to retry
     * */
-    @Retry(name = "fetchDataRetry")
-    @CircuitBreaker(name = "fetchDataBreaker")
     public <R> R fetchData(String dataType, Class<R> responseType) {
         log.info("Fetching data of type: {}", responseType);
         return restClient.get()
@@ -83,7 +84,7 @@ public class ScheduledRestClient<T> {
 
     /*
     * keeps track of the current rate limit
-    * TODO: add circuit breaking to -> open state the function if it reaches the limit
+    *
     * */
     public void updateBucket() {
         if (!bucket.tryConsume(1)) {
