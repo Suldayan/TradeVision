@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -37,15 +36,19 @@ public class DataFilterService<T> {
                 candleTopic);
     }
 
+    /*
+    * Matches the response with its corresponding topic for kafka to know what topic to send to
+    *
+    * */
     public void addTopicToData(T response) {
-        CompletableFuture.runAsync(() -> {
+        try {
             if (response instanceof MarketResponseModel) {
+                log.debug("Adding topic: {} to match response: {}", topics.getFirst(), response.getClass());
                 producerService.sendData(topics.getFirst(), response);
             }
-        }).exceptionally(throwable -> {
-            log.error(String.format("Unable to add topic to response::%s", throwable.getMessage()));
-            return null;
-        });
+        } catch (Exception e) {
+            log.error(String.format("Failed to add topic to response::%s - %s", response, e.getMessage()));
+        }
     }
 
     //TODO: add a retry method for sending data to kafka producer

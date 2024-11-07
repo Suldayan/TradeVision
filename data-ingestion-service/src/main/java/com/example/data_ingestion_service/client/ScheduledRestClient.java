@@ -48,7 +48,9 @@ public class ScheduledRestClient<T> {
     * data through a filter, determining whether the data should be passed or not
     * */
     @Scheduled(fixedRate = 1000)
-    public void scheduleFetch() {
+    @Retry(name = "manageFetch")
+    @CircuitBreaker(name = "manageFetch", fallbackMethod = "fallbackMethod") //TODO: configure fallback
+    public void manageFetch() {
         dataTypeToModel.entrySet().stream()
                 .map(entry -> CompletableFuture
                         .supplyAsync(() -> fetchData(entry.getKey(), entry.getValue()))
@@ -103,5 +105,10 @@ public class ScheduledRestClient<T> {
             throw new IOException(String.format("Failed to convert response of type::%s, %s",
                     responseType, e.getMessage()));
         }
+    }
+
+    public void fallbackResponse(Exception e) throws Exception {
+        throw new Exception(String.format("Circuit falling back due to multiple failures::%s",
+                e.getMessage()));
     }
 }

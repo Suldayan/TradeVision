@@ -12,6 +12,7 @@ coincap:
   websocket:
     url:
       asset: "wss://ws.coincap.io/prices?assets=ALL"
+
   rest-api:
     base_url: api.coincap.io/v2
 
@@ -27,32 +28,37 @@ raw-data:
 resilience4j:
   retry:
     instances:
-      fetchDataRetry:
+      manageFetch:
         maxRetryAttempts: 6
         waitDuration: 1s
         enableExponentialBackoff: true
         exponentialBackoffMultiplier: 2
         retryExceptions:
           - java.lang.ResponseStatusException
+          - java.io.IOException
 
   circuitbreaker:
     instances:
-      fetchDataBreaker:
+      manageFetch:
         registerHealthIndicator: true
-        slidingWindowSize: 5
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
         minimumNumberOfCalls: 5
         failureRateThreshold: 50
-        waitDurationInOpenState: 10s
+        waitDurationInOpenState: 30s
         permittedNumberOfCallsInHalfOpenState: 3
         eventConsumerBufferSize: 10
-        recordExceptions:
-          - java.lang.ResponseStatusException
-          - java.lang.TimeoutException
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException
 
     management:
       endpoints:
         web:
           exposure:
             include: '*'
+
+      endpoint:
+        health:
+          show-details: always
 
 
