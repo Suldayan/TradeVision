@@ -5,3 +5,7 @@ spring:
 coincap:
   base-url: https://api.coincap.io/v2
   api-key: ${COINCAP_API_KEY}
+
+bucket:
+  rate-limit: 500
+  time-period: 60
