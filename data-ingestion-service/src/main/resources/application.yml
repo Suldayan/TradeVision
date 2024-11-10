@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: data-ingestion-service
+
+coincap:
+  base-url: https://api.coincap.io/v2
+  api-key: ${COINCAP_API_KEY}
