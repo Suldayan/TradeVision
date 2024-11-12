@@ -2,6 +2,19 @@ spring:
   application:
     name: data-ingestion-service
 
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASS}}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    locations: classpath:db/migration
+
+
 coincap:
   base-url: https://api.coincap.io/v2
   api-key: ${COINCAP_API_KEY}
@@ -9,3 +22,5 @@ coincap:
 bucket:
   rate-limit: 500
   time-period: 60
+
+
