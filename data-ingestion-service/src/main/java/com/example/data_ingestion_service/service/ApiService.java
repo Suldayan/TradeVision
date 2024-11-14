@@ -19,11 +19,17 @@ public class ApiService {
         this.apiClient = apiClient;
     }
 
+    /*
+    * Periodically fetches market data from the coin cap api
+    * @returns a response entity of object RawMarketWrapperModel, where the list of
+    * rawMarketModels represents the actual data being saved in the database
+    * */
+    //TODO: wrap with retry -> circuit breaking -> scheduled
     public ResponseEntity<RawMarketWrapperModel> fetchMarketData() throws CustomApiServiceException{
         try {
             log.info("Fetching market data");
             log.debug("Fetching market data at: {}", LocalDateTime.now());
-            return apiClient.getMarketData();
+            return apiClient.getAllMarketData();
         } catch (Exception error) {
             log.error("Failed to fetch market data: {}", error.getMessage());
             String errorMessage = String.format(

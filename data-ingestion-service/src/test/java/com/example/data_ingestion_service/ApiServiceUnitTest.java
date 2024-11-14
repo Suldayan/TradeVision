@@ -17,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,16 +39,11 @@ public class ApiServiceUnitTest {
         rawMarketModel = RawMarketModel.builder()
                 .id(1L)
                 .exchangeId("testExchangeId")
-                .rank(1)
-                .baseId("testBaseId")
-                .quoteId("testQuoteId")
                 .baseSymbol("BTC")
                 .quoteSymbol("USD")
-                .priceQuote(new BigDecimal("45000.50"))
                 .priceUsd(new BigDecimal("45000.50"))
                 .volumeUsd24Hr(new BigDecimal("1000000000.00"))
                 .percentExchangeVolume(new BigDecimal("0.05"))
-                .tradesCount24Hr(100000L)
                 .updated(1633024800000L)
                 .build();
 
@@ -59,7 +53,7 @@ public class ApiServiceUnitTest {
     }
 
     @Test
-    void fetchMarketData_ReturnsMarketWrapperObject() throws CustomApiServiceException {
+    void testFetchMarketData_ReturnsMarketWrapperObject() throws CustomApiServiceException {
 
         when(apiService.fetchMarketData()).thenReturn(ResponseEntity.ok(rawMarketWrapperModel));
 
@@ -68,5 +62,12 @@ public class ApiServiceUnitTest {
         assertNotNull(result);
         assertEquals(rawMarketWrapperModel, result);
         assertEquals(rawMarketWrapperModel.getMarketModelList().getFirst(), rawMarketModel);
+    }
+
+    @Test
+    void testFetchMarketData_ThrowsCustomApiServiceException() throws CustomApiServiceException {
+        when(apiService.fetchMarketData()).thenThrow(new CustomApiServiceException("Unable to fetch market data"));
+
+
     }
 }
