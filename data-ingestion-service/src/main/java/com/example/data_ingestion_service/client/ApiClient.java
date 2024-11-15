@@ -23,14 +23,14 @@ public interface ApiClient {
      * @return ResponseEntity containing RawAssetWrapperModel
      */
     @GetExchange("/asset/{id}/history")
-    ResponseEntity<RawAssetWrapperModel> getAssetSpecificHistoricData(@PathVariable String id);
+    ResponseEntity<RawAssetHistoryWrapperModel> getAssetSpecificHistoricData(@PathVariable String id);
 
     /**
      * Retrieves data for all assets.
      * @return ResponseEntity containing RawAssetHistoryWrapperModel
      */
     @GetExchange("/asset")
-    ResponseEntity<RawAssetHistoryWrapperModel> getAllAssetData();
+    ResponseEntity<RawAssetWrapperModel> getAllAssetData();
 
     /**
      * Retrieves data for all available exchanges.
