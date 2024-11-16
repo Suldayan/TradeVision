@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "raw_asset_history")
+@Table(name = "raw_asset_history_data")
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,7 +24,7 @@ public class RawAssetHistoryModel {
     private BigDecimal priceUsd;
 
     @JsonProperty("time")
-    private Long time;
+    private Long updated;
 
     @OneToMany(mappedBy = "base_id")
     private List<RawMarketModel> markets;

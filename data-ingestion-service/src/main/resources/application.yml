@@ -12,8 +12,9 @@ spring:
       ddl-auto: none
 
   flyway:
+    enabled: true
+    baseline-on-migration: true
     locations: classpath:db/migration
-
 
 coincap:
   base-url: https://api.coincap.io/v2
@@ -22,5 +23,9 @@ coincap:
 bucket:
   rate-limit: 500
   time-period: 60
+
+api:
+  scheduled:
+    interval: 6000
 
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class FilterService {
 
     // TODO: process the data by comparison between previous models so only meaningful data is pushed
+    // TODO: add caching for data model comparison??
     public void processMarketData(RawMarketWrapperModel marketData) {
 
     }

@@ -20,13 +20,17 @@ public class RawMarketModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "exchange_id")
-    @JsonProperty("exchangeId")
-    private String exchangeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exchange_id", nullable = false)
+    private RawExchangesModel exchange;
 
-    @Column(name = "base_id")
-    @JsonProperty("baseId")
-    private String baseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "base_asset_id", nullable = false)
+    private RawAssetModel baseAsset;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quote_asset_id", nullable = false)
+    private RawAssetModel quoteAsset;
 
     @Column(name = "base_symbol")
     @JsonProperty("baseSymbol")
@@ -47,12 +51,4 @@ public class RawMarketModel {
 
     @JsonProperty("updated")
     private Long updated;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exchange_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private RawExchangesModel exchange;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_id", referencedColumnName = "history", insertable = false, updatable = false)
-    private RawAssetHistoryModel assetHistory;
 }

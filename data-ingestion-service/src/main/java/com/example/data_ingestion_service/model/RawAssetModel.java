@@ -1,27 +1,27 @@
 package com.example.data_ingestion_service.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "raw_asset")
+@Table(name = "raw_asset_data")
 public class RawAssetModel {
-    @JsonProperty("id")
     @Id
+    @JsonProperty("id")
     private String id;
 
+    @Column(unique = true)
     @JsonProperty("symbol")
     private String symbol;
 
@@ -48,4 +48,10 @@ public class RawAssetModel {
 
     @JsonProperty("vwap24Hr")
     private BigDecimal vwap24Hr;
+
+    @OneToMany(mappedBy = "baseAsset")
+    private Set<RawMarketModel> baseMarkets;
+
+    @OneToMany(mappedBy = "quoteAsset")
+    private Set<RawMarketModel> quoteMarkets;
 }

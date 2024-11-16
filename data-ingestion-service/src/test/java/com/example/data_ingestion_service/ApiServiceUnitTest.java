@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ApiServiceUnitTest {
@@ -54,7 +54,6 @@ public class ApiServiceUnitTest {
 
     @Test
     void testFetchMarketData_ReturnsMarketWrapperObject() throws CustomApiServiceException {
-
         when(apiService.fetchMarketData()).thenReturn(ResponseEntity.ok(rawMarketWrapperModel));
 
         RawMarketWrapperModel result = apiService.fetchMarketData().getBody();
@@ -65,9 +64,9 @@ public class ApiServiceUnitTest {
     }
 
     @Test
-    void testFetchMarketData_ThrowsCustomApiServiceException() throws CustomApiServiceException {
-        when(apiService.fetchMarketData()).thenThrow(new CustomApiServiceException("Unable to fetch market data"));
+    void testSendDataToFilter_Success() throws CustomApiServiceException {
+        apiService.sendDataToFilter();
 
-
+        verify(apiService.fetchMarketData());
     }
 }

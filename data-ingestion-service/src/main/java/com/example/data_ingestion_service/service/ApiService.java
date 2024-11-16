@@ -27,17 +27,15 @@ public class ApiService {
         this.filterService = filterService;
     }
 
-    //@Scheduled(fixedRate = )
+    /*
+     * Periodically fetches all data from the coin cap api
+     * */
+    @Scheduled(fixedRateString = "${api.scheduled.interval:6000}")
     public void scheduleDataFetch() {
         log.info("Starting scheduled data fetch at: {}", LocalDateTime.now());
         sendDataToFilter();
     }
 
-    /*
-    * Periodically fetches market data from the coin cap api
-    * @return a response entity of object RawMarketWrapperModel, where the list of
-    * rawMarketModels represents the actual data being saved in the database
-    * */
     //TODO: wrap with retry -> circuit breaking -> scheduled
     public ResponseEntity<RawMarketWrapperModel> fetchMarketData() throws CustomApiServiceException{
         try {

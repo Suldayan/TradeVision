@@ -8,10 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Set;
 
 @Entity
-@Table(name = "raw_exchanges")
+@Table(name = "raw_exchanges_data")
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,6 +21,7 @@ public class RawExchangesModel {
     @JsonProperty("id")
     private String id;
 
+    @Column(unique = true)
     @JsonProperty("name")
     private String name;
 
@@ -34,5 +35,5 @@ public class RawExchangesModel {
     private Long updated;
 
     @OneToMany(mappedBy = "exchange")
-    private List<RawMarketModel> markets;
+    private Set<RawMarketModel> markets;
 }
