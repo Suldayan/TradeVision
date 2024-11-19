@@ -2,9 +2,10 @@ package com.example.data_ingestion_service;
 
 import com.example.data_ingestion_service.client.ApiClient;
 import com.example.data_ingestion_service.exception.CustomApiServiceException;
-import com.example.data_ingestion_service.model.RawMarketModel;
-import com.example.data_ingestion_service.model.RawMarketWrapperModel;
+import com.example.data_ingestion_service.model.*;
 import com.example.data_ingestion_service.service.ApiService;
+import com.example.data_ingestion_service.service.FilterService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,22 +29,29 @@ public class ApiServiceUnitTest {
     @Mock
     private ApiClient apiClient;
 
+    @Mock
+    private FilterService filterService;
+
     @InjectMocks
     private ApiService apiService;
 
-    private RawMarketWrapperModel rawMarketWrapperModel;
-    private RawMarketModel rawMarketModel;
-
-
     @BeforeEach
     void setup() {
+        filterService = new FilterService();
+        apiService = new ApiService(apiClient, filterService);
         MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void teardown() {
+        filterService = null;
+        apiService = null;
     }
 
     @Test
     void testFetchMarketData_ReturnsMarketWrapperObject() throws CustomApiServiceException {
         // Arrange
-        rawMarketModel = RawMarketModel.builder()
+        RawMarketModel rawMarketModel = RawMarketModel.builder()
                 .id(1L)
                 .baseSymbol("BTC")
                 .quoteSymbol("USD")
@@ -53,7 +61,7 @@ public class ApiServiceUnitTest {
                 .updated(1633024800000L)
                 .build();
 
-        rawMarketWrapperModel = RawMarketWrapperModel.builder()
+        RawMarketWrapperModel rawMarketWrapperModel = RawMarketWrapperModel.builder()
                 .marketModelList(Collections.singletonList(rawMarketModel))
                 .build();
 
@@ -70,8 +78,34 @@ public class ApiServiceUnitTest {
     }
 
     @Test
-    void testSendDataToFilter_Success() throws CustomApiServiceException {
+    void testSendDataToFilter_Success() throws CustomApiServiceException, InterruptedException {
+        // Arrange :(
+        RawMarketModel rawMarketModel = new RawMarketModel();
+        RawExchangesModel rawExchangesModel = new RawExchangesModel();
+        RawAssetModel rawAssetModel = new RawAssetModel();
 
+        RawMarketWrapperModel rawMarketWrapperModel = RawMarketWrapperModel.builder()
+                .marketModelList(Collections.singletonList(rawMarketModel)).build();
 
+        RawExchangeWrapperModel rawExchangeWrapperModel = RawExchangeWrapperModel.builder()
+                .rawExchangesModelList(Collections.singletonList(rawExchangesModel))
+                .build();
+
+        RawAssetWrapperModel rawAssetWrapperModel = RawAssetWrapperModel.builder()
+                .rawAssetModelList(Collections.singletonList(rawAssetModel))
+                .build();
+
+        // Act :/
+        when(apiService.fetchMarketData()).thenReturn(ResponseEntity.ok(rawMarketWrapperModel));
+        when(apiService.fetchExchangeData()).thenReturn(ResponseEntity.ok(rawExchangeWrapperModel));
+        when(apiService.fetchAssetData()).thenReturn(ResponseEntity.ok(rawAssetWrapperModel));
+
+        apiService.sendDataToFilter();
+
+        Thread.sleep(100);
+
+        verify(filterService, times(1)).processMarketData(rawMarketWrapperModel);
+        verify(filterService, times(1)).processExchangeData(rawExchangeWrapperModel);
+        verify(filterService, times(1)).processAssetHistoryData(rawAssetWrapperModel);
     }
 }

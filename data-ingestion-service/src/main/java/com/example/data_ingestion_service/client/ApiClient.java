@@ -1,6 +1,5 @@
 package com.example.data_ingestion_service.client;
 
-import com.example.data_ingestion_service.model.RawAssetHistoryWrapperModel;
 import com.example.data_ingestion_service.model.RawAssetWrapperModel;
 import com.example.data_ingestion_service.model.RawExchangeWrapperModel;
 import com.example.data_ingestion_service.model.RawMarketWrapperModel;
@@ -16,14 +15,6 @@ public interface ApiClient {
      */
     @GetExchange("/market")
     ResponseEntity<RawMarketWrapperModel> getAllMarketData();
-
-    /**
-     * Retrieves specific historical asset data by asset ID.
-     * @param id The unique identifier of the asset.
-     * @return ResponseEntity containing RawAssetWrapperModel
-     */
-    @GetExchange("/asset/{id}/history")
-    ResponseEntity<RawAssetHistoryWrapperModel> getAssetSpecificHistoricData(@PathVariable String id);
 
     /**
      * Retrieves data for all assets.

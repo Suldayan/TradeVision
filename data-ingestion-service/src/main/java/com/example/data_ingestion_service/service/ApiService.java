@@ -1,18 +1,15 @@
 package com.example.data_ingestion_service.service;
 
 import com.example.data_ingestion_service.client.ApiClient;
-import com.example.data_ingestion_service.exception.CustomApiServiceException;
 import com.example.data_ingestion_service.model.RawAssetWrapperModel;
 import com.example.data_ingestion_service.model.RawExchangeWrapperModel;
 import com.example.data_ingestion_service.model.RawMarketWrapperModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -28,97 +25,78 @@ public class ApiService {
     }
 
     /*
-     * Periodically fetches all data from the coin cap api
-     * */
+    * Helper functions for supporting the supply async lambda
+    * @return the response entity as its corresponding model object from the api client
+    * */
+    public RawMarketWrapperModel getMarketApiResponseAsBody() {
+        return apiClient.getAllMarketData().getBody();
+    }
+    public RawExchangeWrapperModel getExchangeApiResponseAsBody() {
+        return apiClient.getAllExchangeData().getBody();
+    }
+    public RawAssetWrapperModel getAssetApiResponseAsBody() {
+        return apiClient.getAllAssetData().getBody();
+    }
+
+    // Helper functions for sending data to the filter service
+    public void sendMarketDataToFilter(RawMarketWrapperModel data) { filterService.processMarketData(data); }
+    public void sendExchangeDataToFilter(RawExchangeWrapperModel data) { filterService.processExchangeData(data); }
+    public void sendAssetDataToFilter(RawAssetWrapperModel data) { filterService.processAssetHistoryData(data); }
+
+    //TODO: figure out how to reconfigure throwing the custom exception
+    // Helper function for centralized error handling that throws a custom exception, CustomApiServiceException
+    public Void handleError(Throwable error) {
+        log.error("An error has occurred during the asynchronous chain of fetching: {}",
+                error.getMessage());
+        return null;
+    }
+
+    // Helper function for centralized logging within the asynchronous chain
+    public void logAsynchronousChain() {
+        log.info("Data successfully fetched and sent to filter at: {}", LocalDateTime.now());
+
+        //TODO: configure a bucket counter for log debugging
+    }
+
+    //TODO: wrap with bucket -> retry -> circuit breaking
+    /*
+    * Asynchronous functions for fetching its respective data, then running it through the filter service
+    * @return a CompletableFuture<Void> to represent the functions fully finished state through the
+    * asynchronous chain
+    * */
     @Scheduled(fixedRateString = "${api.scheduled.interval:6000}")
-    public void scheduleDataFetch() {
-        log.info("Starting scheduled data fetch at: {}", LocalDateTime.now());
-        sendDataToFilter();
+    @Async
+    public CompletableFuture<Void> fetchMarketData() {
+        log.info("Fetching market data");
+        log.debug("Fetching market data at: {}", LocalDateTime.now());
+
+        return CompletableFuture.supplyAsync(this::getMarketApiResponseAsBody)
+                .thenAccept(this::sendMarketDataToFilter)
+                .thenRun(this::logAsynchronousChain)
+                .exceptionally(this::handleError);
     }
 
-    //TODO: wrap with retry -> circuit breaking -> scheduled
-    public ResponseEntity<RawMarketWrapperModel> fetchMarketData() throws CustomApiServiceException{
-        try {
-            log.info("Fetching market data");
-            log.debug("Fetching market data at: {}", LocalDateTime.now());
-            return apiClient.getAllMarketData();
-        } catch (Exception error) {
-            log.error("Failed to fetch market data: {}", error.getMessage());
-            String errorMessage = String.format(
-                    "Error while fetching market data at: %s, %s",
-                    LocalDateTime.now(), error.getMessage());
-            throw new CustomApiServiceException(errorMessage);
-        }
+    @Scheduled(fixedRateString = "${api.scheduled.interval:6000}")
+    @Async
+    public CompletableFuture<Void> fetchExchangeData() {
+        log.info("Fetching exchange data");
+        log.debug("Fetching exchange data at: {}", LocalDateTime.now());
+
+        return CompletableFuture.supplyAsync(this::getExchangeApiResponseAsBody)
+                .thenAccept(this::sendExchangeDataToFilter)
+                .thenRun(this::logAsynchronousChain)
+                .exceptionally(this::handleError);
     }
 
-    public ResponseEntity<RawExchangeWrapperModel> fetchExchangeData() throws CustomApiServiceException {
-        try {
-            log.info("Fetching exchange data");
-            log.debug("Fetching exchange data at: {}", LocalDateTime.now());
-            return apiClient.getAllExchangeData();
-        } catch (Exception error) {
-            log.error("Failed to fetch exchange data: {}", error.getMessage());
-            String errorMessage = String.format(
-                    "Error while fetching exchange data at: %s, %s",
-                    LocalDateTime.now(), error.getMessage());
-            throw new CustomApiServiceException(errorMessage);
-        }
-    }
+    @Scheduled(fixedRateString = "${api.scheduled.interval:6000}")
+    @Async
+    public CompletableFuture<Void> fetchAssetData() {
+        log.info("Fetching asset data");
+        log.debug("Fetching asset data at: {}", LocalDateTime.now());
 
-    public ResponseEntity<RawAssetWrapperModel> fetchAssetData() throws CustomApiServiceException {
-        try {
-            log.info("Fetching asset data");
-            log.debug("Fetching asset data at: {}", LocalDateTime.now());
-            return apiClient.getAllAssetData();
-        } catch (Exception error) {
-            log.error("Failed to fetch asset data: {}", error.getMessage());
-            String errorMessage = String.format(
-                    "Error while fetching asset data at: %s, %s",
-                    LocalDateTime.now(), error.getMessage());
-            throw new CustomApiServiceException(errorMessage);
-        }
-    }
-
-    public void sendDataToFilter() {
-        List<CompletableFuture<?>> futures = new ArrayList<>();
-
-        futures.add(CompletableFuture.supplyAsync(() -> {
-            try {
-                ResponseEntity<RawMarketWrapperModel> marketData = fetchMarketData();
-                filterService.processMarketData(marketData.getBody());
-                return null;
-            } catch (CustomApiServiceException e) {
-                log.error("Failed to process market data");
-                return null;
-            }
-        }));
-
-        futures.add(CompletableFuture.supplyAsync(() -> {
-            try {
-                ResponseEntity<RawExchangeWrapperModel> exchangeData = fetchExchangeData();
-                filterService.processExchangeData(exchangeData.getBody());
-                return null;
-            } catch (CustomApiServiceException e) {
-                log.error("Failed to process exchange data");
-                return null;
-            }
-        }));
-
-        futures.add(CompletableFuture.supplyAsync(() -> {
-            try {
-                ResponseEntity<RawAssetWrapperModel> assetData = fetchAssetData();
-                filterService.processAssetHistoryData(assetData.getBody());
-                return null;
-            } catch (CustomApiServiceException e) {
-                log.error("Failed to process asset history data");
-                return null;
-            }
-        }));
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .exceptionally(throwable -> {
-                    log.error("Error processing data", throwable);
-                    return null;
-                });
+        return CompletableFuture.supplyAsync(this::getAssetApiResponseAsBody)
+                .thenAccept(this::sendAssetDataToFilter)
+                .thenRun(this::logAsynchronousChain)
+                .exceptionally(this::handleError);
     }
 }

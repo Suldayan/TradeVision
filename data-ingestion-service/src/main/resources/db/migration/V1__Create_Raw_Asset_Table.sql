@@ -10,9 +10,9 @@ CREATE TABLE raw_asset_data (
     changePercent24Hr DECIMAL(10, 8) NOT NULL,
     vwap24Hr DECIMAL(10, 8) NOT NULL,
 
-    PRIMARY KEY (id),
-    FOREIGN KEY base_market REFERENCES market_data(quoteSymbol)
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id)
+);
+
