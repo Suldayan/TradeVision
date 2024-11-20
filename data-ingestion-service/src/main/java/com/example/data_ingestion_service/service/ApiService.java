@@ -4,6 +4,8 @@ import com.example.data_ingestion_service.client.ApiClient;
 import com.example.data_ingestion_service.model.RawAssetWrapperModel;
 import com.example.data_ingestion_service.model.RawExchangeWrapperModel;
 import com.example.data_ingestion_service.model.RawMarketWrapperModel;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 @Slf4j
 @Service
@@ -18,27 +21,40 @@ public class ApiService {
 
     private final ApiClient apiClient;
     private final FilterService filterService;
+    private final MeterRegistry meterRegistry;
 
-    public ApiService(ApiClient apiClient, FilterService filterService) {
+    public ApiService(ApiClient apiClient, FilterService filterService, MeterRegistry meterRegistry) {
         this.apiClient = apiClient;
         this.filterService = filterService;
+        this.meterRegistry = meterRegistry;
     }
 
     /*
     * Helper functions for supporting the supply async lambda
-    * @return the response entity as its corresponding model object from the api client
+    * @return the response entity as its corresponding model object from the api client within a lambda
+    * representing a timer for api responses
     * */
     public RawMarketWrapperModel getMarketApiResponseAsBody() {
-        return apiClient.getAllMarketData().getBody();
+        return trackApiResponseTime(() -> apiClient.getAllMarketData().getBody());
     }
     public RawExchangeWrapperModel getExchangeApiResponseAsBody() {
-        return apiClient.getAllExchangeData().getBody();
+        return trackApiResponseTime(() -> apiClient.getAllExchangeData().getBody());
     }
     public RawAssetWrapperModel getAssetApiResponseAsBody() {
-        return apiClient.getAllAssetData().getBody();
+        return trackApiResponseTime(() -> apiClient.getAllAssetData().getBody());
     }
 
-    // Helper functions for sending data to the filter service
+    /*
+    * Helper function for tracking api response times for data
+    * @param takes Supplier<T> data, representing the data being returned from the helper functions
+    * @return generic type T, representing the response time in which is logged
+    * */
+    public <T> T trackApiResponseTime(Supplier<T> data) {
+        Timer timer = meterRegistry.timer("api.response.time", "endpoint", "coincap");
+        return timer.record(data);
+    }
+
+    // Helper functions for lambda support and sending data to the filter service
     public void sendMarketDataToFilter(RawMarketWrapperModel data) { filterService.processMarketData(data); }
     public void sendExchangeDataToFilter(RawExchangeWrapperModel data) { filterService.processExchangeData(data); }
     public void sendAssetDataToFilter(RawAssetWrapperModel data) { filterService.processAssetHistoryData(data); }
