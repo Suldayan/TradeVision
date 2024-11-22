@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -21,14 +20,14 @@ public class ApiService {
 
     private final ApiClient apiClient;
     private final FilterService filterService;
-    private final MeterRegistry meterRegistry;
+    private final Timer timer;
 
-    public ApiService(ApiClient apiClient, FilterService filterService, MeterRegistry meterRegistry) {
+    public ApiService(ApiClient apiClient, FilterService filterService, Timer timer) {
         this.apiClient = apiClient;
         this.filterService = filterService;
-        this.meterRegistry = meterRegistry;
+        this.timer = timer;
     }
-
+    
     /*
     * Helper functions for supporting the supply async lambda
     * @return the response entity as its corresponding model object from the api client within a lambda
@@ -50,14 +49,22 @@ public class ApiService {
     * @return generic type T, representing the response time in which is logged
     * */
     public <T> T trackApiResponseTime(Supplier<T> data) {
-        Timer timer = meterRegistry.timer("api.response.time", "endpoint", "coincap");
         return timer.record(data);
     }
 
     // Helper functions for lambda support and sending data to the filter service
-    public void sendMarketDataToFilter(RawMarketWrapperModel data) { filterService.processMarketData(data); }
-    public void sendExchangeDataToFilter(RawExchangeWrapperModel data) { filterService.processExchangeData(data); }
-    public void sendAssetDataToFilter(RawAssetWrapperModel data) { filterService.processAssetHistoryData(data); }
+    public void sendMarketDataToFilter(RawMarketWrapperModel data) {
+        log.info("Sending market data to filter at: {}", LocalDateTime.now());
+        filterService.processMarketData(data);
+    }
+    public void sendExchangeDataToFilter(RawExchangeWrapperModel data) {
+        log.info("Sending exchange data to filter at: {}", LocalDateTime.now());
+        filterService.processExchangeData(data);
+    }
+    public void sendAssetDataToFilter(RawAssetWrapperModel data) {
+        log.info("Sending asset data to filter at: {}", LocalDateTime.now());
+        filterService.processAssetHistoryData(data);
+    }
 
     //TODO: figure out how to reconfigure throwing the custom exception
     // Helper function for centralized error handling that throws a custom exception, CustomApiServiceException
@@ -69,7 +76,8 @@ public class ApiService {
 
     // Helper function for centralized logging within the asynchronous chain
     public void logAsynchronousChain() {
-        log.info("Data successfully fetched and sent to filter at: {}", LocalDateTime.now());
+        log.info("Data successfully fetched and sent to filter");
+        log.debug("Data successfully fetched and sent to filter at: {}", LocalDateTime.now());
 
         //TODO: configure a bucket counter for log debugging
     }
