@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>data-ingestion-service</artifactId>
+	<artifactId>tradevision-data-ingestion-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>data-ingestion-service</name>
 	<description>Data ingestion layer, collecting from the coincap API</description>
@@ -66,11 +66,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.bucket4j</groupId>
-			<artifactId>bucket4j-core</artifactId>
-			<version>8.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

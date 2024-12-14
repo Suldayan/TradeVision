@@ -1,17 +1,21 @@
-package com.example.data_ingestion_service.model;
+package com.example.data_ingestion_service.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
 @Builder
-public class RawExchangeWrapperModel {
+@NoArgsConstructor
+@AllArgsConstructor
+public class RawAssetWrapperModel {
     @JsonProperty("data")
-    private List<RawExchangesModel> rawExchangesModelList;
+    private List<RawAssetModel> rawAssetModelList;
 
     @JsonProperty("timestamp")
     private BigDecimal timestamp;

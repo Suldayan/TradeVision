@@ -1,7 +1,11 @@
-package com.example.data_ingestion_service.config;
+package com.example.data_ingestion_service.configs;
 
-import com.example.data_ingestion_service.client.ApiClient;
-import com.example.data_ingestion_service.exception.CustomRestClientException;
+import com.example.data_ingestion_service.clients.AssetClient;
+import com.example.data_ingestion_service.clients.ExchangeClient;
+import com.example.data_ingestion_service.clients.MarketClient;
+import com.example.data_ingestion_service.configs.exception.RestClientException;
+import com.example.data_ingestion_service.configs.interceptor.RestClientInterceptor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,11 +18,12 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class RestClientConfig {
+    private final RestClientInterceptor restClientInterceptor;
 
     @Value("${coincap.base-url}")
     private String baseUrl;
-
     @Value("${coincap.api-key}")
     private String apiKey;
 
@@ -27,6 +32,7 @@ public class RestClientConfig {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeaders(this::configureHeaders)
+                .requestInterceptor(restClientInterceptor)
                 .defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
                     String errorMessage = String.format(
                             "Server error occurred while calling %s. Status code: %s, Response body: %s",
@@ -35,7 +41,7 @@ public class RestClientConfig {
                             response.getBody()
                     );
                     log.error(errorMessage);
-                    throw new CustomRestClientException(errorMessage);
+                    throw new RestClientException(errorMessage);
                 })
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, (request, response) -> {
                     String errorMessage = String.format(
@@ -45,7 +51,7 @@ public class RestClientConfig {
                             response.getBody()
                     );
                     log.error(errorMessage);
-                    throw new CustomRestClientException(errorMessage);
+                    throw new RestClientException(errorMessage);
                 })
                 .build();
     }
@@ -58,10 +64,29 @@ public class RestClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(RestClient restClient) {
-        HttpServiceProxyFactory httpServiceProxyFactory =
-                HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient))
-                        .build();
-        return httpServiceProxyFactory.createClient(ApiClient.class);
+    public RestClientAdapter adapter() {
+        return RestClientAdapter.create(restClient());
+    }
+
+    @Bean
+    public HttpServiceProxyFactory factory() {
+        return HttpServiceProxyFactory
+                .builderFor(adapter())
+                .build();
+    }
+
+    @Bean
+    public MarketClient marketClient() {
+        return factory().createClient(MarketClient.class);
+    }
+
+    @Bean
+    public ExchangeClient exchangeClient() {
+        return factory().createClient(ExchangeClient.class);
+    }
+
+    @Bean
+    public AssetClient assetClient() {
+        return factory().createClient(AssetClient.class);
     }
 }

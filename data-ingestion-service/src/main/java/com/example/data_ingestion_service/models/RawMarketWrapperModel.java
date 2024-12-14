@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.model;
+package com.example.data_ingestion_service.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
