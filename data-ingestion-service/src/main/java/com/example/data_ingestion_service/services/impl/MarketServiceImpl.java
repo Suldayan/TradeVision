@@ -31,7 +31,7 @@ public class MarketServiceImpl implements MarketService {
             return markets;
         } catch (Exception e) {
             log.error("An error occurred while fetching markets data");
-            throw new ApiException("Failed to fetch market wrapper data");
+            throw new ApiException(String.format("Failed to fetch market wrapper data: %s", e));
         }
     }
 
@@ -47,7 +47,7 @@ public class MarketServiceImpl implements MarketService {
             return market;
         } catch (Exception e) {
             log.error("An error occurred while fetching market list");
-            throw new ApiException("Failed to retrieve market list");
+            throw new ApiException(String.format("Failed to retrieve market list: %s", e));
         }
     }
 }

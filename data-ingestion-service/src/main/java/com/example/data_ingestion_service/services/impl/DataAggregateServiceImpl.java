@@ -53,6 +53,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     @Scheduled(fixedRateString = "1000")
     @Override
     public void fetchDataAsync() throws DataAggregateException {
+        //TODO make sure to release memory of the list after each scheduled fetch
         dataTypes.stream()
                 .parallel()
                 .forEach(dataType -> {

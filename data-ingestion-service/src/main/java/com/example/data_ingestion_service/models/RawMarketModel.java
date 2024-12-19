@@ -1,6 +1,8 @@
 package com.example.data_ingestion_service.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +19,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RawMarketModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @JsonProperty("baseId")
+    private String id;
+
+    @JsonProperty("rank")
+    @JsonIgnore
+    private Integer rank;
+
+    @JsonProperty("exchangeId")
+    private String exchangeId;
+
+    @JsonProperty("quoteId")
+    private String quoteId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exchange_id", nullable = false)
@@ -40,6 +52,9 @@ public class RawMarketModel {
     @JsonProperty("quoteSymbol")
     private String quoteSymbol;
 
+    @JsonProperty("priceQuote")
+    private BigDecimal priceQuote;
+
     @JsonProperty("priceUsd")
     private BigDecimal priceUsd;
 
@@ -48,6 +63,10 @@ public class RawMarketModel {
 
     @JsonProperty("percentExchangeVolume")
     private BigDecimal percentExchangeVolume;
+
+    @JsonProperty("tradesCount24Hr")
+    @Nullable
+    private Integer tradesCount;
 
     @JsonProperty("updated")
     private Long updated;

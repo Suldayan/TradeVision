@@ -1,13 +1,14 @@
 package com.example.data_ingestion_service.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RawMarketWrapperModel {
     @JsonProperty("data")
     private List<RawMarketModel> marketModelList;
