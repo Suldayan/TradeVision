@@ -1,9 +1,10 @@
 package com.example.data_ingestion_service.services.impl;
 
-import com.example.data_ingestion_service.models.RawAssetModel;
-import com.example.data_ingestion_service.models.RawExchangesModel;
-import com.example.data_ingestion_service.models.RawMarketModel;
+import com.example.data_ingestion_service.models.*;
+import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.DataAggregateService;
+import com.example.data_ingestion_service.services.dto.MarketDTO;
+import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.exceptions.DataAggregateException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -16,10 +17,24 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+/*
+* Aggregates data via the coin cap api (served from the services) then filters it by price comparison, only pushing data with a >= 5% change within price or if it doesn't already exist
+* Data aggregates on 5 minute intervals with a retry, time limiter, and circuit breaker with Resilience 4j for extra percussion
+* The most recent api fetch will be cached via redis, and will be compared with the database (postgres) equivalent for price checks
+* The cache will have a lifetime of 5m 10s to ensure it gets properly compared before being erased. (This may be changed for programmatic deletion rather than life cycles)
+* Overall aggregation for this service involves a full work flow of ingesting -> filtering -> saving
+* @param takes market, exchange, and asset services for its api implementations and market model repository for saving the data
+* */
 
 @Service
 @Slf4j
@@ -28,89 +43,169 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     private final MarketServiceImpl marketService;
     private final ExchangeServiceImpl exchangeService;
     private final AssetServiceImpl assetService;
-
-    //TODO possibly change set into List and ? into Object
-    public final List<List<?>> dataTypes = new ArrayList<>();
+    private final RawMarketModelRepository marketModelRepository;
 
     /*
-     * The list of data types being fetched via api from a http interface
-     * */
-    @PostConstruct
-    private void configureDataTypes() {
-        //TODO: dataTypes is throwing null pointer due to the services throwing null
-        dataTypes.add(marketService.getMarketsAsList());
-        dataTypes.add(exchangeService.getExchangeDataAsList());
-        dataTypes.add(assetService.getAssetDataAsList());
-        log.info("Data types configured: {}", dataTypes.size());
+    * Fetches and caches the exchange api response
+    * @return a list of raw exchange models to cache
+    * */
+    @Nonnull
+    @CachePut(value = "exchangeApiResponse")
+    @Override
+    public List<RawExchangesModel> fetchExchanges() {
+        return exchangeService.getExchangeDataAsList();
     }
 
     /*
-     * Takes the lists of data types and streams each fetch in parallel for filtering and partitioning
-     * */
+    * Fetches and caches the asset api response
+    * @return a list of raw asset models to cache
+    * */
+    @Nonnull
+    @CachePut(value = "assetApiResponse")
+    @Override
+    public List<RawAssetModel> fetchAssets() {
+        return assetService.getAssetDataAsList();
+    }
+
+    /*
+    * Runs the assets and exchanges fetch functions asynchronously with the markets for matched responses by fetch time
+    * */
+    @Override
+    public void asyncFetch() {
+            CompletableFuture.supplyAsync(this::fetchAssets)
+                    .thenRunAsync(this::fetchExchanges)
+                    .exceptionally(error -> {
+                        throw new ApiException(error.getMessage());
+                    });
+    }
+
+    /*
+    * Periodically fetch market data every 5 minutes, storing the data in a cache for price comparison
+    * @return a list of market DTOs
+    * */
     @Retry(name = "apiRetry")
     @TimeLimiter(name = "apiTimeLimiter")
     @CircuitBreaker(name = "apiCircuitBreaker")
-    @Scheduled(fixedRateString = "1000")
+    @Scheduled(fixedRateString = "300000") // 5 minute scheduling
+    @CachePut(value = "marketApiResponse")
+    @Nonnull
     @Override
-    public void fetchDataAsync() throws DataAggregateException {
-        //TODO make sure to release memory of the list after each scheduled fetch
-        dataTypes.stream()
-                .parallel()
-                .forEach(dataType -> {
-                    try {
-                        log.debug("Streaming data types at: {}", LocalDateTime.now());
-                        dataType.forEach(this::detectDataType);
-                    } catch (Exception e) {
-                        log.error("Error processing data at: {}", LocalDateTime.now());
-                        throw new DataAggregateException(String.format("Error processing data type: %s", e));
-                    }
-                });
+    public List<MarketDTO> fetchScheduledMarketPrice() throws DataAggregateException {
+        List<RawMarketModel> marketData = marketService.getMarketsData();
+        return marketData.parallelStream()
+                .map(attribute -> MarketDTO.builder()
+                        .baseId(attribute.getId())
+                        .quoteId(attribute.getQuoteId())
+                        .exchangeId(attribute.getExchangeId())
+                        .currentPrice(attribute.getPriceUsd())
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 
     /*
-     * Finds the class of the data and brings it to a filter
-     * @Param takes a generic type t data, representing the api fetched data
-     * */
+    * Creates a new list of markets containing only markets with meaningful price changes
+    * @return a list of market transfer objects that contain these changes
+    * */
+    @Nonnull
     @Override
-    public <T> void detectDataType(@Nonnull T data) {
-        switch (data) {
-            case RawMarketModel rawMarketModel -> {
-                log.info("Detected data of type market");
-                // cacheMarketData((RawMarketModel) data);
-            }
-            case RawExchangesModel rawExchangesModel -> {
-                log.info("Detected data of type exchange");
-                // cacheExchangeData((RawMarketModel) data);
-            }
-            case RawAssetModel rawAssetModel -> {
-                log.info("Detected data of type asset");
-                // cacheAssetData((RawMarketModel) data);
-            }
-            default -> log.warn("Data has been passed but not detected as any valid entity");
+    public List<MarketDTO> collectAndUpdateMarketState() {
+        List<MarketDTO> cachedMarketData = fetchScheduledMarketPrice();
+        return cachedMarketData.parallelStream()
+                .map(data -> {
+                    if (!isPriceChangeMeaningful(data)) {
+                        // Then we can just ignore
+                        log.debug("No significant change to price data, this message is for debugging purposes");
+                    }
+                    return MarketDTO.builder()
+                            .baseId(data.getBaseId())
+                            .quoteId(data.getQuoteId())
+                            .exchangeId(data.getExchangeId())
+                            .currentPrice(data.getCurrentPrice())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    /*
+    * Determines whether the price change is meaningful enough to be saved into the database unless it does not already exist within it
+    * @return a boolean, true, if the price change is more than or equal to 5%
+    * */
+    @Override
+    public Boolean isPriceChangeMeaningful(@Nonnull MarketDTO cachedData) {
+        Optional<RawMarketModel> lastSignificantChange = marketModelRepository.findById(cachedData.getBaseId());
+        if (lastSignificantChange.isEmpty()) {
+            // Convert DTO to entity and save
+            RawMarketModel newEntry = mapDtoToEntity(cachedData);
+            marketModelRepository.save(newEntry);
+            return true;
+        }
+        // Get the last significant price
+        BigDecimal lastPrice = lastSignificantChange.get().getPriceUsd();
+        if (lastPrice.compareTo(BigDecimal.ZERO) == 0) {
+            return true;
+        }
+        // Calculate percentage change
+        BigDecimal currentPrice = cachedData.getCurrentPrice();
+        BigDecimal percentageChange = currentPrice
+                .subtract(lastPrice)
+                .abs()
+                .divide(lastPrice, MathContext.DECIMAL128)
+                .multiply(BigDecimal.valueOf(100));
+        // Check if the change is >= 5%
+        return percentageChange.compareTo(BigDecimal.valueOf(5)) >= 0;
+    }
+
+    /*
+     * Fills the market models with its corresponding base/quote assets and exchanges, then saves to the database
+     * */
+    @Transactional
+    @Override
+    public void completeMarketAttributes() throws DataAggregateException {
+        List<MarketDTO> meaningfulMarketState = collectAndUpdateMarketState();
+        List<RawExchangesModel> cachedExchanges = fetchExchanges();
+        List<RawAssetModel> cachedAssets = fetchAssets();
+        meaningfulMarketState.parallelStream()
+                        .forEach(attribute -> {
+                            //TODO match each attribute with the corresponding fetched data
+                        });
+        //TODO make sure to release memory of the list after each scheduled fetch
+    }
+
+    /*
+    * Helper function for dto -> entity conversion specifically for the Markets
+    * @param takes a market dto for conversion
+    * @return a RawMarketModel after successful conversion
+    * */
+    // TODO however, we can most likely create our own custom market model for only containing the variables we want
+    @Nonnull
+    private RawMarketModel mapDtoToEntity(@Nonnull MarketDTO dto) {
+        return new RawMarketModel(
+                dto.getBaseId(),
+                dto.getCurrentPrice()
+        );
+    }
+
+    /*
+    * Helper function for saving to the database
+    * @param takes a generic type T, entity, and will detect the class type of that entity and save it to its corresponding repository
+    * */
+    //TODO if we create a custom market model, we will have to change the instance of this model
+    private <T> void saveToDatabase(@Nonnull T entity) {
+        switch (entity) {
+            case entity instanceof RawMarketModel:
+                // TODO configure the other data type saves
+                marketModelRepository.save((RawMarketModel) entity);
+                break;
+            case entity instanceof RawExchangesModel:
+                // exchangeModelRepository.save((RawExchangesModel) entity);
+                break;
+            case entity instanceof RawAssetModel:
+                // assetModelRepository.save((RawAssetModel) entity);
+                break;
+            default -> log.warn("Info was sent to be saved but was not a recognizable type");
+
         }
     }
-
-    //TODO: test fetch functions before configuring redis
-    /*
-    * Helper function for caching data
-    * @Param takes an entity of RawMarketModel, fetched from the detectDataType function
-    * @return a RawMarketModel, supporting the cache annotation
-    *
-    @CachePut("marketData")
-    private RawMarketModel cacheMarketData(@Nonnull RawMarketModel data) {
-        return data;
-    }
-
-    /*
-    * Compares the market attributes with its previous successful save only pushing significant changes
-    * @Param takes a RawMarketModel entity data
-    * @return a boolean, determining whether the changes were significant or not
-    *
-    private boolean hasMeaningfulChangeMarket(@Nonnull RawMarketModel data) {
-        RawMarketModel lastUpdatedData = cachedData;
-
-
-    }
-    */
 }
 

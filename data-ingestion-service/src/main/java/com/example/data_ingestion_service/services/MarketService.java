@@ -6,6 +6,5 @@ import com.example.data_ingestion_service.models.RawMarketWrapperModel;
 import java.util.List;
 
 public interface MarketService {
-    RawMarketWrapperModel getMarketData();
-    List<RawMarketModel> getMarketsAsList();
+    List<RawMarketModel> getMarketsData();
 }

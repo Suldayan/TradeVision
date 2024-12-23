@@ -18,36 +18,24 @@ import java.util.List;
 public class MarketServiceImpl implements MarketService {
     private final MarketClient marketClient;
 
+    /*
+    * Grabs all the market data from the market endpoint
+    * @returns a list of each model, containing each crypto id and its metadata
+    * */
     @Nonnull
     @Override
-    public RawMarketWrapperModel getMarketData() {
+    public List<RawMarketModel> getMarketsData() {
         try {
-            RawMarketWrapperModel markets = marketClient.getMarkets();
-            log.info("Fetched markets with result: {}", markets);
-            if (markets == null) {
+            RawMarketWrapperModel marketHolder = marketClient.getMarkets();
+            log.info("Fetched markets with result: {}", marketHolder);
+            if (marketHolder == null) {
                 log.error("Fetched data from market wrapper returned as null");
                 throw new ApiException("Markets data fetched but return as null");
             }
-            return markets;
+            return marketHolder.getMarketModelList();
         } catch (Exception e) {
             log.error("An error occurred while fetching markets data");
             throw new ApiException(String.format("Failed to fetch market wrapper data: %s", e));
-        }
-    }
-
-    @Nonnull
-    @Override
-    public List<RawMarketModel> getMarketsAsList() {
-        try {
-            List<RawMarketModel> market = marketClient.getMarkets().getMarketModelList();
-            if (market == null) {
-                log.error("Data retrieved from markets but returned as null");
-                throw new ApiException("Market list retrieved but returned as null");
-            }
-            return market;
-        } catch (Exception e) {
-            log.error("An error occurred while fetching market list");
-            throw new ApiException(String.format("Failed to retrieve market list: %s", e));
         }
     }
 }

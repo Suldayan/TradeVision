@@ -58,19 +58,14 @@ public class ApiUnitTest {
               "timestamp": 344232
             }
             """;
+        //TODO current issue: wrapper returns as null despite the json inside data being matched to the raw market model
         // Read the values onto the wrapper model object
         ObjectMapper mapper = new ObjectMapper();
-        /*
-        * TODO fixed the json issue but bumped into a new one where the raw market wrapper model always returns as null.
-        *  Figured that this could be due to the fact that the issue previously fixed exposes the market model and not the wrapper model.
-        *  Because of this, we could change the getMarketData() function to return the list of market models as it's properties are connected to the function
-        * */
         RawMarketWrapperModel wrapperModelResponse = mapper.readValue(mockApiResponse, RawMarketWrapperModel.class);
 
-        when(marketService.getMarketData()).thenReturn(wrapperModelResponse);
         assertDoesNotThrow(() -> {
-            RawMarketWrapperModel result = marketService.getMarketData();
-            assertEquals(marketService.getMarketData(), wrapperModelResponse, "Market api responses should match");
+            List<RawMarketModel> result = marketService.getMarketsData();
+            assertEquals(result, wrapperModelResponse.getMarketModelList(), "Market api responses should match");
         });
     }
 }

@@ -24,33 +24,8 @@ public class RawMarketModel {
 
     @JsonProperty("rank")
     @JsonIgnore
+    @Nullable
     private Integer rank;
-
-    @JsonProperty("exchangeId")
-    private String exchangeId;
-
-    @JsonProperty("quoteId")
-    private String quoteId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exchange_id", nullable = false)
-    private RawExchangesModel exchange;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_asset_id", nullable = false)
-    private RawAssetModel baseAsset;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_asset_id", nullable = false)
-    private RawAssetModel quoteAsset;
-
-    @Column(name = "base_symbol")
-    @JsonProperty("baseSymbol")
-    private String baseSymbol;
-
-    @Column(name = "quote_symbol")
-    @JsonProperty("quoteSymbol")
-    private String quoteSymbol;
 
     @JsonProperty("priceQuote")
     private BigDecimal priceQuote;
@@ -70,4 +45,38 @@ public class RawMarketModel {
 
     @JsonProperty("updated")
     private Long updated;
+
+    /*
+     * For exchanges
+     * */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exchange_id", nullable = false)
+    private RawExchangesModel exchange;
+
+    @JsonProperty("exchangeId")
+    private String exchangeId;
+
+    /*
+     * For assets
+     * */
+    @JsonProperty("quoteId")
+    private String quoteId;
+
+    @Column(name = "base_symbol")
+    @JsonProperty("baseSymbol")
+    private String baseSymbol;
+
+    @Column(name = "quote_symbol")
+    @JsonProperty("quoteSymbol")
+    private String quoteSymbol;
+
+    @Nullable
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "base_asset_id", nullable = false)
+    private RawAssetModel baseAsset;
+
+    @Nullable
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quote_asset_id", nullable = false)
+    private RawAssetModel quoteAsset;
 }
