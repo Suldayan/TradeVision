@@ -1,6 +1,8 @@
 package com.example.data_ingestion_service.services.impl;
 
 import com.example.data_ingestion_service.models.*;
+import com.example.data_ingestion_service.repository.RawAssetModelRepository;
+import com.example.data_ingestion_service.repository.RawExchangeModelRepository;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.DataAggregateService;
 import com.example.data_ingestion_service.services.dto.MarketDTO;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
 * The most recent api fetch will be cached via redis, and will be compared with the database (postgres) equivalent for price checks
 * The cache will have a lifetime of 5m 10s to ensure it gets properly compared before being erased. (This may be changed for programmatic deletion rather than life cycles)
 * Overall aggregation for this service involves a full work flow of ingesting -> filtering -> saving
-* @param takes market, exchange, and asset services for its api implementations and market model repository for saving the data
+* @param takes market, exchange, and asset services for its api implementations and market,exchange, and asset model repositories for saving the data
 * */
 
 @Service
@@ -44,6 +46,8 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     private final ExchangeServiceImpl exchangeService;
     private final AssetServiceImpl assetService;
     private final RawMarketModelRepository marketModelRepository;
+    private final RawExchangeModelRepository exchangeModelRepository;
+    private final RawAssetModelRepository assetModelRepository;
 
     /*
     * Fetches and caches the exchange api response
@@ -136,7 +140,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
         Optional<RawMarketModel> lastSignificantChange = marketModelRepository.findById(cachedData.getBaseId());
         if (lastSignificantChange.isEmpty()) {
             // Convert DTO to entity and save
-            RawMarketModel newEntry = mapDtoToEntity(cachedData);
+            RawMarketModel newEntry = dtoToEntity(cachedData);
             marketModelRepository.save(newEntry);
             return true;
         }
@@ -159,7 +163,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     /*
      * Fills the market models with its corresponding base/quote assets and exchanges, then saves to the database
      * */
-    @Transactional
     @Override
     public void completeMarketAttributes() throws DataAggregateException {
         List<MarketDTO> meaningfulMarketState = collectAndUpdateMarketState();
@@ -179,7 +182,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     * */
     // TODO however, we can most likely create our own custom market model for only containing the variables we want
     @Nonnull
-    private RawMarketModel mapDtoToEntity(@Nonnull MarketDTO dto) {
+    private RawMarketModel dtoToEntity(@Nonnull MarketDTO dto) {
         return new RawMarketModel(
                 dto.getBaseId(),
                 dto.getCurrentPrice()
@@ -187,24 +190,26 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     }
 
     /*
-    * Helper function for saving to the database
+    * Helper generic function for saving to the database
     * @param takes a generic type T, entity, and will detect the class type of that entity and save it to its corresponding repository
     * */
     //TODO if we create a custom market model, we will have to change the instance of this model
+    @Transactional
     private <T> void saveToDatabase(@Nonnull T entity) {
         switch (entity) {
             case entity instanceof RawMarketModel:
-                // TODO configure the other data type saves
                 marketModelRepository.save((RawMarketModel) entity);
+                log.debug("Saving data of type: Market");
                 break;
             case entity instanceof RawExchangesModel:
-                // exchangeModelRepository.save((RawExchangesModel) entity);
+                exchangeModelRepository.save((RawExchangesModel) entity);
+                log.debug("Saving data of type: Exchange");
                 break;
             case entity instanceof RawAssetModel:
-                // assetModelRepository.save((RawAssetModel) entity);
+                assetModelRepository.save((RawAssetModel) entity);
+                log.debug("Saving data of type: Asset");
                 break;
             default -> log.warn("Info was sent to be saved but was not a recognizable type");
-
         }
     }
 }
