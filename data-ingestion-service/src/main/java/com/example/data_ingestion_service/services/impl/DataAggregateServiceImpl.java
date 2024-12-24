@@ -57,7 +57,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     @CachePut(value = "exchangeApiResponse")
     @Override
     public List<RawExchangesModel> fetchExchanges() {
-        return exchangeService.getExchangeDataAsList();
+        return exchangeService.getExchangeData();
     }
 
     /*
@@ -68,7 +68,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     @CachePut(value = "assetApiResponse")
     @Override
     public List<RawAssetModel> fetchAssets() {
-        return assetService.getAssetDataAsList();
+        return assetService.getAssetData();
     }
 
     /*

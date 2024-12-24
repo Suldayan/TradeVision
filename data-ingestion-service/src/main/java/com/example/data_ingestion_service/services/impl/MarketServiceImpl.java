@@ -19,8 +19,8 @@ public class MarketServiceImpl implements MarketService {
     private final MarketClient marketClient;
 
     /*
-    * Grabs all the market data from the market endpoint
-    * @returns a list of each model, containing each crypto id and its metadata
+    * Grabs all the market data from the markets endpoint
+    * @returns a list of each model, containing market metadata
     * */
     @Nonnull
     @Override
@@ -34,7 +34,7 @@ public class MarketServiceImpl implements MarketService {
             }
             return marketHolder.getMarketModelList();
         } catch (Exception e) {
-            log.error("An error occurred while fetching markets data");
+            log.error("An error occurred while fetching markets data: {}", e.getMessage());
             throw new ApiException(String.format("Failed to fetch market wrapper data: %s", e));
         }
     }
