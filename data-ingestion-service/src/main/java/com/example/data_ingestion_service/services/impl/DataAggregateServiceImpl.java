@@ -1,9 +1,10 @@
 package com.example.data_ingestion_service.services.impl;
 
+import com.example.data_ingestion_service.models.processed.MarketModel;
 import com.example.data_ingestion_service.models.raw.RawAssetModel;
 import com.example.data_ingestion_service.models.raw.RawExchangesModel;
 import com.example.data_ingestion_service.models.raw.RawMarketModel;
-import com.example.data_ingestion_service.repository.RawMarketModelRepository;
+import com.example.data_ingestion_service.repository.MarketModelRepository;
 import com.example.data_ingestion_service.services.DataAggregateService;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -39,7 +40,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     private final ExchangeServiceImpl exchangeService;
     private final AssetServiceImpl assetService;
     // TODO: configure the processed repositories and replace these with those
-    private final RawMarketModelRepository marketModelRepository;
+    private final MarketModelRepository marketModelRepository;
 
     /*
     * Fetches and caches the exchange api response
@@ -123,7 +124,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     * */
     @Override
     public Boolean isPriceChangeMeaningful(@Nonnull RawMarketModel cachedData) {
-        Optional<RawMarketModel> lastSignificantChange = marketModelRepository.findById(cachedData.getId());
+        Optional<MarketModel> lastSignificantChange = marketModelRepository.findById(cachedData.getId());
         if (lastSignificantChange.isEmpty()) {
             // TODO: Instead of doing this type of conversion, we can use our new processed models, create a new entity using the builder and we can save it to the database
             // TODO: But we must figure out how to use the dto properly as it contains each id connected to each other

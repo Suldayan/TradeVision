@@ -6,9 +6,9 @@ import com.example.data_ingestion_service.models.processed.MarketModel;
 import com.example.data_ingestion_service.models.raw.RawAssetModel;
 import com.example.data_ingestion_service.models.raw.RawExchangesModel;
 import com.example.data_ingestion_service.models.raw.RawMarketModel;
-import com.example.data_ingestion_service.repository.RawAssetModelRepository;
-import com.example.data_ingestion_service.repository.RawExchangeModelRepository;
-import com.example.data_ingestion_service.repository.RawMarketModelRepository;
+import com.example.data_ingestion_service.repository.AssetModelRepository;
+import com.example.data_ingestion_service.repository.ExchangeModelRepository;
+import com.example.data_ingestion_service.repository.MarketModelRepository;
 import com.example.data_ingestion_service.services.DataTransformationService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +35,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DataTransformationServiceImpl implements DataTransformationService {
-    // TODO: configure the processed repositories and replace these with those
-    private final RawMarketModelRepository marketModelRepository;
-    private final RawExchangeModelRepository exchangeModelRepository;
-    private final RawAssetModelRepository assetModelRepository;
+    private final MarketModelRepository marketModelRepository;
+    private final ExchangeModelRepository exchangeModelRepository;
+    private final AssetModelRepository assetModelRepository;
 
     private final DataAggregateServiceImpl aggregateService;
 
@@ -199,16 +198,16 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     @Override
     public <T> void saveToDatabase(@Nonnull T entity) {
         switch (entity) {
-            case RawMarketModel rawMarketModel -> {
-                marketModelRepository.save(rawMarketModel);
+            case MarketModel marketModel -> {
+                marketModelRepository.save(marketModel);
                 log.debug("Saving data of type: Market");
             }
-            case RawExchangesModel rawExchangesModel -> {
-                exchangeModelRepository.save(rawExchangesModel);
+            case ExchangeModel exchangeModel -> {
+                exchangeModelRepository.save(exchangeModel);
                 log.debug("Saving data of type: Exchange");
             }
-            case RawAssetModel rawAssetModel -> {
-                assetModelRepository.save(rawAssetModel);
+            case AssetModel assetModel -> {
+                assetModelRepository.save(assetModel);
                 log.debug("Saving data of type: Asset");
             }
             default -> log.warn("Info was sent to be saved but was not a recognizable type");
