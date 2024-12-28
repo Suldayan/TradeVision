@@ -1,5 +1,6 @@
 package com.example.data_ingestion_service.models.processed;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,4 +40,14 @@ public class AssetModel {
     @OneToMany(mappedBy = "quoteAsset")
     @Nullable
     private Set<MarketModel> quoteMarkets;
+
+    public void addBaseMarket(@Nonnull MarketModel marketModel) {
+        assert baseMarkets != null;
+        baseMarkets.add(marketModel);
+    }
+
+    public void addQuoteMarket(@Nonnull MarketModel marketModel) {
+        assert quoteMarkets != null;
+        quoteMarkets.add(marketModel);
+    }
 }

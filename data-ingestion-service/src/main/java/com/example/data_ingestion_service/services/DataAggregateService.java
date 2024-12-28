@@ -15,5 +15,4 @@ public interface DataAggregateService {
     void asyncFetch();
     List<RawMarketModel> collectAndUpdateMarketState();
     Boolean isPriceChangeMeaningful(@Nonnull RawMarketModel cachedData);
-    void completeModelAttributes() throws DataAggregateException;
 }

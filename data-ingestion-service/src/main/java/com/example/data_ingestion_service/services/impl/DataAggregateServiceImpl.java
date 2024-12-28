@@ -1,28 +1,20 @@
 package com.example.data_ingestion_service.services.impl;
 
-import com.example.data_ingestion_service.models.processed.AssetModel;
-import com.example.data_ingestion_service.models.processed.ExchangeModel;
-import com.example.data_ingestion_service.models.processed.MarketModel;
 import com.example.data_ingestion_service.models.raw.RawAssetModel;
 import com.example.data_ingestion_service.models.raw.RawExchangesModel;
 import com.example.data_ingestion_service.models.raw.RawMarketModel;
-import com.example.data_ingestion_service.repository.RawAssetModelRepository;
-import com.example.data_ingestion_service.repository.RawExchangeModelRepository;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.DataAggregateService;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
-import com.example.data_ingestion_service.services.exceptions.DataAggregateException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -48,8 +40,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     private final AssetServiceImpl assetService;
     // TODO: configure the processed repositories and replace these with those
     private final RawMarketModelRepository marketModelRepository;
-    private final RawExchangeModelRepository exchangeModelRepository;
-    private final RawAssetModelRepository assetModelRepository;
 
     /*
     * Fetches and caches the exchange api response
@@ -112,7 +102,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     @Override
     public List<RawMarketModel> collectAndUpdateMarketState() {
         List<RawMarketModel> cachedMarketData = fetchMarkets();
-        return cachedMarketData.parallelStream()
+        return cachedMarketData.stream()
                 .map(data -> {
                     if (!isPriceChangeMeaningful(data)) {
                         // Then we can just ignore
@@ -162,111 +152,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
                 .multiply(BigDecimal.valueOf(100));
         // Check if the change is >= 5%
         return percentageChange.compareTo(BigDecimal.valueOf(5)) >= 0;
-    }
-
-    /*
-     * Fills the market models with its corresponding base/quote assets and exchanges, then saves to the database
-     * */
-    @CacheEvict(cacheNames = "marketApiResponse, exchangeApiResponse, assetApiResponse")
-    @Override
-    public void completeModelAttributes() throws DataAggregateException {
-        List<RawMarketModel> meaningfulMarketState = collectAndUpdateMarketState();
-        List<RawExchangesModel> cachedExchanges = fetchExchanges();
-        List<RawAssetModel> cachedAssets = fetchAssets();
-
-        //TODO: we can completable future this and async the save onto the db function
-        List<ExchangeModel> exchangeModels = cachedExchanges.parallelStream()
-                .map(attribute -> ExchangeModel.builder()
-                        .id(attribute.getId())
-                        .name(attribute.getName())
-                        .percentTotalVolume(attribute.getPercentTotalVolume())
-                        .volumeUsd(attribute.getVolumeUsd())
-                        .updated(attribute.getUpdated())
-                        .markets(null) // Set as null initially until all models are built, then we go over the relationships and set them
-                        .build())
-                .toList();
-
-        List<AssetModel> assetModels = cachedAssets.parallelStream()
-                .map(attribute -> AssetModel.builder()
-                        .id(attribute.getId())
-                        .symbol(attribute.getSymbol())
-                        .name(attribute.getName())
-                        .supply(attribute.getSupply())
-                        .maxSupply(attribute.getMaxSupply())
-                        .marketCapUsd(attribute.getMarketCapUsd())
-                        .volumeUsd24Hr(attribute.getVolumeUsd24Hr())
-                        .priceUsd(attribute.getPriceUsd())
-                        .changePercent24Hr(attribute.getChangePercent24Hr())
-                        .vwap24Hr(attribute.getVwap24Hr())
-                        .baseMarkets(null) // We set these as null as well as they'll be synchronized during the market streaming and defined at that time
-                        .quoteMarkets(null)
-                        .build())
-                .toList();
-
-        List<MarketModel> marketModels = meaningfulMarketState.parallelStream()
-                .map(attribute -> MarketModel.builder()
-                        .id(attribute.getId())
-                        .exchange(
-                                exchangeModels.parallelStream()
-                                        .filter(exchangeModel -> Objects.equals(attribute.getExchangeId(), exchangeModel.getId()))
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                            log.debug("The corresponding exchange model with id: {} does not exist", attribute.getExchangeId());
-                                            return null;
-                                        })
-                        )
-                        .baseAsset(
-                                assetModels.parallelStream()
-                                        .filter(baseModel -> Objects.equals(attribute.getBaseSymbol(), baseModel.getId()))
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                            log.debug("The corresponding base asset model with id: {} does not exist", attribute.getExchangeId());
-                                            return null;
-                                        })
-                        )
-                        .quoteAsset(
-                                assetModels.parallelStream()
-                                        .filter(quoteModel -> Objects.equals(attribute.getBaseSymbol(), quoteModel.getId()))
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                            log.debug("The corresponding quote asset model with id: {} does not exist", attribute.getExchangeId());
-                                            return null;
-                                        })
-                        )
-                        .baseSymbol(attribute.getBaseSymbol())
-                        .quoteSymbol(attribute.getQuoteSymbol())
-                        .priceQuote(attribute.getPriceQuote())
-                        .priceUsd(attribute.getPriceUsd())
-                        .volumeUsd24Hr(attribute.getVolumeUsd24Hr())
-                        .percentExchangeVolume(attribute.getPercentExchangeVolume())
-                        .tradesCount(attribute.getTradesCount())
-                        .updated(attribute.getUpdated())
-                        .build())
-                .toList();
-    }
-
-    /*
-    * Helper generic function for saving to the database
-    * @param takes a generic type T, entity, and will detect the class type of that entity and save it to its corresponding repository
-    * */
-    //TODO if we create a custom market model, we will have to change the instance of this model
-    @Transactional
-    private <T> void saveToDatabase(@Nonnull T entity) {
-        switch (entity) {
-            case entity instanceof RawMarketModel:
-                marketModelRepository.save((RawMarketModel) entity);
-                log.debug("Saving data of type: Market");
-                break;
-            case entity instanceof RawExchangesModel:
-                exchangeModelRepository.save((RawExchangesModel) entity);
-                log.debug("Saving data of type: Exchange");
-                break;
-            case entity instanceof RawAssetModel:
-                assetModelRepository.save((RawAssetModel) entity);
-                log.debug("Saving data of type: Asset");
-                break;
-            default -> log.warn("Info was sent to be saved but was not a recognizable type");
-        }
     }
 }
 
