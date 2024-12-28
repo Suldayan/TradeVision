@@ -1,5 +1,6 @@
 package com.example.data_ingestion_service.models;
 
+import com.example.data_ingestion_service.models.raw.RawExchangesModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;

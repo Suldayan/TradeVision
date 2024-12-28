@@ -1,6 +1,8 @@
-package com.example.data_ingestion_service.models;
+package com.example.data_ingestion_service.models.raw;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,20 +10,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "raw_asset_data")
 public class RawAssetModel {
     @Id
     @JsonProperty("id")
     private String id;
 
-    @Column(unique = true)
+    @JsonProperty("rank")
+    @JsonIgnore
+    private Integer rank;
+
     @JsonProperty("symbol")
     private String symbol;
 
@@ -32,6 +34,7 @@ public class RawAssetModel {
     private BigDecimal supply;
 
     @JsonProperty("maxSupply")
+    @Nullable
     private BigDecimal maxSupply;
 
     @JsonProperty("marketCapUsd")
@@ -49,9 +52,7 @@ public class RawAssetModel {
     @JsonProperty("vwap24Hr")
     private BigDecimal vwap24Hr;
 
-    @OneToMany(mappedBy = "baseAsset")
-    private Set<RawMarketModel> baseMarkets;
-
-    @OneToMany(mappedBy = "quoteAsset")
-    private Set<RawMarketModel> quoteMarkets;
+    @JsonProperty("explorer")
+    @JsonIgnore
+    private String explorer;
 }

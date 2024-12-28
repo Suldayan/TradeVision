@@ -2,7 +2,7 @@ package com.example.data_ingestion_service.services.impl;
 
 import com.example.data_ingestion_service.clients.ExchangeClient;
 import com.example.data_ingestion_service.models.RawExchangeWrapperModel;
-import com.example.data_ingestion_service.models.RawExchangesModel;
+import com.example.data_ingestion_service.models.raw.RawExchangesModel;
 import com.example.data_ingestion_service.services.ExchangeService;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
 import jakarta.annotation.Nonnull;

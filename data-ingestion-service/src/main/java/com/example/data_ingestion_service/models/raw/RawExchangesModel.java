@@ -1,5 +1,6 @@
-package com.example.data_ingestion_service.models;
+package com.example.data_ingestion_service.models.raw;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,22 +9,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
-@Entity
-@Table(name = "raw_exchanges_data")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RawExchangesModel {
     @Id
-    @JsonProperty("id")
+    @JsonProperty("exchangeId")
     private String id;
 
     @Column(unique = true)
     @JsonProperty("name")
     private String name;
+
+    @JsonProperty("rank")
+    @JsonIgnore
+    private Integer rank;
 
     @JsonProperty("percentTotalVolume")
     private BigDecimal percentTotalVolume;
@@ -31,9 +33,17 @@ public class RawExchangesModel {
     @JsonProperty("volumeUsd")
     private BigDecimal volumeUsd;
 
+    @JsonProperty("tradingPairs")
+    private Integer tradingPairs;
+
+    @JsonProperty("socket")
+    @JsonIgnore
+    private boolean socket;
+
+    @JsonProperty("exchangeUrl")
+    @JsonIgnore
+    private String exchangeUrl;
+
     @JsonProperty("updated")
     private Long updated;
-
-    @OneToMany(mappedBy = "exchange")
-    private Set<RawMarketModel> markets;
 }

@@ -1,7 +1,6 @@
 package com.example.data_ingestion_service.services;
 
-import com.example.data_ingestion_service.models.RawAssetModel;
-import com.example.data_ingestion_service.models.RawAssetWrapperModel;
+import com.example.data_ingestion_service.models.raw.RawAssetModel;
 
 import java.util.List;
 

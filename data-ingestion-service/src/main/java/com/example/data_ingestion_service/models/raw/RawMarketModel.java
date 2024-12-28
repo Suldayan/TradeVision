@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.models;
+package com.example.data_ingestion_service.models.raw;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "raw_market_data")
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,7 +22,6 @@ public class RawMarketModel {
 
     @JsonProperty("rank")
     @JsonIgnore
-    @Nullable
     private Integer rank;
 
     @JsonProperty("priceQuote")
@@ -46,37 +43,15 @@ public class RawMarketModel {
     @JsonProperty("updated")
     private Long updated;
 
-    /*
-     * For exchanges
-     * */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exchange_id", nullable = false)
-    private RawExchangesModel exchange;
-
     @JsonProperty("exchangeId")
     private String exchangeId;
 
-    /*
-     * For assets
-     * */
     @JsonProperty("quoteId")
     private String quoteId;
 
-    @Column(name = "base_symbol")
     @JsonProperty("baseSymbol")
     private String baseSymbol;
 
-    @Column(name = "quote_symbol")
     @JsonProperty("quoteSymbol")
     private String quoteSymbol;
-
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_asset_id", nullable = false)
-    private RawAssetModel baseAsset;
-
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_asset_id", nullable = false)
-    private RawAssetModel quoteAsset;
 }

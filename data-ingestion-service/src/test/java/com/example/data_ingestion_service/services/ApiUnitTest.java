@@ -1,7 +1,7 @@
 package com.example.data_ingestion_service.services;
 
 import com.example.data_ingestion_service.clients.MarketClient;
-import com.example.data_ingestion_service.models.RawMarketModel;
+import com.example.data_ingestion_service.models.raw.RawMarketModel;
 import com.example.data_ingestion_service.models.RawMarketWrapperModel;
 import com.example.data_ingestion_service.services.impl.MarketServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,12 +14,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ApiUnitTest {
