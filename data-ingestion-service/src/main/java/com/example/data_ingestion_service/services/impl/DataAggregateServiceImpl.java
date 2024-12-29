@@ -39,7 +39,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     private final MarketServiceImpl marketService;
     private final ExchangeServiceImpl exchangeService;
     private final AssetServiceImpl assetService;
-    // TODO: configure the processed repositories and replace these with those
+
     private final MarketModelRepository marketModelRepository;
 
     /*
@@ -112,6 +112,16 @@ public class DataAggregateServiceImpl implements DataAggregateService {
                     return RawMarketModel.builder()
                             .id(data.getId())
                             .rank(data.getRank())
+                            .priceQuote(data.getPriceQuote())
+                            .priceUsd(data.getPriceUsd())
+                            .volumeUsd24Hr(data.getVolumeUsd24Hr())
+                            .percentExchangeVolume(data.getPercentExchangeVolume())
+                            .tradesCount(data.getTradesCount())
+                            .updated(data.getUpdated())
+                            .exchangeId(data.getExchangeId())
+                            .quoteId(data.getQuoteId())
+                            .baseSymbol(data.getBaseSymbol())
+                            .quoteSymbol(data.getQuoteSymbol())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -126,17 +136,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     public Boolean isPriceChangeMeaningful(@Nonnull RawMarketModel cachedData) {
         Optional<MarketModel> lastSignificantChange = marketModelRepository.findById(cachedData.getId());
         if (lastSignificantChange.isEmpty()) {
-            // TODO: Instead of doing this type of conversion, we can use our new processed models, create a new entity using the builder and we can save it to the database
-            // TODO: But we must figure out how to use the dto properly as it contains each id connected to each other
-            // TODO: Possibly replace dtoToEntity with the completeModelAttributes function instead??
-
-            /*
-            * TODO: A new possible flow could be that we receive the data via caching fetch functions -> save the id and price relationships within the market dto -> compare the prices
-            *  for validity -> if empty, we create the model and save it to the db/otherwise, we boolean check -> create the new models by parallel streaming through the market dto
-            *  attributes so each model has the right relationships with each other -> save to db
-            * */
-
-            // TODO: convert the cached response into a processed response with all of its relationships
             return true;
         }
         // Get the last significant price
