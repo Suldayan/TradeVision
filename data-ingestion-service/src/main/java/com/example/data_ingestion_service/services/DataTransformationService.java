@@ -4,6 +4,7 @@ import com.example.data_ingestion_service.models.processed.AssetModel;
 import com.example.data_ingestion_service.models.processed.ExchangeModel;
 import jakarta.annotation.Nonnull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,5 +14,5 @@ public interface DataTransformationService {
     Map<String, ExchangeModel> indexExchanges();
     Map<String, AssetModel> indexAssets();
     void completeMarketAttributes();
-    <T> void saveToDatabase(@Nonnull T entity);
+    <S> void saveToDatabase(@Nonnull List<S> entity);
 }

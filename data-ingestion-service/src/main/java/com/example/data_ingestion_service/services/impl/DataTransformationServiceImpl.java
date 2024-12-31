@@ -17,10 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,6 +55,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                         .updated(attribute.getUpdated())
                         .build())
                 .collect(Collectors.toSet());
+
     }
 
     /*
@@ -116,52 +114,51 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         Map<String, ExchangeModel> exchanges = indexExchanges();
         Map<String, AssetModel> assets = indexAssets();
 
-        filteredMarketModels
-                .forEach(attribute -> {
-                    MarketModel marketModel = MarketModel.builder()
-                            .id(attribute.getId())
-                            .exchange(
-                                    (ExchangeModel) exchanges.entrySet()
-                                            .stream()
-                                            .filter(exchangeModel -> Objects.equals(attribute.getExchangeId(), exchangeModel.getKey()))
-                                            .findFirst()
-                                            .orElseGet(() -> {
-                                                log.debug("The corresponding exchange model with id: {} does not exist", attribute.getExchangeId());
-                                                return null;
-                                            })
-                            )
-                            .baseAsset(
-                                    (AssetModel) assets.entrySet()
-                                            .stream()
-                                            .filter(baseModel -> Objects.equals(attribute.getBaseSymbol(), baseModel.getKey()))
-                                            .findFirst()
-                                            .orElseGet(() -> {
-                                                log.debug("The corresponding base asset model with id: {} does not exist", attribute.getExchangeId());
-                                                return null;
-                                            })
-                            )
-                            .quoteAsset(
-                                    (AssetModel) assets.entrySet()
-                                            .stream()
-                                            .filter(quoteModel -> Objects.equals(attribute.getBaseSymbol(), quoteModel.getKey()))
-                                            .findFirst()
-                                            .orElseGet(() -> {
-                                                log.debug("The corresponding quote asset model with id: {} does not exist", attribute.getExchangeId());
-                                                return null;
-                                            })
-                            )
-                            .baseSymbol(attribute.getBaseSymbol())
-                            .quoteSymbol(attribute.getQuoteSymbol())
-                            .priceQuote(attribute.getPriceQuote())
-                            .priceUsd(attribute.getPriceUsd())
-                            .volumeUsd24Hr(attribute.getVolumeUsd24Hr())
-                            .percentExchangeVolume(attribute.getPercentExchangeVolume())
-                            .tradesCount(attribute.getTradesCount())
-                            .updated(attribute.getUpdated())
-                            .build();
-
-                    saveToDatabase(marketModel);
-                });
+        List<MarketModel> marketModels = filteredMarketModels
+                .stream()
+                .map(attribute -> MarketModel.builder()
+                        .id(attribute.getId())
+                        .exchange(
+                                (ExchangeModel) exchanges.entrySet()
+                                        .stream()
+                                        .filter(exchangeModel -> Objects.equals(attribute.getExchangeId(), exchangeModel.getKey()))
+                                        .findFirst()
+                                        .orElseGet(() -> {
+                                            log.debug("The corresponding exchange model with id: {} does not exist", attribute.getExchangeId());
+                                            return null;
+                                        })
+                        )
+                        .baseAsset(
+                                (AssetModel) assets.entrySet()
+                                        .stream()
+                                        .filter(baseModel -> Objects.equals(attribute.getBaseSymbol(), baseModel.getKey()))
+                                        .findFirst()
+                                        .orElseGet(() -> {
+                                            log.debug("The corresponding base asset model with id: {} does not exist", attribute.getExchangeId());
+                                            return null;
+                                        })
+                        )
+                        .quoteAsset(
+                                (AssetModel) assets.entrySet()
+                                        .stream()
+                                        .filter(quoteModel -> Objects.equals(attribute.getBaseSymbol(), quoteModel.getKey()))
+                                        .findFirst()
+                                        .orElseGet(() -> {
+                                            log.debug("The corresponding quote asset model with id: {} does not exist", attribute.getExchangeId());
+                                            return null;
+                                        })
+                        )
+                        .baseSymbol(attribute.getBaseSymbol())
+                        .quoteSymbol(attribute.getQuoteSymbol())
+                        .priceQuote(attribute.getPriceQuote())
+                        .priceUsd(attribute.getPriceUsd())
+                        .volumeUsd24Hr(attribute.getVolumeUsd24Hr())
+                        .percentExchangeVolume(attribute.getPercentExchangeVolume())
+                        .tradesCount(attribute.getTradesCount())
+                        .updated(attribute.getUpdated())
+                        .build())
+                .toList();
+        saveToDatabase(marketModels);
     }
 
     /*
@@ -170,19 +167,30 @@ public class DataTransformationServiceImpl implements DataTransformationService 
      * */
     @Transactional
     @Override
-    public <T> void saveToDatabase(@Nonnull T entity) {
-        switch (entity) {
-            case MarketModel marketModel -> {
-                marketModelRepository.save(marketModel);
-                log.debug("Saving data of type: Market");
+    public <S> void saveToDatabase(@Nonnull List<S> entities) {
+        if (entities.isEmpty()) {
+            log.warn("The list of entities has been passed but is empty");
+        }
+        // Grab the first element to find out what the data type is
+        S firstElement = entities.getFirst();
+        switch (firstElement) {
+            case MarketModel ignored -> {
+                @SuppressWarnings(value = "unchecked")
+                List<MarketModel> marketModels = (List<MarketModel>) entities;
+                marketModelRepository.saveAll(marketModels);
+                log.debug("Saving data of type: Market, with size: {}", entities.size());
             }
-            case ExchangeModel exchangeModel -> {
-                exchangeModelRepository.save(exchangeModel);
-                log.debug("Saving data of type: Exchange");
+            case ExchangeModel ignored -> {
+                @SuppressWarnings(value = "unchecked")
+                List<ExchangeModel> exchangeModels = (List<ExchangeModel>) entities;
+                exchangeModelRepository.saveAll(exchangeModels);
+                log.debug("Saving data of type: Exchange, with size: {}", entities.size());
             }
-            case AssetModel assetModel -> {
-                assetModelRepository.save(assetModel);
-                log.debug("Saving data of type: Asset");
+            case AssetModel ignored -> {
+                @SuppressWarnings(value = "unchecked")
+                List<AssetModel> assetModels = (List<AssetModel>) entities;
+                assetModelRepository.saveAll(assetModels);
+                log.debug("Saving data of type: Asset, with size: {}", entities.size());
             }
             default -> log.warn("Info was sent to be saved but was not a recognizable type");
         }
