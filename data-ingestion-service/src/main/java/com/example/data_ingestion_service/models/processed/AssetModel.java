@@ -32,22 +32,4 @@ public class AssetModel {
     private BigDecimal priceUsd;
     private BigDecimal changePercent24Hr;
     private BigDecimal vwap24Hr;
-
-    @OneToMany(mappedBy = "baseAsset")
-    @Nullable
-    private Set<MarketModel> baseMarkets;
-
-    @OneToMany(mappedBy = "quoteAsset")
-    @Nullable
-    private Set<MarketModel> quoteMarkets;
-
-    public void addBaseMarket(@Nonnull MarketModel marketModel) {
-        assert baseMarkets != null;
-        baseMarkets.add(marketModel);
-    }
-
-    public void addQuoteMarket(@Nonnull MarketModel marketModel) {
-        assert quoteMarkets != null;
-        quoteMarkets.add(marketModel);
-    }
 }

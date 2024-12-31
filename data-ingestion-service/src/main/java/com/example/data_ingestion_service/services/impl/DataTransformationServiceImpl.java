@@ -45,6 +45,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     * Converts the raw entity model into an exchange model
     * @return a set of exchange models, ensuring there are no duplicates
     * */
+    // TODO: use mapstruct for the conversions lol
     @Override
     public Set<ExchangeModel> rawToEntityExchange() {
         List<RawExchangesModel> cachedExchanges = aggregateService.fetchExchanges();
@@ -55,7 +56,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                         .percentTotalVolume(attribute.getPercentTotalVolume())
                         .volumeUsd(attribute.getVolumeUsd())
                         .updated(attribute.getUpdated())
-                        .markets(null)
                         .build())
                 .collect(Collectors.toSet());
     }
@@ -79,8 +79,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                         .priceUsd(attribute.getPriceUsd())
                         .changePercent24Hr(attribute.getChangePercent24Hr())
                         .vwap24Hr(attribute.getVwap24Hr())
-                        .baseMarkets(null)
-                        .quoteMarkets(null)
                         .build())
                 .collect(Collectors.toSet());
     }
@@ -161,30 +159,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                             .tradesCount(attribute.getTradesCount())
                             .updated(attribute.getUpdated())
                             .build();
-
-                    ExchangeModel exchange = exchanges.get(attribute.getExchangeId());
-                    if (exchange != null) {
-                        exchange.addMarket(marketModel);
-                        saveToDatabase(exchange);
-                    } else {
-                        log.debug("The corresponding exchange model with id: {} does not exist", attribute.getExchangeId());
-                    }
-
-                    AssetModel quote = assets.get(attribute.getQuoteId());
-                    if (quote != null) {
-                        quote.addQuoteMarket(marketModel);
-                        saveToDatabase(quote);
-                    } else {
-                        log.debug("The corresponding quote asset model with id: {} does not exist", attribute.getExchangeId());
-                    }
-
-                    AssetModel base = assets.get(attribute.getId());
-                    if (base != null) {
-                        base.addBaseMarket(marketModel);
-                        saveToDatabase(base);
-                    } else {
-                        log.debug("The corresponding base asset model with id: {} does not exist", attribute.getExchangeId());
-                    }
 
                     saveToDatabase(marketModel);
                 });

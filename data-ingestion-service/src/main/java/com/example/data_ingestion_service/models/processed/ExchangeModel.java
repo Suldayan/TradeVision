@@ -27,13 +27,4 @@ public class ExchangeModel {
     private BigDecimal percentTotalVolume;
     private BigDecimal volumeUsd;
     private Long updated;
-
-    @OneToMany(mappedBy = "exchange")
-    @Nullable
-    private Set<MarketModel> markets;
-
-    public void addMarket(@Nonnull MarketModel market) {
-        assert markets != null;
-        markets.add(market);
-    }
 }
