@@ -9,6 +9,7 @@ import com.example.data_ingestion_service.models.raw.RawMarketModel;
 import com.example.data_ingestion_service.repository.AssetModelRepository;
 import com.example.data_ingestion_service.repository.ExchangeModelRepository;
 import com.example.data_ingestion_service.repository.MarketModelRepository;
+import com.example.data_ingestion_service.services.DataAggregateService;
 import com.example.data_ingestion_service.services.DataTransformationService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     private final ExchangeModelRepository exchangeModelRepository;
     private final AssetModelRepository assetModelRepository;
 
-    private final DataAggregateServiceImpl aggregateService;
+    private final DataAggregateService aggregateService;
 
     /*
     * Converts the raw entity model into an exchange model
@@ -170,6 +171,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     public <S> void saveToDatabase(@Nonnull List<S> entities) {
         if (entities.isEmpty()) {
             log.warn("The list of entities has been passed but is empty");
+            return;
         }
         // Grab the first element to find out what the data type is
         S firstElement = entities.getFirst();
