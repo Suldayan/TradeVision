@@ -5,8 +5,11 @@ import com.example.data_ingestion_service.models.raw.RawAssetModel;
 import com.example.data_ingestion_service.models.raw.RawExchangesModel;
 import com.example.data_ingestion_service.models.raw.RawMarketModel;
 import com.example.data_ingestion_service.repository.MarketModelRepository;
+import com.example.data_ingestion_service.services.AssetService;
 import com.example.data_ingestion_service.services.DataAggregateService;
-import com.example.data_ingestion_service.services.exceptions.ApiException;
+import com.example.data_ingestion_service.services.ExchangeService;
+import com.example.data_ingestion_service.services.MarketService;
+import com.example.data_ingestion_service.services.exceptions.DataAggregateException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
@@ -21,6 +24,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /*
@@ -36,11 +42,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DataAggregateServiceImpl implements DataAggregateService {
-    private final MarketServiceImpl marketService;
-    private final ExchangeServiceImpl exchangeService;
-    private final AssetServiceImpl assetService;
+    private final MarketService marketService;
+    private final ExchangeService exchangeService;
+    private final AssetService assetService;
 
     private final MarketModelRepository marketModelRepository;
+
+    private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     /*
     * Fetches and caches the exchange api response
@@ -84,15 +92,27 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     @CircuitBreaker(name = "apiCircuitBreaker")
     @Scheduled(fixedRateString = "300000") // 5 minute scheduling
     @Override
-    public void asyncFetch() {
-            CompletableFuture
-                    .supplyAsync(this::fetchAssets)
-                    .thenRunAsync(this::fetchMarkets)
-                    .thenRunAsync(this::fetchExchanges)
-                    .exceptionally(error -> {
-                        // TODO add better error handling later
-                        throw new ApiException(error.getMessage());
-                    });
+    public CompletableFuture<Void> asyncFetch() {
+        CompletableFuture<List<RawExchangesModel>> exchangeFuture = CompletableFuture.supplyAsync(this::fetchExchanges);
+        CompletableFuture<List<RawAssetModel>> assetFuture = CompletableFuture.supplyAsync(this::fetchAssets);
+        CompletableFuture<List<RawMarketModel>> marketFuture = CompletableFuture.supplyAsync(this::fetchMarkets);
+
+        return CompletableFuture.allOf(exchangeFuture, assetFuture, marketFuture)
+                        .whenComplete((result, error) -> {
+                            if (error != null) {
+                                log.error("Failed to complete all async tasks: {}", error.getMessage(), error);
+                            } else {
+                                log.info("All async tasks have been completed");
+                            }
+                        });
+    }
+
+    private <T> CompletableFuture<Void> asyncFetch(Supplier<T> supplier, String taskName) {
+        return CompletableFuture.supplyAsync(supplier, executor)
+                .exceptionally(error -> {
+                    log.error("An error occurred during the async process for {}: {}", taskName, error.getMessage(), error);
+                    throw new DataAggregateException(String.format("Failed to async the %s: %s", taskName, error.getMessage()), error);
+                });
     }
 
     /*
@@ -104,27 +124,65 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     public List<RawMarketModel> collectAndUpdateMarketState() {
         List<RawMarketModel> cachedMarketData = fetchMarkets();
         return cachedMarketData.stream()
-                .map(data -> {
-                    if (!isPriceChangeMeaningful(data)) {
-                        // Then we can just ignore
-                        log.debug("No significant change to price data, this message is for debugging purposes");
-                    }
-                    return RawMarketModel.builder()
-                            .id(data.getId())
-                            .rank(data.getRank())
-                            .priceQuote(data.getPriceQuote())
-                            .priceUsd(data.getPriceUsd())
-                            .volumeUsd24Hr(data.getVolumeUsd24Hr())
-                            .percentExchangeVolume(data.getPercentExchangeVolume())
-                            .tradesCount(data.getTradesCount())
-                            .updated(data.getUpdated())
-                            .exchangeId(data.getExchangeId())
-                            .quoteId(data.getQuoteId())
-                            .baseSymbol(data.getBaseSymbol())
-                            .quoteSymbol(data.getQuoteSymbol())
-                            .build();
-                })
+                .filter(this::isPriceChangeMeaningful)
+                .map(data -> RawMarketModel.builder()
+                        .id(data.getId())
+                        .rank(data.getRank())
+                        .priceQuote(data.getPriceQuote())
+                        .priceUsd(data.getPriceUsd())
+                        .volumeUsd24Hr(data.getVolumeUsd24Hr())
+                        .percentExchangeVolume(data.getPercentExchangeVolume())
+                        .tradesCount(data.getTradesCount())
+                        .updated(data.getUpdated())
+                        .exchangeId(data.getExchangeId())
+                        .quoteId(data.getQuoteId())
+                        .baseSymbol(data.getBaseSymbol())
+                        .quoteSymbol(data.getQuoteSymbol())
+                        .build())
                 .collect(Collectors.toList());
+    }
+
+    @Nonnull
+    @Override
+    public Set<String> filterExchangeIds() {
+        List<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
+        return filteredMarketModels.stream()
+                .map(RawMarketModel::getExchangeId)
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    @Override
+    public Set<String> filterAssetIds() {
+        List<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
+        Set<String> baseIds = filteredMarketModels.stream()
+                .map(RawMarketModel::getId)
+                .collect(Collectors.toSet());
+        Set<String> quoteIds = filteredMarketModels.stream()
+                .map(RawMarketModel::getQuoteId)
+                .collect(Collectors.toSet());
+        baseIds.addAll(quoteIds);
+        return baseIds;
+    }
+
+    @Nonnull
+    @Override
+    public Set<RawExchangesModel> exchangeIdsToModels() {
+        Set<String> exchangeIds = filterExchangeIds();
+        List<RawExchangesModel> unfilteredModels = fetchExchanges();
+        return unfilteredModels.stream()
+                .filter(model -> exchangeIds.contains(model.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    @Override
+    public Set<RawAssetModel> assetIdsToModels() {
+        Set<String> assetIds = filterAssetIds();
+        List<RawAssetModel> unfilteredAssets = fetchAssets();
+        return unfilteredAssets.stream()
+                .filter(model -> assetIds.contains(model.getId()))
+                .collect(Collectors.toSet());
     }
 
     /*

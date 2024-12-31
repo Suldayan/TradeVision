@@ -43,10 +43,10 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     * Converts the raw entity model into an exchange model
     * @return a set of exchange models, ensuring there are no duplicates
     * */
-    // TODO: use mapstruct for the conversions lol
+    // TODO: this conversion seems not to be needed anymore as we're removing the circular relationship
     @Override
     public Set<ExchangeModel> rawToEntityExchange() {
-        List<RawExchangesModel> cachedExchanges = aggregateService.fetchExchanges();
+        Set<RawExchangesModel> cachedExchanges = aggregateService.exchangeIdsToModels();
         return cachedExchanges.stream()
                 .map(attribute -> ExchangeModel.builder()
                         .id(attribute.getId())
@@ -56,7 +56,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                         .updated(attribute.getUpdated())
                         .build())
                 .collect(Collectors.toSet());
-
     }
 
     /*
@@ -65,7 +64,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     * */
     @Override
     public Set<AssetModel> rawToEntityAsset() {
-        List<RawAssetModel> cachedAssets = aggregateService.fetchAssets();
+        Set<RawAssetModel> cachedAssets = aggregateService.assetIdsToModels();
         return cachedAssets.stream()
                 .map(attribute -> AssetModel.builder()
                         .id(attribute.getId())
