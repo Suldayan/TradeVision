@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -18,18 +19,10 @@ import java.util.Set;
 @Entity
 @Table(name = "asset")
 public class AssetModel {
+    // The asset id is the name of the given asset
     @Id
     private String id;
 
-    @Column(unique = true)
-    private String symbol;
-
-    private String name;
-    private BigDecimal supply;
-    private BigDecimal maxSupply;
-    private BigDecimal marketCapUsd;
-    private BigDecimal volumeUsd24Hr;
     private BigDecimal priceUsd;
-    private BigDecimal changePercent24Hr;
-    private BigDecimal vwap24Hr;
+    private LocalDateTime fetched;
 }

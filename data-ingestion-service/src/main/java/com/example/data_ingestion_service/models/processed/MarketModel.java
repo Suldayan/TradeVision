@@ -34,27 +34,6 @@ public class MarketModel {
     @Nullable
     private AssetModel quoteAsset;
 
-    @Column(name = "base_symbol")
-    private String baseSymbol;
-
-    @Column(name = "quote_symbol")
-    private String quoteSymbol;
-
-    private BigDecimal priceQuote;
     private BigDecimal priceUsd;
-    private BigDecimal volumeUsd24Hr;
-    private BigDecimal percentExchangeVolume;
-    private Integer tradesCount;
     private Long updated;
-
-    @PrePersist
-    @PreUpdate
-    private void updateSymbols() {
-        if (baseAsset != null) {
-            this.baseSymbol = baseAsset.getSymbol();
-        }
-        if (quoteAsset != null) {
-            this.quoteSymbol = quoteAsset.getSymbol();
-        }
-    }
 }

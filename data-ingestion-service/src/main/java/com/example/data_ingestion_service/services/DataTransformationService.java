@@ -11,8 +11,8 @@ import java.util.Set;
 public interface DataTransformationService {
     Set<ExchangeModel> rawToEntityExchange();
     Set<AssetModel> rawToEntityAsset();
-    Map<String, ExchangeModel> indexExchanges();
-    Map<String, AssetModel> indexAssets();
+    Map<String, ExchangeModel> indexExchangesById();
+    Map<String, AssetModel> indexAssetsById();
     void completeMarketAttributes();
     <S> void saveToDatabase(@Nonnull List<S> entity);
 }

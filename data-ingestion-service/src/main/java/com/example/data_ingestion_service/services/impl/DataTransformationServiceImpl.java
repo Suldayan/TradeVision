@@ -39,10 +39,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     private final DataAggregateService aggregateService;
 
-    /*
-    * Converts the raw entity model into an exchange model
-    * @return a set of exchange models, ensuring there are no duplicates
-    * */
     // TODO: this conversion seems not to be needed anymore as we're removing the circular relationship
     @Override
     public Set<ExchangeModel> rawToEntityExchange() {
@@ -58,10 +54,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                 .collect(Collectors.toSet());
     }
 
-    /*
-    * Converts a raw asset model into an asset model
-    * @return  a set of asset models to ensure there are no duplicates
-    * */
     @Override
     public Set<AssetModel> rawToEntityAsset() {
         Set<RawAssetModel> cachedAssets = aggregateService.assetIdsToModels();
@@ -81,38 +73,30 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                 .collect(Collectors.toSet());
     }
 
-    /*
-    * Creates a map of string and exchange models, indexing by id for easier finding
-    * @return a Map<String, ExchangeModel>, containing all ids and their corresponding exchange model
-    * */
     @Override
-    public Map<String, ExchangeModel> indexExchanges() {
+    public Map<String, ExchangeModel> indexExchangesById() {
         Set<ExchangeModel> exchangeModels = rawToEntityExchange();
         return exchangeModels.stream()
                 .collect(Collectors.toMap(ExchangeModel::getId, Function.identity()));
     }
 
-    /*
-     * Creates a map of string and asset models, indexing by id for easier finding
-     * @return a Map<String, AssetModel>, containing all ids and their corresponding exchange model
-     * */
     @Override
-    public Map<String, AssetModel> indexAssets() {
+    public Map<String, AssetModel> indexAssetsById() {
         Set<AssetModel> assetModels = rawToEntityAsset();
         return assetModels.stream()
                 .collect(Collectors.toMap(AssetModel::getId, Function.identity()));
     }
 
     /*
-    * Completes all models by connecting each corresponding market, asset and exchange relationship with each other
+    * Completes market models by completing the exchange and asset relationship towards the market
     * Evicts the cache for the next scheduled fetch via the data aggregate service
     * */
     @CacheEvict(cacheNames = "marketApiResponse, exchangeApiResponse, assetApiResponse")
     @Override
     public void completeMarketAttributes() {
         List<RawMarketModel> filteredMarketModels = aggregateService.collectAndUpdateMarketState();
-        Map<String, ExchangeModel> exchanges = indexExchanges();
-        Map<String, AssetModel> assets = indexAssets();
+        Map<String, ExchangeModel> exchanges = indexExchangesById();
+        Map<String, AssetModel> assets = indexAssetsById();
 
         List<MarketModel> marketModels = filteredMarketModels
                 .stream()

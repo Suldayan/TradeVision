@@ -21,9 +21,6 @@ public class ExchangeModel {
     @Id
     String id;
 
-    @Column(unique = true)
-    private String name;
-
     private BigDecimal percentTotalVolume;
     private BigDecimal volumeUsd;
     private Long updated;

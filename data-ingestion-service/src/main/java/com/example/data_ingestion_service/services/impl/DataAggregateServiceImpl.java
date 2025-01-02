@@ -50,10 +50,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    /*
-    * Fetches and caches the exchange api response
-    * @return a list of raw exchange models to cache
-    * */
     @Nonnull
     @CachePut(value = "exchangeApiResponse")
     @Override
@@ -61,10 +57,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
         return exchangeService.getExchangeData();
     }
 
-    /*
-    * Fetches and caches the asset api response
-    * @return a list of raw asset models to cache
-    * */
     @Nonnull
     @CachePut(value = "assetApiResponse")
     @Override
@@ -72,10 +64,6 @@ public class DataAggregateServiceImpl implements DataAggregateService {
         return assetService.getAssetData();
     }
 
-    /*
-     * Fetches and caches the market api response
-     * @return a list of raw market models to cache
-     * */
     @Nonnull
     @CachePut(value = "marketApiResponse")
     @Override
@@ -83,10 +71,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
         return marketService.getMarketsData();
     }
 
-    /*
-    * Runs the assets and exchanges fetch functions asynchronously with the markets for matched responses by fetch time
-    * */
-    //TODO more than likely, we'll have to configure scheduling and activation for the overall file within this function. This function should be the central orchestration
+    //TODO configure message queuing with kafka/rabbitmq for the event driven flow
     @Retry(name = "apiRetry")
     @TimeLimiter(name = "apiTimeLimiter")
     @CircuitBreaker(name = "apiCircuitBreaker")
@@ -107,11 +92,11 @@ public class DataAggregateServiceImpl implements DataAggregateService {
                         });
     }
 
-    private <T> CompletableFuture<Void> asyncFetch(Supplier<T> supplier, String taskName) {
+    private <T> CompletableFuture<T> asyncFetch(Supplier<T> supplier, String taskName) {
         return CompletableFuture.supplyAsync(supplier, executor)
                 .exceptionally(error -> {
                     log.error("An error occurred during the async process for {}: {}", taskName, error.getMessage(), error);
-                    throw new DataAggregateException(String.format("Failed to async the %s: %s", taskName, error.getMessage()), error);
+                    throw new DataAggregateException(String.format("Failed to async the %s: %s", taskName, error.getMessage()));
                 });
     }
 
