@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.models.processed;
+package com.example.data_processing_service.models.processed;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -22,7 +22,7 @@ public class MarketModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exchange_id", nullable = false)
     @Nullable
-    private ExchangeModel exchange;
+    private ExchangesModel exchange;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "base_asset_id", nullable = false)

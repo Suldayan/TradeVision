@@ -1,16 +1,16 @@
-package com.example.data_ingestion_service.services.impl;
+package com.example.data_processing_service.services.impl;
 
-import com.example.data_ingestion_service.models.processed.AssetModel;
-import com.example.data_ingestion_service.models.processed.ExchangeModel;
-import com.example.data_ingestion_service.models.processed.MarketModel;
-import com.example.data_ingestion_service.models.raw.RawAssetModel;
-import com.example.data_ingestion_service.models.raw.RawExchangesModel;
-import com.example.data_ingestion_service.models.raw.RawMarketModel;
-import com.example.data_ingestion_service.repository.AssetModelRepository;
-import com.example.data_ingestion_service.repository.ExchangeModelRepository;
-import com.example.data_ingestion_service.repository.MarketModelRepository;
-import com.example.data_ingestion_service.services.DataAggregateService;
-import com.example.data_ingestion_service.services.DataTransformationService;
+import com.example.data_processing_service.models.processed.AssetModel;
+import com.example.data_processing_service.models.processed.ExchangesModel;
+import com.example.data_processing_service.models.processed.MarketModel;
+import com.example.data_processing_service.models.raw.RawAssetModel;
+import com.example.data_processing_service.models.raw.RawExchangesModel;
+import com.example.data_processing_service.models.raw.RawMarketModel;
+import com.example.data_processing_service.repository.processed.AssetModelRepository;
+import com.example.data_processing_service.repository.processed.ExchangeModelRepository;
+import com.example.data_processing_service.repository.processed.MarketModelRepository;
+import com.example.data_processing_service.services.FilterService;
+import com.example.data_processing_service.services.TransformationService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,33 +18,28 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-/*
-* Transforms all incoming data from the data aggregate service and fully completes them to be saved onto the database (postgres)
-* @param takes a Market, Exchange and Asset Model Repository for saving to the database after all transformations have been applied and takes a DataAggregateServiceImpl to grab the data
-* Every transformation involves converting each model from its raw form to its filtered form, then finally filling the attributes with their respective relationships
-* The transformation flow is as follows: gather data -> convert (raw to processed) -> fill -> save
-* */
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DataTransformationServiceImpl implements DataTransformationService {
+public class TransformationServiceImpl implements TransformationService {
     private final MarketModelRepository marketModelRepository;
     private final ExchangeModelRepository exchangeModelRepository;
     private final AssetModelRepository assetModelRepository;
 
-    private final DataAggregateService aggregateService;
+    private final FilterService filterService;
 
-    // TODO: this conversion seems not to be needed anymore as we're removing the circular relationship
     @Override
-    public Set<ExchangeModel> rawToEntityExchange() {
-        Set<RawExchangesModel> cachedExchanges = aggregateService.exchangeIdsToModels();
+    public Set<ExchangesModel> rawToEntityExchange() {
+        Set<RawExchangesModel> cachedExchanges = filterService.exchangeIdsToModels();
         return cachedExchanges.stream()
-                .map(attribute -> ExchangeModel.builder()
+                .map(attribute -> ExchangesModel.builder()
                         .id(attribute.getId())
                         .name(attribute.getName())
                         .percentTotalVolume(attribute.getPercentTotalVolume())
@@ -56,7 +51,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     @Override
     public Set<AssetModel> rawToEntityAsset() {
-        Set<RawAssetModel> cachedAssets = aggregateService.assetIdsToModels();
+        Set<RawAssetModel> cachedAssets = filterService.assetIdsToModels();
         return cachedAssets.stream()
                 .map(attribute -> AssetModel.builder()
                         .id(attribute.getId())
@@ -74,10 +69,10 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     }
 
     @Override
-    public Map<String, ExchangeModel> indexExchangesById() {
-        Set<ExchangeModel> exchangeModels = rawToEntityExchange();
+    public Map<String, ExchangesModel> indexExchangesById() {
+        Set<ExchangesModel> exchangeModels = rawToEntityExchange();
         return exchangeModels.stream()
-                .collect(Collectors.toMap(ExchangeModel::getId, Function.identity()));
+                .collect(Collectors.toMap(ExchangesModel::getId, Function.identity()));
     }
 
     @Override
@@ -88,14 +83,14 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     }
 
     /*
-    * Completes market models by completing the exchange and asset relationship towards the market
-    * Evicts the cache for the next scheduled fetch via the data aggregate service
-    * */
+     * Completes market models by completing the exchange and asset relationship towards the market
+     * Evicts the cache for the next scheduled fetch via the data aggregate service
+     * */
     @CacheEvict(cacheNames = "marketApiResponse, exchangeApiResponse, assetApiResponse")
     @Override
     public void completeMarketAttributes() {
-        List<RawMarketModel> filteredMarketModels = aggregateService.collectAndUpdateMarketState();
-        Map<String, ExchangeModel> exchanges = indexExchangesById();
+        List<RawMarketModel> filteredMarketModels = filterService.collectAndUpdateMarketState();
+        Map<String, ExchangesModel> exchanges = indexExchangesById();
         Map<String, AssetModel> assets = indexAssetsById();
 
         List<MarketModel> marketModels = filteredMarketModels
@@ -103,7 +98,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                 .map(attribute -> MarketModel.builder()
                         .id(attribute.getId())
                         .exchange(
-                                (ExchangeModel) exchanges.entrySet()
+                                (ExchangesModel) exchanges.entrySet()
                                         .stream()
                                         .filter(exchangeModel -> Objects.equals(attribute.getExchangeId(), exchangeModel.getKey()))
                                         .findFirst()
@@ -165,9 +160,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                 marketModelRepository.saveAll(marketModels);
                 log.debug("Saving data of type: Market, with size: {}", entities.size());
             }
-            case ExchangeModel ignored -> {
+            case ExchangesModel ignored -> {
                 @SuppressWarnings(value = "unchecked")
-                List<ExchangeModel> exchangeModels = (List<ExchangeModel>) entities;
+                List<ExchangesModel> exchangeModels = (List<ExchangesModel>) entities;
                 exchangeModelRepository.saveAll(exchangeModels);
                 log.debug("Saving data of type: Exchange, with size: {}", entities.size());
             }

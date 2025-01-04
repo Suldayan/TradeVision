@@ -1,20 +1,16 @@
-spring:
-  application:
-    name: data-ingestion-service
+datasource:
+  url: ${DB_URL}
+  username: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+  driver-class-name: org.postgresql.Driver
+jpa:
+  hibernate:
+    ddl-auto: none
 
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-
-  flyway:
-    enabled: true
-    baseline-on-migration: true
-    locations: classpath:db/migration
+flyway:
+  enabled: true
+  baseline-on-migration: true
+  locations: classpath:db/migration
 
 coincap:
   base-url: ${CC_BASE_URL}
@@ -51,5 +47,3 @@ resilience4j.timelimiter:
     apiTimeLimit:
       timeoutDuration: 2s
       cancelRunningFuture: false
-
-

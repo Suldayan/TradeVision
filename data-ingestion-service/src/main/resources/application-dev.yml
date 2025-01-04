@@ -1,24 +1,17 @@
 spring:
-  application:
-    name: data-ingestion-service
-
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
-
-  flyway:
-    enabled: true
-    baseline-on-migration: true
-    locations: classpath:db/migration
-
-coincap:
-  base-url: ${CC_BASE_URL}
-  api-key: ${CC_API_KEY}
+      ddl-auto: update # Options: validate, update, create, create-drop
+    show-sql: true
 
 resilience4j.circuitbreaker:
   instances:
@@ -51,5 +44,4 @@ resilience4j.timelimiter:
     apiTimeLimit:
       timeoutDuration: 2s
       cancelRunningFuture: false
-
 

@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class DataIngestionServiceApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(DataIngestionServiceApplication.class, args);
 	}
 

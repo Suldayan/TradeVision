@@ -1,15 +1,14 @@
-package com.example.data_ingestion_service.models.processed;
+package com.example.data_processing_service.models.processed;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +16,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "exchanges")
-public class ExchangeModel {
+public class ExchangesModel {
     @Id
     String id;
 
