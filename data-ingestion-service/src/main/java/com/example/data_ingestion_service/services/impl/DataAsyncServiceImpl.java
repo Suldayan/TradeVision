@@ -1,13 +1,10 @@
 package com.example.data_ingestion_service.services.impl;
 
-import com.example.data_ingestion_service.models.raw.RawAssetModel;
-import com.example.data_ingestion_service.models.raw.RawExchangesModel;
-import com.example.data_ingestion_service.models.raw.RawMarketModel;
+import com.example.data_ingestion_service.models.RawAssetModel;
+import com.example.data_ingestion_service.models.RawExchangesModel;
+import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.*;
 import com.example.data_ingestion_service.services.exceptions.DataAggregateException;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
-import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +28,7 @@ import java.util.function.Supplier;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DataAggregateServiceImpl implements DataAggregateService {
+public class DataAsyncServiceImpl implements DataAsyncService {
     private final MarketService marketService;
     private final ExchangeService exchangeService;
     private final AssetService assetService;
@@ -41,30 +38,30 @@ public class DataAggregateServiceImpl implements DataAggregateService {
 
     @Nonnull
     @Override
-    public List<RawExchangesModel> fetchExchanges() {
-        return exchangeService.getExchangeData();
+    public Set<RawExchangesModel> fetchExchanges() {
+        return exchangeService.convertToModel();
     }
 
     @Nonnull
     @Override
-    public List<RawAssetModel> fetchAssets() {
-        return assetService.getAssetData();
+    public Set<RawAssetModel> fetchAssets() {
+        return assetService.convertToModel();
     }
 
     @Nonnull
     @Override
-    public List<RawMarketModel> fetchMarkets() {
-        return marketService.getMarketsData();
+    public Set<RawMarketModel> fetchMarkets() {
+        return marketService.convertToModel();
     }
 
-    @Retry(name = "apiRetry")
-    @TimeLimiter(name = "apiTimeLimiter")
-    @CircuitBreaker(name = "apiCircuitBreaker")
+    //@Retry(name = "apiRetry")
+    //@TimeLimiter(name = "apiTimeLimiter")
+    //@CircuitBreaker(name = "apiCircuitBreaker")
     @Override
     public CompletableFuture<Void> asyncFetch() {
-        CompletableFuture<List<RawExchangesModel>> exchangeFuture = asyncFetch(this::fetchExchanges, "fetchExchanges");
-        CompletableFuture<List<RawAssetModel>> assetFuture = asyncFetch(this::fetchAssets, "fetchAssets");
-        CompletableFuture<List<RawMarketModel>> marketFuture = asyncFetch(this::fetchMarkets, "fetchMarkets");
+        CompletableFuture<Set<RawExchangesModel>> exchangeFuture = asyncFetch(this::fetchExchanges, "fetchExchanges");
+        CompletableFuture<Set<RawAssetModel>> assetFuture = asyncFetch(this::fetchAssets, "fetchAssets");
+        CompletableFuture<Set<RawMarketModel>> marketFuture = asyncFetch(this::fetchMarkets, "fetchMarkets");
 
         return CompletableFuture.allOf(
                 exchangeFuture.thenCompose(this::saveToDatabaseAsync),
@@ -87,7 +84,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
                 });
     }
 
-    private <S> CompletableFuture<Void> saveToDatabaseAsync(@Nonnull List<S> entities) {
+    private <S> CompletableFuture<Void> saveToDatabaseAsync(@Nonnull Set<S> entities) {
         return CompletableFuture.runAsync(() -> databaseService.saveToDatabase(entities));
     }
 }

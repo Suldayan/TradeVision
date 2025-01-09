@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.models.raw;
+package com.example.data_ingestion_service.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,8 +18,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RawExchangesModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String modelId;
+
     @JsonProperty("exchangeId")
-    private String id;
+    private String exchangeId;
 
     @Column(unique = true)
     @JsonProperty("name")

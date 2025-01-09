@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.models.raw;
+package com.example.data_ingestion_service.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,8 +19,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RawMarketModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String modelId;
+
     @JsonProperty("baseId")
-    private String id;
+    private String baseId;
 
     @JsonProperty("rank")
     @JsonIgnore

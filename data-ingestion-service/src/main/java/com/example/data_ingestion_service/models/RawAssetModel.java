@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.models.raw;
+package com.example.data_ingestion_service.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,6 +19,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RawAssetModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String modelId;
+
     @JsonProperty("id")
     private String id;
 

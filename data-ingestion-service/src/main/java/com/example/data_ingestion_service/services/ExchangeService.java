@@ -1,9 +1,11 @@
 package com.example.data_ingestion_service.services;
 
-import com.example.data_ingestion_service.models.raw.RawExchangesModel;
+import com.example.data_ingestion_service.models.RawExchangesModel;
+import com.example.data_ingestion_service.records.Exchange;
 
-import java.util.List;
+import java.util.Set;
 
 public interface ExchangeService {
-    List<RawExchangesModel> getExchangeData();
+    Set<Exchange> getExchangeData();
+    Set<RawExchangesModel> convertToModel();
 }

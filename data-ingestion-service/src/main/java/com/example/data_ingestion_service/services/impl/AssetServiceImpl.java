@@ -1,41 +1,53 @@
 package com.example.data_ingestion_service.services.impl;
 
 import com.example.data_ingestion_service.clients.AssetClient;
-import com.example.data_ingestion_service.models.raw.RawAssetModel;
-import com.example.data_ingestion_service.models.RawAssetWrapperModel;
+import com.example.data_ingestion_service.models.RawAssetModel;
+import com.example.data_ingestion_service.records.Asset;
+import com.example.data_ingestion_service.records.wrapper.AssetWrapper;
 import com.example.data_ingestion_service.services.AssetService;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
+import com.example.data_ingestion_service.services.mapper.AssetMapper;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AssetServiceImpl implements AssetService {
     private final AssetClient assetClient;
+    private final AssetMapper assetMapper;
 
-    /*
-     * Grabs all the market data from the assets endpoint
-     * @returns a list of each asset, containing asset metadata
-     * */
     @Nonnull
     @Override
-    public List<RawAssetModel>  getAssetData() {
+    public Set<Asset> getAssetData() throws ApiException {
         try {
-            RawAssetWrapperModel assetHolder = assetClient.getAssets();
-            log.info("Fetched assets with result: {}", assetHolder);
+            AssetWrapper assetHolder = assetClient.getAssets();
             if (assetHolder == null) {
-                log.error("Fetched data from asset wrapper returned as null");
-                throw new ApiException("Assets data fetched but return as null");
+                throw new ApiException("Asset wrapper model fetched but returned as null");
             }
-            return assetHolder.getRawAssetModelList();
+
+            Set<Asset> assetList = assetHolder.assets();
+            if (assetList.isEmpty()) {
+                log.warn("Asset list is null or empty. Endpoint might be returning incomplete data.");
+                throw new ApiException("Asset list fetched but is null or empty");
+            }
+
+            log.info("Successfully fetched {} assets.", assetList.size());
+            return assetList;
+
         } catch (Exception e) {
-            log.error("An error occurred while fetching assets data: {}", e.getMessage());
-            throw new ApiException(String.format("Failed to fetch asset wrapper data: %s", e));
+            log.error("An error occurred while fetching assets data: {}", e.getMessage(), e.getCause());
+            throw new ApiException(String.format("Failed to fetch asset wrapper data: %s", e.getMessage()));
         }
+    }
+
+    @Nonnull
+    @Override
+    public Set<RawAssetModel> convertToModel() {
+        return assetMapper.assetRecordToEntity(getAssetData());
     }
 }

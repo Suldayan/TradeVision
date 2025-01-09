@@ -1,52 +1,33 @@
 package com.example.data_ingestion_service.configs.interceptor;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.io.*;
+import java.util.Optional;
 
 @Slf4j
 @Component
 public class RestClientInterceptor implements ClientHttpRequestInterceptor {
 
+    @NonNull
     @Override
-    public ClientHttpResponse intercept(HttpRequest request,
-                                        byte[] body,
-                                        ClientHttpRequestExecution execution)
-            throws IOException {
-        // Log the request details
-        logRequestDetailsInfo(request, body);
-
-        // Proceed with the request execution
-        ClientHttpResponse response = execution.execute(request, body);
-
-        // Log the response details
-        logResponseDetails(response);
-
-        return response;
-    }
-
-    private void logRequestDetailsInfo(HttpRequest request, byte[] body) throws IOException {
-        log.info("Request URI: {}", request.getURI());
-        log.info("Request Body: {}", new String(body, StandardCharsets.UTF_8));
-    }
-
-    private void logResponseDetails(ClientHttpResponse response) throws IOException {
-        log.info("Response Status Code: {}", response.getStatusCode());
-        log.info("Response Headers: {}", response.getHeaders());
-        // Read the response body (if needed)
-        String responseBody = new BufferedReader(
-                new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))
-                .lines()
-                .collect(Collectors.joining("\n"));
-        log.info("Response Body: {}", responseBody);
+    public ClientHttpResponse intercept(
+            @NonNull HttpRequest request,
+            byte @NonNull [] body,
+            ClientHttpRequestExecution execution) throws IOException {
+        /*
+        String apiKey = Optional.of(System.getenv("CC_API_KEY"))
+                .orElseThrow(() -> new IllegalStateException("Api key environment variable received as null"));
+        */
+        String apiKey = "f4217ec2-4649-4d6a-a87e-f5c6fee44527";
+        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
+        return execution.execute(request, body);
     }
 }

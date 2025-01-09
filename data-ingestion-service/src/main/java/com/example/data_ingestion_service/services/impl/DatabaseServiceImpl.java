@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -19,11 +19,11 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Transactional
     @Override
-    public <S> void saveToDatabase(@Nonnull List<S> entities) {
+    public <S> void saveToDatabase(@Nonnull Set<S> entities) {
         if (entities.isEmpty()) {
             log.warn("The list of entities for saving has been passed but is empty");
         }
-        Class<?> entityClass = entities.getFirst().getClass();
+        Class<?> entityClass = entities.getClass();
         CrudRepository<S, ?> repository = repositoryMapper.getRepository(entityClass);
         if (repository != null) {
             repository.saveAll(entities);
