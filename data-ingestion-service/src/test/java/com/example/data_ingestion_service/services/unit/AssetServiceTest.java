@@ -1,7 +1,6 @@
-package com.example.data_ingestion_service.services;
+package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.clients.AssetClient;
-import com.example.data_ingestion_service.models.RawAssetModel;
 import com.example.data_ingestion_service.records.Asset;
 import com.example.data_ingestion_service.records.wrapper.AssetWrapper;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
@@ -14,15 +13,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AssetServiceImplTest {
+public class AssetServiceTest {
 
     @Mock
     private AssetClient assetClient;
@@ -88,7 +87,7 @@ class AssetServiceImplTest {
 
         // Act & Assert
         ApiException exception = assertThrows(ApiException.class, () -> assetService.getAssetData());
-        assertEquals("Failed to fetch asset wrapper data: Asset list fetched but is null or empty", exception.getMessage());
+        assertEquals("Failed to fetch asset wrapper data: Asset wrapper model fetched but returned as null", exception.getMessage());
         verify(assetClient).getAssets();
     }
 
@@ -103,4 +102,3 @@ class AssetServiceImplTest {
         verify(assetClient).getAssets();
     }
 }
-
