@@ -23,12 +23,13 @@ public class DatabaseServiceImpl implements DatabaseService {
         if (entities.isEmpty()) {
             log.warn("The list of entities for saving has been passed but is empty");
         }
-        Class<?> entityClass = entities.getClass();
+        Class<?> entityClass = entities.iterator().next().getClass();
         CrudRepository<S, ?> repository = repositoryMapper.getRepository(entityClass);
         if (repository != null) {
             repository.saveAll(entities);
-            log.debug("Saving entities of type: {} with list size: {}", entities.getClass().getSimpleName(), entities.size());
+            log.debug("Saving entities of type: {} with set size: {}", entityClass, entities.size());
+        } else {
+            log.warn("The class of the given entity does not exist within the repository mapping");
         }
-        log.warn("The class of the given entity does not exist within the repository mapping");
     }
 }

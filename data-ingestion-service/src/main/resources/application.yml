@@ -30,28 +30,10 @@ resilience4j.circuitbreaker:
       failure-rate-threshold: 50
       wait-duration-in-open-state: 10s
 
-resilience4j.retry:
-  instances:
-    apiRetry:
-      max-attempts: 3
-      wait-duration: 100ms
-      enableExponentialBackoff: true
-      retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
+logging:
+  level:
+    root: INFO
 
-resilience4j.ratelimiter:
-  instances:
-    apiRateLimit:
-      limitForPeriod: 500
-      limitRefreshPeriod: 60s
-      timeoutDuration: 0
-      registerHealthIndicator: true
-      eventConsumerBufferSize: 100
 
-resilience4j.timelimiter:
-  instances:
-    apiTimeLimit:
-      timeoutDuration: 10s
-      cancelRunningFuture: false
 
 

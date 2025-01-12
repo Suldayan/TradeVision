@@ -23,15 +23,20 @@ public class MarketServiceImpl implements MarketService {
 
     @Nonnull
     @Override
-    public Set<Market> getMarketsData() {
+    public Set<Market> getMarketsData() throws ApiException {
         try {
             MarketWrapper marketHolder = marketClient.getMarkets();
-            log.info("Fetched markets with result: {}", marketHolder);
             if (marketHolder == null) {
                 log.error("Fetched data from market wrapper returned as null");
                 throw new ApiException("Markets data fetched but return as null");
             }
-            return marketHolder.markets();
+            Set<Market> marketSet = marketHolder.markets();
+            if (marketSet.isEmpty()) {
+                log.warn("Market set returned as empty. Endpoint might be returning incomplete data");
+                throw new ApiException("Market set fetched but is empty");
+            }
+            log.info("Successfully fetched {} markets.", marketSet.size());
+            return marketSet;
         } catch (Exception e) {
             log.error("An error occurred while fetching markets data: {}", e.getMessage());
             throw new ApiException(String.format("Failed to fetch market wrapper data: %s", e));

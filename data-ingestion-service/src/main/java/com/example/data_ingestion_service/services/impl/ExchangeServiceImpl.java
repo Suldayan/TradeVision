@@ -23,15 +23,19 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     @Nonnull
     @Override
-    public Set<Exchange> getExchangeData() {
+    public Set<Exchange> getExchangeData() throws ApiException {
         try {
             ExchangeWrapper exchangeHolder = exchangeClient.getExchanges();
-            log.info("Fetched exchanges with result: {}", exchangeHolder);
             if (exchangeHolder == null) {
-                log.error("Fetched data from exchange wrapper returned as null");
                 throw new ApiException("Exchanges data fetched but return as null");
             }
-            return exchangeHolder.exchanges();
+            Set<Exchange> exchangeSet = exchangeHolder.exchanges();
+            if (exchangeSet.isEmpty()) {
+                log.warn("Exchange set fetched as empty. Endpoint might be returning incomplete data");
+                throw new ApiException("Asset set fetched but is empty");
+            }
+            log.info("Successfully fetched {} exchanges.", exchangeSet.size());
+            return exchangeSet;
         } catch (Exception e) {
             log.error("An error occurred while fetching exchanges data: {}", e.getMessage());
             throw new ApiException(String.format("Failed to fetch exchange wrapper data: %s", e));

@@ -22,6 +22,7 @@ public class RestClientInterceptor implements ClientHttpRequestInterceptor {
             @NonNull HttpRequest request,
             byte @NonNull [] body,
             ClientHttpRequestExecution execution) throws IOException {
+        // TODO configure the env for the api key :(
         /*
         String apiKey = Optional.of(System.getenv("CC_API_KEY"))
                 .orElseThrow(() -> new IllegalStateException("Api key environment variable received as null"));

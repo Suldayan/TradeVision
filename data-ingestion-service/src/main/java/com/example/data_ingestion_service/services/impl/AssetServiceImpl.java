@@ -29,16 +29,13 @@ public class AssetServiceImpl implements AssetService {
             if (assetHolder == null) {
                 throw new ApiException("Asset wrapper model fetched but returned as null");
             }
-
-            Set<Asset> assetList = assetHolder.assets();
-            if (assetList.isEmpty()) {
-                log.warn("Asset list is null or empty. Endpoint might be returning incomplete data.");
-                throw new ApiException("Asset list fetched but is null or empty");
+            Set<Asset> assetSet = assetHolder.assets();
+            if (assetSet.isEmpty()) {
+                log.warn("Asset set returned as empty. Endpoint might be returning incomplete data");
+                throw new ApiException("Asset set fetched but is empty");
             }
-
-            log.info("Successfully fetched {} assets.", assetList.size());
-            return assetList;
-
+            log.info("Successfully fetched {} assets.", assetSet.size());
+            return assetSet;
         } catch (Exception e) {
             log.error("An error occurred while fetching assets data: {}", e.getMessage(), e.getCause());
             throw new ApiException(String.format("Failed to fetch asset wrapper data: %s", e.getMessage()));

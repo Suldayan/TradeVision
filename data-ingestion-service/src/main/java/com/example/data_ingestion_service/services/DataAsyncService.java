@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public interface DataAsyncService {
-    Set<RawExchangesModel> fetchExchanges();
-    Set<RawAssetModel> fetchAssets();
-    Set<RawMarketModel> fetchMarkets();
+    CompletableFuture<Set<RawExchangesModel>> fetchExchanges();
+    CompletableFuture<Set<RawAssetModel>> fetchAssets();
+    CompletableFuture<Set<RawMarketModel>> fetchMarkets();
     CompletableFuture<Void> asyncFetch();
 }

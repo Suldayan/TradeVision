@@ -26,7 +26,6 @@ public class RawMarketModel {
     private String baseId;
 
     @JsonProperty("rank")
-    @JsonIgnore
     private Integer rank;
 
     @JsonProperty("priceQuote")

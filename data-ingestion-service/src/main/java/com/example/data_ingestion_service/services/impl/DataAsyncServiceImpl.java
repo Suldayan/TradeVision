@@ -4,21 +4,21 @@ import com.example.data_ingestion_service.models.RawAssetModel;
 import com.example.data_ingestion_service.models.RawExchangesModel;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.*;
-import com.example.data_ingestion_service.services.exceptions.DataAggregateException;
+import com.example.data_ingestion_service.services.exceptions.AsyncException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 
 /*
 * Aggregates data via the coin cap api (served from the services) then filters it by price comparison, only pushing data with a >= 5% change within price or if it doesn't already exist
-* Data aggregates on 5 minute intervals with a retry, time limiter, and circuit breaker with Resilience 4j for extra percussion
+* Data aggregates on 5 minute intervals with a circuit breaker via Resilience 4j if there are multiple api failures
 * The most recent api fetch will be cached via redis, and will be compared with the database (postgres) equivalent for price checks
 * The cache will have a lifetime of 5m 10s to ensure it gets properly compared before being erased. (This may be changed for programmatic deletion rather than life cycles)
 * Overall aggregation for this service involves a full work flow of ingesting -> filtering -> saving
@@ -34,58 +34,76 @@ public class DataAsyncServiceImpl implements DataAsyncService {
     private final AssetService assetService;
     private final DatabaseService databaseService;
 
-    private static final ExecutorService executor = Executors.newFixedThreadPool(10);
-
+    @Async("apiExecutor")
     @Nonnull
     @Override
-    public Set<RawExchangesModel> fetchExchanges() {
-        return exchangeService.convertToModel();
+    public CompletableFuture<Set<RawExchangesModel>> fetchExchanges() {
+        return CompletableFuture.supplyAsync(exchangeService::convertToModel)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.debug("Exchange asynchronous fetch successful at: {}", LocalTime.now());
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("Failed to fetch exchanges asynchronously: {}", ex.getMessage(), ex);
+                    throw new AsyncException("Exchange fetch has failed on the asynchronous flow.", ex);
+                });
     }
 
+    @Async("apiExecutor")
     @Nonnull
     @Override
-    public Set<RawAssetModel> fetchAssets() {
-        return assetService.convertToModel();
+    public CompletableFuture<Set<RawAssetModel>> fetchAssets() {
+        return CompletableFuture.supplyAsync(assetService::convertToModel)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.debug("Asset asynchronous fetch successful at: {}", LocalTime.now());
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("Failed to fetch assets asynchronously: {}", ex.getMessage(), ex);
+                    throw new AsyncException("Asset fetch has failed on the asynchronous flow.", ex);
+                });
     }
 
+    @Async("apiExecutor")
     @Nonnull
     @Override
-    public Set<RawMarketModel> fetchMarkets() {
-        return marketService.convertToModel();
+    public CompletableFuture<Set<RawMarketModel>> fetchMarkets() {
+        return CompletableFuture.supplyAsync(marketService::convertToModel)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.debug("Market asynchronous fetch successful at: {}", LocalTime.now());
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("Failed to fetch market asynchronously: {}", ex.getMessage(), ex);
+                    throw new AsyncException("Market fetch has failed on the asynchronous flow.", ex);
+                });
     }
 
-    //@Retry(name = "apiRetry")
-    //@TimeLimiter(name = "apiTimeLimiter")
-    //@CircuitBreaker(name = "apiCircuitBreaker")
+    @CircuitBreaker(name = "apiCircuitBreaker")
     @Override
     public CompletableFuture<Void> asyncFetch() {
-        CompletableFuture<Set<RawExchangesModel>> exchangeFuture = asyncFetch(this::fetchExchanges, "fetchExchanges");
-        CompletableFuture<Set<RawAssetModel>> assetFuture = asyncFetch(this::fetchAssets, "fetchAssets");
-        CompletableFuture<Set<RawMarketModel>> marketFuture = asyncFetch(this::fetchMarkets, "fetchMarkets");
-
         return CompletableFuture.allOf(
-                exchangeFuture.thenCompose(this::saveToDatabaseAsync),
-                assetFuture.thenCompose(this::saveToDatabaseAsync),
-                marketFuture.thenCompose(this::saveToDatabaseAsync)
+                fetchExchanges().thenCompose(this::saveToDatabaseAsync),
+                fetchAssets().thenCompose(this::saveToDatabaseAsync),
+                fetchMarkets().thenCompose(this::saveToDatabaseAsync)
         ).whenComplete((result, error) -> {
             if (error != null) {
                 log.error("Failed to complete all async tasks: {}", error.getMessage(), error);
             } else {
-                log.info("All async tasks and database saves have been completed");
+                log.info("All async tasks completed successfully");
             }
         });
     }
 
-    private <T> CompletableFuture<T> asyncFetch(@Nonnull Supplier<T> supplier, @Nonnull String taskName) {
-        return CompletableFuture.supplyAsync(supplier, executor)
-                .exceptionally(error -> {
-                    log.error("An error occurred during the async process for {}: {}", taskName, error.getMessage(), error);
-                    throw new DataAggregateException(String.format("Failed to async the %s: %s", taskName, error.getMessage()));
-                });
-    }
-
     private <S> CompletableFuture<Void> saveToDatabaseAsync(@Nonnull Set<S> entities) {
-        return CompletableFuture.runAsync(() -> databaseService.saveToDatabase(entities));
+        return CompletableFuture.runAsync(() -> databaseService.saveToDatabase(entities))
+                .exceptionally(error -> {
+                    log.error("Failed to save {} to database at: {}, {}", entities.getClass(), LocalTime.now(), error.getMessage(), error);
+                    return null;
+                });
     }
 }
 
