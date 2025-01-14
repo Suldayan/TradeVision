@@ -2,7 +2,6 @@ package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.clients.AssetClient;
 import com.example.data_ingestion_service.records.Asset;
-import com.example.data_ingestion_service.records.Exchange;
 import com.example.data_ingestion_service.records.wrapper.AssetWrapper;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.impl.AssetServiceImpl;
@@ -34,45 +33,43 @@ public class AssetServiceTest {
     @InjectMocks
     private AssetServiceImpl assetService;
 
+    public static final Asset mockAsset1 = new Asset(
+            "1",
+            1,
+            "BTC",
+            "Bitcoin",
+            new BigDecimal("21000000"),
+            new BigDecimal("21000000"),
+            new BigDecimal("400000000000"),
+            new BigDecimal("1000000000"),
+            new BigDecimal("20000"),
+            5.0,
+            new BigDecimal("19500"),
+            "https://bitcoin.org"
+    );
+
+    public static final Asset mockAsset2 = new Asset(
+            "2",
+            2,
+            "ETH",
+            "Ethereum",
+            new BigDecimal("120000000"),
+            new BigDecimal("120000000"),
+            new BigDecimal("200000000000"),
+            new BigDecimal("500000000"),
+            new BigDecimal("1500"),
+            3.0,
+            new BigDecimal("1450"),
+            "https://ethereum.org"
+    );
+
     @Test
     void getAssetData_ReturnsValidAssets() {
-        // Arrange
-        Asset mockAsset1 = new Asset(
-                "1",
-                1,
-                "BTC",
-                "Bitcoin",
-                new BigDecimal("21000000"),
-                new BigDecimal("21000000"),
-                new BigDecimal("400000000000"),
-                new BigDecimal("1000000000"),
-                new BigDecimal("20000"),
-                5.0,
-                new BigDecimal("19500"),
-                "https://bitcoin.org"
-        );
-        Asset mockAsset2 = new Asset(
-                "2",
-                2,
-                "ETH",
-                "Ethereum",
-                new BigDecimal("120000000"),
-                new BigDecimal("120000000"),
-                new BigDecimal("200000000000"),
-                new BigDecimal("500000000"),
-                new BigDecimal("1500"),
-                3.0,
-                new BigDecimal("1450"),
-                "https://ethereum.org"
-        );
-
         AssetWrapper mockAssetWrapper = new AssetWrapper(Set.of(mockAsset1, mockAsset2), 133234325L);
         when(assetClient.getAssets()).thenReturn(mockAssetWrapper);
 
-        // Act
         Set<Asset> assets = assetService.getAssetData();
 
-        // Assert
         assertDoesNotThrow(() -> assets);
         assertNotNull(assets);
         assertEquals(2, assets.size());
@@ -80,7 +77,6 @@ public class AssetServiceTest {
         assertTrue(assets.contains(mockAsset2));
         verify(assetClient).getAssets();
     }
-
 
     @Test
     void getAssetData_ThrowsException_WhenAssetWrapperIsNull() {
