@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -56,10 +57,11 @@ public class ExchangeServiceTest {
             "https://www.mockexchangeb.com",
             System.currentTimeMillis()
     );
+
+    public static final ExchangeWrapper mockExchangeWrapper = new ExchangeWrapper(Set.of(exchange1, exchange2), 124324353L);
     
     @Test
     void testGetExchangeData_ReturnsValidSetOfExchangeRecords() {
-        ExchangeWrapper mockExchangeWrapper = new ExchangeWrapper(Set.of(exchange1, exchange2), 124324353L);
         when(exchangeClient.getExchanges()).thenReturn(mockExchangeWrapper);
         
         Set<Exchange> result = exchangeService.getExchangeData();
@@ -103,6 +105,7 @@ public class ExchangeServiceTest {
     @Test
     void convertToModel_ReturnsValidRawExchangeModelSet() {
         RawExchangesModel rawExchangesModel1 = RawExchangesModel.builder()
+                .modelId(UUID.randomUUID().toString())
                 .exchangeId(exchange1.exchangeId())
                 .name(exchange1.name())
                 .rank(exchange1.rank())
@@ -115,6 +118,7 @@ public class ExchangeServiceTest {
                 .build();
 
         RawExchangesModel rawExchangesModel2 = RawExchangesModel.builder()
+                .modelId(UUID.randomUUID().toString())
                 .exchangeId(exchange2.exchangeId())
                 .name(exchange2.name())
                 .rank(exchange2.rank())
@@ -126,9 +130,7 @@ public class ExchangeServiceTest {
                 .updated(exchange2.updated())
                 .build();
 
-        ExchangeWrapper exchangeWrapper = new ExchangeWrapper(Set.of(exchange1, exchange2), 1223532L);
-
-        when(exchangeClient.getExchanges()).thenReturn(exchangeWrapper);
+        when(exchangeClient.getExchanges()).thenReturn(mockExchangeWrapper);
         when(exchangeMapper.exchangeRecordToEntity(exchangeService.getExchangeData())).thenReturn(Set.of(rawExchangesModel1, rawExchangesModel2));
 
         Set<RawExchangesModel> result = exchangeService.convertToModel();

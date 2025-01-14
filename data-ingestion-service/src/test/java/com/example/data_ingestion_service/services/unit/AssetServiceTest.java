@@ -1,6 +1,7 @@
 package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.clients.AssetClient;
+import com.example.data_ingestion_service.models.RawAssetModel;
 import com.example.data_ingestion_service.records.Asset;
 import com.example.data_ingestion_service.records.wrapper.AssetWrapper;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,9 +65,10 @@ public class AssetServiceTest {
             "https://ethereum.org"
     );
 
+    public static final AssetWrapper mockAssetWrapper = new AssetWrapper(Set.of(mockAsset1, mockAsset2), 133234325L);
+
     @Test
     void getAssetData_ReturnsValidAssets() {
-        AssetWrapper mockAssetWrapper = new AssetWrapper(Set.of(mockAsset1, mockAsset2), 133234325L);
         when(assetClient.getAssets()).thenReturn(mockAssetWrapper);
 
         Set<Asset> assets = assetService.getAssetData();
@@ -113,6 +116,47 @@ public class AssetServiceTest {
 
     @Test
     void convertToModel_ReturnsValidRawAssetModelSet() {
+        RawAssetModel rawAssetModel1 = RawAssetModel.builder()
+                .modelId(UUID.randomUUID().toString())
+                .id(mockAsset1.id())
+                .rank(mockAsset1.rank())
+                .symbol(mockAsset1.symbol())
+                .name(mockAsset1.name())
+                .supply(mockAsset1.supply())
+                .maxSupply(mockAsset1.maxSupply())
+                .marketCapUsd(mockAsset1.marketCapUsd())
+                .volumeUsd24Hr(mockAsset1.volume24Hr())
+                .priceUsd(mockAsset1.priceUsd())
+                .changePercent24Hr(BigDecimal.valueOf(mockAsset1.changePercent24Hr()))
+                .vwap24Hr(mockAsset1.vwap24Hr())
+                .explorer(mockAsset1.explorer())
+                .build();
 
+        RawAssetModel rawAssetModel2 = RawAssetModel.builder()
+                .modelId(UUID.randomUUID().toString())
+                .id(mockAsset2.id())
+                .rank(mockAsset2.rank())
+                .symbol(mockAsset2.symbol())
+                .name(mockAsset2.name())
+                .supply(mockAsset2.supply())
+                .maxSupply(mockAsset2.maxSupply())
+                .marketCapUsd(mockAsset2.marketCapUsd())
+                .volumeUsd24Hr(mockAsset2.volume24Hr())
+                .priceUsd(mockAsset2.priceUsd())
+                .changePercent24Hr(BigDecimal.valueOf(mockAsset2.changePercent24Hr()))
+                .vwap24Hr(mockAsset2.vwap24Hr())
+                .explorer(mockAsset2.explorer())
+                .build();
+
+        when(assetClient.getAssets()).thenReturn(mockAssetWrapper);
+        when(assetMapper.assetRecordToEntity(assetService.getAssetData())).thenReturn(Set.of(rawAssetModel1, rawAssetModel2));
+
+        Set<RawAssetModel> result = assetService.convertToModel();
+
+        assertDoesNotThrow(() -> assetService.convertToModel());
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        System.out.println(result);
     }
 }
