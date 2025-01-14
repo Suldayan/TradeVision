@@ -4,7 +4,6 @@ import com.example.data_ingestion_service.models.RawAssetModel;
 import com.example.data_ingestion_service.models.RawExchangesModel;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.*;
-import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.impl.DataAsyncServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

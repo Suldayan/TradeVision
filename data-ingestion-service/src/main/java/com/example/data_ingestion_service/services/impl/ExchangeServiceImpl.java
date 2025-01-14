@@ -27,12 +27,12 @@ public class ExchangeServiceImpl implements ExchangeService {
         try {
             ExchangeWrapper exchangeHolder = exchangeClient.getExchanges();
             if (exchangeHolder == null) {
-                throw new ApiException("Exchanges data fetched but return as null");
+                throw new ApiException("Exchanges data fetched but returned as null");
             }
             Set<Exchange> exchangeSet = exchangeHolder.exchanges();
             if (exchangeSet.isEmpty()) {
                 log.warn("Exchange set fetched as empty. Endpoint might be returning incomplete data");
-                throw new ApiException("Asset set fetched but is empty");
+                throw new ApiException("Exchange set fetched but is empty");
             }
             log.info("Successfully fetched {} exchanges.", exchangeSet.size());
             return exchangeSet;

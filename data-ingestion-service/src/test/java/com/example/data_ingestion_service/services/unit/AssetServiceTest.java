@@ -2,6 +2,7 @@ package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.clients.AssetClient;
 import com.example.data_ingestion_service.records.Asset;
+import com.example.data_ingestion_service.records.Exchange;
 import com.example.data_ingestion_service.records.wrapper.AssetWrapper;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.impl.AssetServiceImpl;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +51,6 @@ public class AssetServiceTest {
                 new BigDecimal("19500"),
                 "https://bitcoin.org"
         );
-
         Asset mockAsset2 = new Asset(
                 "2",
                 2,
@@ -72,6 +73,7 @@ public class AssetServiceTest {
         Set<Asset> assets = assetService.getAssetData();
 
         // Assert
+        assertDoesNotThrow(() -> assets);
         assertNotNull(assets);
         assertEquals(2, assets.size());
         assertTrue(assets.contains(mockAsset1));
@@ -92,6 +94,17 @@ public class AssetServiceTest {
     }
 
     @Test
+    void getAssetData_ThrowsException_OnEmptyDataSet() {
+        // Arrange
+        AssetWrapper assetWrapper = new AssetWrapper(new HashSet<>(), 12323425L);
+        when(assetClient.getAssets()).thenReturn(assetWrapper);
+
+        ApiException exception = assertThrows(ApiException.class, () -> assetService.getAssetData());
+        assertTrue(exception.getMessage().contains("Asset set fetched but is empty"));
+        verify(assetClient).getAssets();
+    }
+
+    @Test
     void getAssetData_ThrowsException_OnClientError() {
         // Arrange
         when(assetClient.getAssets()).thenThrow(new RuntimeException("Client Error"));
@@ -100,5 +113,10 @@ public class AssetServiceTest {
         ApiException exception = assertThrows(ApiException.class, () -> assetService.getAssetData());
         assertTrue(exception.getMessage().contains("Failed to fetch asset wrapper data"));
         verify(assetClient).getAssets();
+    }
+
+    @Test
+    void convertToModel_ReturnsValidRawAssetModelSet() {
+
     }
 }
