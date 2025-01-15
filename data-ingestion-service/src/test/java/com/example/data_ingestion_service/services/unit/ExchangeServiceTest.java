@@ -61,7 +61,7 @@ public class ExchangeServiceTest {
     public static final ExchangeWrapper mockExchangeWrapper = new ExchangeWrapper(Set.of(exchange1, exchange2), 124324353L);
     
     @Test
-    void testGetExchangeData_ReturnsValidSetOfExchangeRecords() {
+    void testGetExchangeData_ReturnsSetOfExchangeRecords() {
         when(exchangeClient.getExchanges()).thenReturn(mockExchangeWrapper);
         
         Set<Exchange> result = exchangeService.getExchangeData();

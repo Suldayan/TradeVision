@@ -68,7 +68,7 @@ public class AssetServiceTest {
     public static final AssetWrapper mockAssetWrapper = new AssetWrapper(Set.of(mockAsset1, mockAsset2), 133234325L);
 
     @Test
-    void getAssetData_ReturnsValidAssets() {
+    void getAssetData_ReturnsSetOfAssetRecords() {
         when(assetClient.getAssets()).thenReturn(mockAssetWrapper);
 
         Set<Asset> assets = assetService.getAssetData();
@@ -83,10 +83,8 @@ public class AssetServiceTest {
 
     @Test
     void getAssetData_ThrowsException_WhenAssetWrapperIsNull() {
-        // Arrange
         when(assetClient.getAssets()).thenReturn(null);
 
-        // Act & Assert
         ApiException exception = assertThrows(ApiException.class, () -> assetService.getAssetData());
         assertEquals("Failed to fetch asset wrapper data: Asset wrapper model fetched but returned as null", exception.getMessage());
         verify(assetClient).getAssets();
@@ -94,7 +92,6 @@ public class AssetServiceTest {
 
     @Test
     void getAssetData_ThrowsException_OnEmptyDataSet() {
-        // Arrange
         AssetWrapper assetWrapper = new AssetWrapper(new HashSet<>(), 12323425L);
         when(assetClient.getAssets()).thenReturn(assetWrapper);
 
@@ -105,17 +102,15 @@ public class AssetServiceTest {
 
     @Test
     void getAssetData_ThrowsException_OnClientError() {
-        // Arrange
         when(assetClient.getAssets()).thenThrow(new RuntimeException("Client Error"));
 
-        // Act & Assert
         ApiException exception = assertThrows(ApiException.class, () -> assetService.getAssetData());
         assertTrue(exception.getMessage().contains("Failed to fetch asset wrapper data"));
         verify(assetClient).getAssets();
     }
 
     @Test
-    void convertToModel_ReturnsValidRawAssetModelSet() {
+    void convertToModel_ReturnsValid_RawAssetModelSet() {
         RawAssetModel rawAssetModel1 = RawAssetModel.builder()
                 .modelId(UUID.randomUUID().toString())
                 .id(mockAsset1.id())
@@ -156,7 +151,5 @@ public class AssetServiceTest {
         assertDoesNotThrow(() -> assetService.convertToModel());
         assertNotNull(result);
         assertEquals(2, result.size());
-
-        System.out.println(result);
     }
 }
