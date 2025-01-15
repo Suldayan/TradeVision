@@ -1,7 +1,6 @@
 package com.example.data_ingestion_service.configs;
 
 import com.example.data_ingestion_service.configs.exception.RestClientException;
-import com.example.data_ingestion_service.configs.interceptor.RestClientInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +22,6 @@ public class RestClientConfig {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeaders(this::configureHeaders)
-                .requestInterceptor(new RestClientInterceptor())
                 .defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
                     String errorMessage = String.format(
                             "Server error occurred while calling %s. Status code: %s, Response body: %s",
