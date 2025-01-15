@@ -46,7 +46,7 @@ public class DataAsyncServiceImpl implements DataAsyncService {
                 })
                 .exceptionally(ex -> {
                     log.error("Failed to fetch exchanges asynchronously: {}", ex.getMessage(), ex);
-                    throw new AsyncException("Exchange fetch has failed on the asynchronous flow.", ex);
+                    throw new AsyncException("Exchange fetch has failed on the asynchronous flow", ex);
                 });
     }
 
@@ -62,7 +62,7 @@ public class DataAsyncServiceImpl implements DataAsyncService {
                 })
                 .exceptionally(ex -> {
                     log.error("Failed to fetch assets asynchronously: {}", ex.getMessage(), ex);
-                    throw new AsyncException("Asset fetch has failed on the asynchronous flow.", ex);
+                    throw new AsyncException("Asset fetch has failed on the asynchronous flow", ex);
                 });
     }
 
@@ -78,10 +78,11 @@ public class DataAsyncServiceImpl implements DataAsyncService {
                 })
                 .exceptionally(ex -> {
                     log.error("Failed to fetch market asynchronously: {}", ex.getMessage(), ex);
-                    throw new AsyncException("Market fetch has failed on the asynchronous flow.", ex);
+                    throw new AsyncException("Market fetch has failed on the asynchronous flow", ex);
                 });
     }
 
+    // TODO properly configure and test this
     @CircuitBreaker(name = "apiCircuitBreaker")
     @Override
     public CompletableFuture<Void> asyncFetch() {
@@ -95,6 +96,9 @@ public class DataAsyncServiceImpl implements DataAsyncService {
             } else {
                 log.info("All async tasks completed successfully");
             }
+        }).exceptionally(ex -> {
+            log.error("Failed asynchronous fetching: {}", ex.getMessage(), ex);
+            throw new AsyncException("Async fetch has failed on an exceptionally error", ex);
         });
     }
 
