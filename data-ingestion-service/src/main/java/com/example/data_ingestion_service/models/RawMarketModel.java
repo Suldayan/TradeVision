@@ -1,7 +1,6 @@
 package com.example.data_ingestion_service.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,40 +21,39 @@ public class RawMarketModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String modelId;
 
-    @JsonProperty("baseId")
-    private String baseId;
-
-    @JsonProperty("rank")
-    private Integer rank;
-
-    @JsonProperty("priceQuote")
-    private BigDecimal priceQuote;
-
-    @JsonProperty("priceUsd")
-    private BigDecimal priceUsd;
-
-    @JsonProperty("volumeUsd24Hr")
-    private BigDecimal volumeUsd24Hr;
-
-    @JsonProperty("percentExchangeVolume")
-    private BigDecimal percentExchangeVolume;
-
-    @JsonProperty("tradesCount24Hr")
-    @Nullable
-    private Integer tradesCount;
-
-    @JsonProperty("updated")
-    private Long updated;
-
-    @JsonProperty("exchangeId")
+    @Nonnull
     private String exchangeId;
 
-    @JsonProperty("quoteId")
-    private String quoteId;
+    @Nonnull
+    private Integer rank;
 
-    @JsonProperty("baseSymbol")
+    @Nonnull
     private String baseSymbol;
 
-    @JsonProperty("quoteSymbol")
+    @Nonnull
+    private String baseId;
+
+    @Nonnull
     private String quoteSymbol;
+
+    @Nonnull
+    private String quoteId;
+
+    @Nonnull
+    private BigDecimal priceQuote;
+
+    @Nonnull
+    private BigDecimal priceUsd;
+
+    @Nonnull
+    private BigDecimal volumeUsd24Hr;
+
+    @Nonnull
+    private BigDecimal percentExchangeVolume;
+
+    @Nullable
+    private Integer tradesCount24Hr;
+
+    @Nonnull
+    private Long updated;
 }

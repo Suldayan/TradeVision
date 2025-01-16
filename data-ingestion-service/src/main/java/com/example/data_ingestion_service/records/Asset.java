@@ -12,7 +12,7 @@ public record Asset(
         @Nonnull BigDecimal supply,
         @Nonnull BigDecimal maxSupply,
         @Nonnull BigDecimal marketCapUsd,
-        @Nonnull BigDecimal volume24Hr,
+        @Nonnull BigDecimal volumeUsd24Hr,
         @Nonnull BigDecimal priceUsd,
         @Nonnull Double changePercent24Hr,
         @Nonnull BigDecimal vwap24Hr,

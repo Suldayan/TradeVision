@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 public record Market(@Nonnull String exchangeId,
                      @Nonnull Integer rank,
                      @Nonnull String baseSymbol,
+                     @Nonnull String baseId,
                      @Nonnull String quoteSymbol,
                      @Nonnull String quoteId,
                      @Nonnull BigDecimal priceQuote,

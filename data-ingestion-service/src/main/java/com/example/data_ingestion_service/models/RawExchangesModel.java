@@ -1,7 +1,6 @@
 package com.example.data_ingestion_service.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,34 +20,29 @@ public class RawExchangesModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String modelId;
 
-    @JsonProperty("exchangeId")
+    @Nonnull
     private String exchangeId;
 
-    @Column(unique = true)
-    @JsonProperty("name")
+    @Nonnull
     private String name;
 
-    @JsonProperty("rank")
-    @JsonIgnore
+    @Nonnull
     private Integer rank;
 
-    @JsonProperty("percentTotalVolume")
+    @Nonnull
     private BigDecimal percentTotalVolume;
 
-    @JsonProperty("volumeUsd")
+    @Nonnull
     private BigDecimal volumeUsd;
 
-    @JsonProperty("tradingPairs")
+    @Nonnull
     private Integer tradingPairs;
 
-    @JsonProperty("socket")
-    @JsonIgnore
     private boolean socket;
 
-    @JsonProperty("exchangeUrl")
-    @JsonIgnore
+    @Nonnull
     private String exchangeUrl;
 
-    @JsonProperty("updated")
+    @Nonnull
     private Long updated;
 }

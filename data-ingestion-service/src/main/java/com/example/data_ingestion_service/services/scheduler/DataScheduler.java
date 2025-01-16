@@ -18,8 +18,8 @@ import java.time.LocalTime;
 public class DataScheduler {
     private final DataAsyncService dataAsyncService;
 
-    // 5 minute scheduling
-    @Scheduled(fixedRateString = "300000")
+    // 5-minute cron job
+    @Scheduled(cron = "0 */5 * * * *")
     public void scheduler() {
         try {
             log.info("Starting scheduled fetch at: {}", LocalTime.now());

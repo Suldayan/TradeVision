@@ -37,6 +37,7 @@ public class MarketServiceTest {
             "Binance",
             1,
             "BTC",
+            "ethereum",
             "USDT",
             "USDT",
             new BigDecimal("45000.50"),
@@ -51,6 +52,7 @@ public class MarketServiceTest {
             "Coinbase",
             2,
             "ETH",
+            "ethereum",
             "USDT",
             "USDT",
             new BigDecimal("3000.75"),
@@ -113,7 +115,7 @@ public class MarketServiceTest {
                 .priceUsd(new BigDecimal("45000.50"))
                 .volumeUsd24Hr(new BigDecimal("300000000.00"))
                 .percentExchangeVolume(new BigDecimal("0.5"))
-                .tradesCount(100000)
+                .tradesCount24Hr(100000)
                 .updated(System.currentTimeMillis())
                 .exchangeId("Binance")
                 .quoteId("USDT")
@@ -129,7 +131,7 @@ public class MarketServiceTest {
                 .priceUsd(new BigDecimal("3000.75"))
                 .volumeUsd24Hr(new BigDecimal("150000000.00"))
                 .percentExchangeVolume(new BigDecimal("0.7"))
-                .tradesCount(50000)
+                .tradesCount24Hr(50000)
                 .updated(System.currentTimeMillis())
                 .exchangeId("Coinbase")
                 .quoteId("USDT")

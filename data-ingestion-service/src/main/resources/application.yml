@@ -1,8 +1,6 @@
 spring:
   application:
     name: data-ingestion-service
-  profile:
-    active: dev
 
   datasource:
     url: ${DB_URL}
@@ -17,10 +15,6 @@ spring:
     enabled: true
     baseline-on-migration: true
     locations: classpath:db/migration
-
-coincap:
-  base-url: https://api.coincap.io/v2
-  api-key: ${CC_API_KEY}
 
 resilience4j.circuitbreaker:
   instances:

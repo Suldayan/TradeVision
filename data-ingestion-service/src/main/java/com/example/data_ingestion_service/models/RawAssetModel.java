@@ -1,7 +1,6 @@
 package com.example.data_ingestion_service.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,42 +21,39 @@ public class RawAssetModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String modelId;
 
-    @JsonProperty("id")
+    @Nonnull
     private String id;
 
-    @JsonProperty("rank")
-    @JsonIgnore
+    @Nonnull
     private Integer rank;
 
-    @JsonProperty("symbol")
+    @Nonnull
     private String symbol;
 
-    @JsonProperty("name")
+    @Nonnull
     private String name;
 
-    @JsonProperty("supply")
+    @Nonnull
     private BigDecimal supply;
 
-    @JsonProperty("maxSupply")
     @Nullable
     private BigDecimal maxSupply;
 
-    @JsonProperty("marketCapUsd")
+    @Nonnull
     private BigDecimal marketCapUsd;
 
-    @JsonProperty("volumeUsd24Hr")
+    @Nonnull
     private BigDecimal volumeUsd24Hr;
 
-    @JsonProperty("priceUsd")
+    @Nonnull
     private BigDecimal priceUsd;
 
-    @JsonProperty("changePercent24Hr")
+    @Nonnull
     private BigDecimal changePercent24Hr;
 
-    @JsonProperty("vwap24Hr")
+    @Nonnull
     private BigDecimal vwap24Hr;
 
-    @JsonProperty("explorer")
-    @JsonIgnore
+    @Nonnull
     private String explorer;
 }
