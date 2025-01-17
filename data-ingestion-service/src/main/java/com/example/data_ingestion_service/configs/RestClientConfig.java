@@ -14,10 +14,12 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class RestClientConfig {
 
+    private final String baseUrl = "https://api.coincap.io/v2";
+
     @Bean
     public RestClient restClient() {
         return RestClient.builder()
-                .baseUrl("https://api.coincap.io/v2")
+                .baseUrl(baseUrl)
                 .defaultHeaders(this::configureHeaders)
                 .defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
                     String errorMessage = String.format(

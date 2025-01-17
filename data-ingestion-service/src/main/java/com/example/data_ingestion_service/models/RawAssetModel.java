@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-
+// TODO configure columns and better validation for models
 @Entity
 @Table(name = "raw_assets")
 @Data
