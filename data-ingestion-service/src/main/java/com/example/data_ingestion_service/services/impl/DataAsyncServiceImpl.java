@@ -38,10 +38,17 @@ public class DataAsyncServiceImpl implements DataAsyncService {
     @Nonnull
     @Override
     public CompletableFuture<Set<RawExchangesModel>> fetchExchanges() {
-        return CompletableFuture.completedFuture(exchangeService.convertToModel())
+        return CompletableFuture.supplyAsync(() -> {
+                    Set<RawExchangesModel> models = exchangeService.convertToModel();
+                    if (models == null) {
+                        throw new AsyncException("(Exchanges) convertToModel returned null result");
+                    }
+                    return models;
+                })
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
-                        log.debug("Exchange asynchronous fetch successful at: {}", LocalTime.now());
+                        log.debug("Fetched asynchronous exchanges with result size: {}",
+                                result != null ? result.size() : 0);
                     }
                 })
                 .exceptionally(ex -> {
@@ -54,32 +61,44 @@ public class DataAsyncServiceImpl implements DataAsyncService {
     @Nonnull
     @Override
     public CompletableFuture<Set<RawAssetModel>> fetchAssets() {
-        return CompletableFuture.completedFuture(assetService.convertToModel())
-                .whenComplete((result, ex) -> {
-                    if (ex == null) {
-                        log.debug("Asset asynchronous fetch successful at: {}", LocalTime.now());
-                    }
-                })
-                .exceptionally(ex -> {
-                    log.error("Failed to fetch assets asynchronously: {}", ex.getMessage(), ex);
-                    throw new AsyncException("Asset fetch has failed on the asynchronous flow", ex);
-                });
+        return CompletableFuture.supplyAsync(() -> {
+            Set<RawAssetModel> models = assetService.convertToModel();
+            if (models == null) {
+                throw new AsyncException("(Assets) convertToModel returned null result");
+            }
+            return models;
+            })
+            .whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.debug("Asset asynchronous fetch successful at: {}", LocalTime.now());
+                }
+            })
+            .exceptionally(ex -> {
+                log.error("Failed to fetch assets asynchronously: {}", ex.getMessage(), ex);
+                throw new AsyncException("Asset fetch has failed on the asynchronous flow", ex);
+            });
     }
 
     @Async("apiExecutor")
     @Nonnull
     @Override
     public CompletableFuture<Set<RawMarketModel>> fetchMarkets() {
-        return CompletableFuture.completedFuture(marketService.convertToModel())
-                .whenComplete((result, ex) -> {
-                    if (ex == null) {
-                        log.debug("Market asynchronous fetch successful at: {}", LocalTime.now());
-                    }
-                })
-                .exceptionally(ex -> {
-                    log.error("Failed to fetch market asynchronously: {}", ex.getMessage(), ex);
-                    throw new AsyncException("Market fetch has failed on the asynchronous flow", ex);
-                });
+        return CompletableFuture.supplyAsync(() -> {
+            Set<RawMarketModel> models = marketService.convertToModel();
+            if (models == null) {
+                throw new AsyncException("(Markets) convertToModel returned null result");
+            }
+            return models;
+            })
+            .whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.debug("Market asynchronous fetch successful at: {}", LocalTime.now());
+                }
+            })
+            .exceptionally(ex -> {
+                log.error("Failed to fetch market asynchronously: {}", ex.getMessage(), ex);
+                throw new AsyncException("Market fetch has failed on the asynchronous flow", ex);
+            });
     }
 
     // TODO properly configure and test this

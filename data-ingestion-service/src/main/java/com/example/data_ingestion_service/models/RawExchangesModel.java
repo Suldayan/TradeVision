@@ -1,6 +1,7 @@
 package com.example.data_ingestion_service.models;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,10 +30,10 @@ public class RawExchangesModel {
     @Nonnull
     private Integer rank;
 
-    @Nonnull
+    @Nullable
     private BigDecimal percentTotalVolume;
 
-    @Nonnull
+    @Nullable
     private BigDecimal volumeUsd;
 
     @Nonnull

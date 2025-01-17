@@ -1,6 +1,7 @@
 package com.example.data_ingestion_service.records;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 
@@ -10,7 +11,7 @@ public record Asset(
         @Nonnull String symbol,
         @Nonnull String name,
         @Nonnull BigDecimal supply,
-        @Nonnull BigDecimal maxSupply,
+        @Nullable BigDecimal maxSupply,
         @Nonnull BigDecimal marketCapUsd,
         @Nonnull BigDecimal volumeUsd24Hr,
         @Nonnull BigDecimal priceUsd,
