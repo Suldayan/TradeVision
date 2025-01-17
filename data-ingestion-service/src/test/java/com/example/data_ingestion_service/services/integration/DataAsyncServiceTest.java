@@ -23,43 +23,39 @@ public class DataAsyncServiceTest {
     @Test
     void fetchExchanges_ReturnsCompletedFuture_OfExchangeModels() {
         CompletableFuture<Set<RawExchangesModel>> apiResponse = dataAsyncService.fetchExchanges();
+        Set<RawExchangesModel> result = assertDoesNotThrow(() -> apiResponse.get(5, TimeUnit.SECONDS));
 
         assertNotNull(apiResponse);
-
-        Set<RawExchangesModel> result = assertDoesNotThrow(() ->
-                apiResponse.get(5, TimeUnit.SECONDS));
-
         assertNotNull(result);
+        assertEquals(100, result.size(), "Set size should be 100");
     }
 
     @Test
     void fetchAssets_ReturnsCompletedFuture_OfAssetModels() {
         CompletableFuture<Set<RawAssetModel>> apiResponse = dataAsyncService.fetchAssets();
+        Set<RawAssetModel> result = assertDoesNotThrow(() -> apiResponse.get(5, TimeUnit.SECONDS));
 
         assertNotNull(apiResponse);
-
-        // TODO find the source of the explorer variable in asset record and model for why it's null when it shouldn't be
-        Set<RawAssetModel> result = assertDoesNotThrow(() ->
-                apiResponse.get(5, TimeUnit.SECONDS));
-
         assertNotNull(result);
+        assertEquals(100, result.size(), "Set size should be 100");
     }
 
     @Test
     void fetchMarkets_ReturnsCompletedFuture_OfMarketModels() {
         CompletableFuture<Set<RawMarketModel>> apiResponse = dataAsyncService.fetchMarkets();
+        Set<RawMarketModel> result = assertDoesNotThrow(() -> apiResponse.get(5, TimeUnit.SECONDS));
 
         assertNotNull(apiResponse);
-
-        Set<RawMarketModel> result = assertDoesNotThrow(() ->
-                apiResponse.get(5, TimeUnit.SECONDS));
+        assertNotNull(result);
+        assertEquals(100, result.size(), "Set size should be 100");
     }
 
     @Test
     void asyncFetch_Completes_AllAsyncTasks() {
-        CompletableFuture<Void> completedAsyncTasks = dataAsyncService.asyncFetch();
+        CompletableFuture<Void> asyncTasks = dataAsyncService.asyncFetch();
 
-        assertDoesNotThrow(() -> dataAsyncService.asyncFetch());
-        assertTrue(completedAsyncTasks.isDone());
+        assertNotNull(asyncTasks);
+        assertDoesNotThrow(() -> asyncTasks.get(5, TimeUnit.SECONDS));
+        assertTrue(asyncTasks.isDone());
     }
 }

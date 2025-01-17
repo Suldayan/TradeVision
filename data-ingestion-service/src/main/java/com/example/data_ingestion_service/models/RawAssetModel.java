@@ -54,6 +54,6 @@ public class RawAssetModel {
     @Nonnull
     private BigDecimal vwap24Hr;
 
-    @Nonnull
+    @Nullable
     private String explorer;
 }
