@@ -13,8 +13,8 @@ public class ExecutorConfig {
     public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(3);
-        executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(3);
+        executor.setMaxPoolSize(3);
+        executor.setQueueCapacity(0);
         executor.setThreadNamePrefix("AsyncApiThread-");
         executor.setRejectedExecutionHandler((r, ex) ->
                 log.warn("Task rejected, que and thread limit reached: {}", ex.getQueue()));
