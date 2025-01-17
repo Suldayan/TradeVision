@@ -38,7 +38,7 @@ public class DataAsyncServiceImpl implements DataAsyncService {
     @Nonnull
     @Override
     public CompletableFuture<Set<RawExchangesModel>> fetchExchanges() {
-        return CompletableFuture.supplyAsync(exchangeService::convertToModel)
+        return CompletableFuture.completedFuture(exchangeService.convertToModel())
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
                         log.debug("Exchange asynchronous fetch successful at: {}", LocalTime.now());
@@ -54,7 +54,7 @@ public class DataAsyncServiceImpl implements DataAsyncService {
     @Nonnull
     @Override
     public CompletableFuture<Set<RawAssetModel>> fetchAssets() {
-        return CompletableFuture.supplyAsync(assetService::convertToModel)
+        return CompletableFuture.completedFuture(assetService.convertToModel())
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
                         log.debug("Asset asynchronous fetch successful at: {}", LocalTime.now());
@@ -70,7 +70,7 @@ public class DataAsyncServiceImpl implements DataAsyncService {
     @Nonnull
     @Override
     public CompletableFuture<Set<RawMarketModel>> fetchMarkets() {
-        return CompletableFuture.supplyAsync(marketService::convertToModel)
+        return CompletableFuture.completedFuture(marketService.convertToModel())
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
                         log.debug("Market asynchronous fetch successful at: {}", LocalTime.now());
