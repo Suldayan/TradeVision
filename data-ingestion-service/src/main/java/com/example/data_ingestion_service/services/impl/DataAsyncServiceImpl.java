@@ -4,8 +4,8 @@ import com.example.data_ingestion_service.models.RawAssetModel;
 import com.example.data_ingestion_service.models.RawExchangesModel;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.*;
-import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.exceptions.AsyncException;
+import com.example.data_ingestion_service.services.exceptions.ValidationException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +42,11 @@ public class DataAsyncServiceImpl implements DataAsyncService {
         return CompletableFuture.supplyAsync(() -> {
                     Set<RawExchangesModel> models = exchangeService.convertToModel();
                     if (models == null) {
-                        throw new AsyncException("(Exchanges) convertToModel returned null result");
+                        throw new ValidationException("(Exchanges) convertToModel returned null result");
                     }
                     if (models.isEmpty()) {
                         log.warn("Exchange models retrieved but is empty");
-                        throw new AsyncException("(Exchanges) convertToModel passed null check but returned an empty set");
+                        throw new ValidationException("(Exchanges) convertToModel passed null check but returned an empty set");
                     }
                     return models;
                 })
@@ -58,6 +58,9 @@ public class DataAsyncServiceImpl implements DataAsyncService {
                 })
                 .exceptionally(ex -> {
                     log.error("Failed to fetch exchanges asynchronously: {}", ex.getMessage(), ex);
+                    if (ex.getCause() instanceof ValidationException) {
+                        throw (ValidationException) ex.getCause();
+                    }
                     throw new AsyncException("Exchange fetch has failed on the asynchronous flow", ex);
                 });
     }
@@ -69,22 +72,26 @@ public class DataAsyncServiceImpl implements DataAsyncService {
         return CompletableFuture.supplyAsync(() -> {
             Set<RawAssetModel> models = assetService.convertToModel();
             if (models == null) {
-                throw new ApiException("(Assets) convertToModel returned null result");
+                throw new ValidationException("(Assets) convertToModel returned null result");
             }
             if (models.isEmpty()) {
                 log.warn("Asset models retrieved but is empty");
-                throw new AsyncException("(Assets) convertToModel passed null check but returned an empty set");
+                throw new ValidationException("(Assets) convertToModel passed null check but returned an empty set");
             }
             return models;
             })
             .whenComplete((result, ex) -> {
                 if (ex == null) {
-                    log.debug("Asset asynchronous fetch successful at: {}", LocalTime.now());
+                    log.debug("Fetched asynchronous assets with result size: {}",
+                            result != null ? result.size() : 0);
                 }
             })
             .exceptionally(ex -> {
                 log.error("Failed to fetch assets asynchronously: {}", ex.getMessage(), ex);
-                throw new ApiException("Asset fetch has failed on the asynchronous flow", ex);
+                if (ex.getCause() instanceof ValidationException) {
+                    throw (ValidationException) ex.getCause();
+                }
+                throw new AsyncException("Asset fetch has failed on the asynchronous flow", ex);
             });
     }
 
@@ -95,21 +102,25 @@ public class DataAsyncServiceImpl implements DataAsyncService {
         return CompletableFuture.supplyAsync(() -> {
             Set<RawMarketModel> models = marketService.convertToModel();
             if (models == null) {
-                throw new ApiException("(Markets) convertToModel returned null result");
+                throw new ValidationException("(Markets) convertToModel returned null result");
             }
             if (models.isEmpty()) {
                 log.warn("Market models retrieved but is empty");
-                throw new AsyncException("(Markets) convertToModel passed null check but returned an empty set");
+                throw new ValidationException("(Markets) convertToModel passed null check but returned an empty set");
             }
             return models;
             })
             .whenComplete((result, ex) -> {
                 if (ex == null) {
-                    log.debug("Market asynchronous fetch successful at: {}", LocalTime.now());
+                    log.debug("Fetched asynchronous markets with result size: {}",
+                            result != null ? result.size() : 0);
                 }
             })
             .exceptionally(ex -> {
                 log.error("Failed to fetch market asynchronously: {}", ex.getMessage(), ex);
+                if (ex.getCause() instanceof ValidationException) {
+                    throw (ValidationException) ex.getCause();
+                }
                 throw new AsyncException("Market fetch has failed on the asynchronous flow", ex);
             });
     }
@@ -136,6 +147,12 @@ public class DataAsyncServiceImpl implements DataAsyncService {
 
     private <S> CompletableFuture<Void> saveToDatabaseAsync(@Nonnull Set<S> entities) {
         return CompletableFuture.runAsync(() -> databaseService.saveToDatabase(entities))
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to send entities to database service: {}", ex.getMessage(), ex);
+                    }
+                    log.info("Successfully sent entity of type: {} to database service at: {}", entities.getClass(), LocalTime.now());
+                })
                 .exceptionally(error -> {
                     log.error("Failed to save {} to database at: {}, {}", entities.getClass(), LocalTime.now(), error.getMessage(), error);
                     return null;
