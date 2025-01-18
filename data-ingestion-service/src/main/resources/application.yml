@@ -16,12 +16,18 @@ spring:
     baseline-on-migration: true
     locations: classpath:db/migration
 
+kafka:
+  producer:
+    bootstrap-servers: localhost:9092
+    key-serializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-serializer: org.apache.kafka.common.serialization.StringDeserializer
+
 resilience4j.circuitbreaker:
   instances:
     apiCircuitBreaker:
       registerHealthIndicator: true
       sliding-window-size: 10
-      failure-rate-threshold: 50
+      failure-rate-threshold: 3
       wait-duration-in-open-state: 10s
 
 logging:

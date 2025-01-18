@@ -64,9 +64,8 @@ public class ExchangeServiceTest {
     void testGetExchangeData_ReturnsSetOfExchangeRecords() {
         when(exchangeClient.getExchanges()).thenReturn(mockExchangeWrapper);
         
-        Set<Exchange> result = exchangeService.getExchangeData();
+        Set<Exchange> result = assertDoesNotThrow(() -> exchangeService.getExchangeData());
 
-        assertDoesNotThrow(() -> result);
         assertNotNull(result);
         assertEquals(2, result.size());
         assertTrue(result.contains(exchange1));
@@ -112,7 +111,7 @@ public class ExchangeServiceTest {
                 .percentTotalVolume(exchange1.percentTotalVolume())
                 .volumeUsd(exchange1.volumeUsd())
                 .tradingPairs(exchange1.tradingPairs())
-                .socket(exchange1.socket())
+                .socket(Boolean.TRUE.equals(exchange1.socket()))
                 .exchangeUrl(exchange1.exchangeUrl())
                 .updated(exchange1.updated())
                 .build();
@@ -125,7 +124,7 @@ public class ExchangeServiceTest {
                 .percentTotalVolume(exchange2.percentTotalVolume())
                 .volumeUsd(exchange2.volumeUsd())
                 .tradingPairs(exchange2.tradingPairs())
-                .socket(exchange2.socket())
+                .socket(Boolean.TRUE.equals(exchange2.socket()))
                 .exchangeUrl(exchange2.exchangeUrl())
                 .updated(exchange2.updated())
                 .build();

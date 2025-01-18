@@ -71,9 +71,8 @@ public class AssetServiceTest {
     void getAssetData_ReturnsSetOfAssetRecords() {
         when(assetClient.getAssets()).thenReturn(mockAssetWrapper);
 
-        Set<Asset> assets = assetService.getAssetData();
+        Set<Asset> assets = assertDoesNotThrow(() -> assetService.getAssetData());
 
-        assertDoesNotThrow(() -> assets);
         assertNotNull(assets);
         assertEquals(2, assets.size());
         assertTrue(assets.contains(mockAsset1));
