@@ -1,5 +1,7 @@
 package com.example.data_processing_service.services.impl;
 
+import com.example.data_processing_service.models.mapper.AssetMapper;
+import com.example.data_processing_service.models.mapper.ExchangeMapper;
 import com.example.data_processing_service.models.processed.AssetModel;
 import com.example.data_processing_service.models.processed.ExchangesModel;
 import com.example.data_processing_service.models.processed.MarketModel;
@@ -33,19 +35,16 @@ public class TransformationServiceImpl implements TransformationService {
     private final ExchangeModelRepository exchangeModelRepository;
     private final AssetModelRepository assetModelRepository;
 
+    private final ExchangeMapper exchangeMapper;
+    private final AssetMapper assetMapper;
+
     private final FilterService filterService;
 
     @Override
     public Set<ExchangesModel> rawToEntityExchange() {
         Set<RawExchangesModel> cachedExchanges = filterService.exchangeIdsToModels();
         return cachedExchanges.stream()
-                .map(attribute -> ExchangesModel.builder()
-                        .id(attribute.getId())
-                        .name(attribute.getName())
-                        .percentTotalVolume(attribute.getPercentTotalVolume())
-                        .volumeUsd(attribute.getVolumeUsd())
-                        .updated(attribute.getUpdated())
-                        .build())
+                .map(exchangeMapper::rawToProcessedExchanges)
                 .collect(Collectors.toSet());
     }
 
@@ -53,18 +52,7 @@ public class TransformationServiceImpl implements TransformationService {
     public Set<AssetModel> rawToEntityAsset() {
         Set<RawAssetModel> cachedAssets = filterService.assetIdsToModels();
         return cachedAssets.stream()
-                .map(attribute -> AssetModel.builder()
-                        .id(attribute.getId())
-                        .symbol(attribute.getSymbol())
-                        .name(attribute.getName())
-                        .supply(attribute.getSupply())
-                        .maxSupply(attribute.getMaxSupply())
-                        .marketCapUsd(attribute.getMarketCapUsd())
-                        .volumeUsd24Hr(attribute.getVolumeUsd24Hr())
-                        .priceUsd(attribute.getPriceUsd())
-                        .changePercent24Hr(attribute.getChangePercent24Hr())
-                        .vwap24Hr(attribute.getVwap24Hr())
-                        .build())
+                .map(assetMapper::rawToProcessedAsset)
                 .collect(Collectors.toSet());
     }
 
@@ -89,11 +77,11 @@ public class TransformationServiceImpl implements TransformationService {
     @CacheEvict(cacheNames = "marketApiResponse, exchangeApiResponse, assetApiResponse")
     @Override
     public void completeMarketAttributes() {
-        List<RawMarketModel> filteredMarketModels = filterService.collectAndUpdateMarketState();
+        Set<RawMarketModel> filteredMarketModels = filterService.collectAndUpdateMarketState();
         Map<String, ExchangesModel> exchanges = indexExchangesById();
         Map<String, AssetModel> assets = indexAssetsById();
 
-        List<MarketModel> marketModels = filteredMarketModels
+        Set<MarketModel> marketModels = filteredMarketModels
                 .stream()
                 .map(attribute -> MarketModel.builder()
                         .id(attribute.getId())
@@ -127,16 +115,10 @@ public class TransformationServiceImpl implements TransformationService {
                                             return null;
                                         })
                         )
-                        .baseSymbol(attribute.getBaseSymbol())
-                        .quoteSymbol(attribute.getQuoteSymbol())
-                        .priceQuote(attribute.getPriceQuote())
                         .priceUsd(attribute.getPriceUsd())
-                        .volumeUsd24Hr(attribute.getVolumeUsd24Hr())
-                        .percentExchangeVolume(attribute.getPercentExchangeVolume())
-                        .tradesCount(attribute.getTradesCount())
                         .updated(attribute.getUpdated())
                         .build())
-                .toList();
+                .collect(Collectors.toSet());
         saveToDatabase(marketModels);
     }
 
@@ -146,13 +128,13 @@ public class TransformationServiceImpl implements TransformationService {
      * */
     @Transactional
     @Override
-    public <S> void saveToDatabase(@Nonnull List<S> entities) {
+    public <S> void saveToDatabase(@Nonnull Set<S> entities) {
         if (entities.isEmpty()) {
             log.warn("The list of entities has been passed but is empty");
             return;
         }
         // Grab the first element to find out what the data type is
-        S firstElement = entities.getFirst();
+        S firstElement = entities.iterator().next();
         switch (firstElement) {
             case MarketModel ignored -> {
                 @SuppressWarnings(value = "unchecked")

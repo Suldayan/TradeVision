@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "asset")
 public class AssetModel {
-    // The asset id is the name of the given asset
     @Id
     private String id;
 

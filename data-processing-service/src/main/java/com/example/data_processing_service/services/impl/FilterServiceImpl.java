@@ -34,9 +34,9 @@ public class FilterServiceImpl implements FilterService {
      * */
     @Nonnull
     @Override
-    public List<RawMarketModel> collectAndUpdateMarketState() {
-        List<RawMarketModel> cachedMarketData = (List<RawMarketModel>) rawMarketModelRepository.findAll();
-        return cachedMarketData.stream()
+    public Set<RawMarketModel> collectAndUpdateMarketState() {
+        Set<RawMarketModel> rawMarketData = rawMarketModelRepository.findAllByTimestamp();
+        return rawMarketData.stream()
                 .filter(this::isPriceChangeMeaningful)
                 .map(data -> RawMarketModel.builder()
                         .id(data.getId())
@@ -52,13 +52,13 @@ public class FilterServiceImpl implements FilterService {
                         .baseSymbol(data.getBaseSymbol())
                         .quoteSymbol(data.getQuoteSymbol())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     @Nonnull
     @Override
     public Set<String> filterExchangeIds() {
-        List<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
+        Set<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
         return filteredMarketModels.stream()
                 .map(RawMarketModel::getExchangeId)
                 .collect(Collectors.toSet());
@@ -67,7 +67,7 @@ public class FilterServiceImpl implements FilterService {
     @Nonnull
     @Override
     public Set<String> filterAssetIds() {
-        List<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
+        Set<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
         Set<String> baseIds = filteredMarketModels.stream()
                 .map(RawMarketModel::getId)
                 .collect(Collectors.toSet());
@@ -88,6 +88,7 @@ public class FilterServiceImpl implements FilterService {
                 .collect(Collectors.toSet());
     }
 
+    // TODO instead of findALl(), make a custom query for findALlByTimestamp
     @Nonnull
     @Override
     public Set<RawAssetModel> assetIdsToModels() {

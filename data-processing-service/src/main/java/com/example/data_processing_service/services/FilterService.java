@@ -5,11 +5,10 @@ import com.example.data_processing_service.models.raw.RawExchangesModel;
 import com.example.data_processing_service.models.raw.RawMarketModel;
 import jakarta.annotation.Nonnull;
 
-import java.util.List;
 import java.util.Set;
 
 public interface FilterService {
-    List<RawMarketModel> collectAndUpdateMarketState();
+    Set<RawMarketModel> collectAndUpdateMarketState();
     Set<String> filterExchangeIds();
     Set<String> filterAssetIds();
     Set<RawExchangesModel> exchangeIdsToModels();

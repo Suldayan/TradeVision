@@ -47,4 +47,6 @@ public class RawExchangesModel {
 
     @JsonProperty("updated")
     private Long updated;
+
+    private Long timestamp;
 }

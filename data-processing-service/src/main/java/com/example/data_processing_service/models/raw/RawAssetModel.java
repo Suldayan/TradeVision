@@ -55,4 +55,6 @@ public class RawAssetModel {
     @JsonProperty("explorer")
     @JsonIgnore
     private String explorer;
+
+    private Long timestamp;
 }
