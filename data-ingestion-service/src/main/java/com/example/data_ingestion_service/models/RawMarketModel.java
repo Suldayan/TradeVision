@@ -68,4 +68,8 @@ public class RawMarketModel {
     @Column(name = "updated", nullable = false)
     @Nonnull
     private Long updated;
+
+    @Column(name = "timestamp", nullable = false)
+    @Nonnull
+    private Long timestamp;
 }
