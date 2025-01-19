@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,7 +31,21 @@ public class ExchangeServiceImpl implements ExchangeService {
             if (exchangeHolder == null) {
                 throw new ApiException("Exchanges data fetched but returned as null");
             }
-            Set<Exchange> exchangeSet = exchangeHolder.exchanges();
+            Set<Exchange> exchangeSet = exchangeHolder.exchanges()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(field -> Exchange.builder()
+                            .exchangeId(field.exchangeId())
+                            .name(field.name())
+                            .rank(field.rank())
+                            .percentTotalVolume(field.percentTotalVolume())
+                            .volumeUsd(field.volumeUsd())
+                            .tradingPairs(field.tradingPairs())
+                            .socket(field.socket())
+                            .exchangeUrl(field.exchangeUrl())
+                            .updated(field.updated())
+                            .build())
+                    .collect(Collectors.toSet());
             if (exchangeSet.isEmpty()) {
                 log.warn("Exchange set fetched as empty. Endpoint might be returning incomplete data");
                 throw new ApiException("Exchange set fetched but is empty");

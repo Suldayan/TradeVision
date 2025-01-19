@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,7 +32,24 @@ public class MarketServiceImpl implements MarketService {
                 log.error("Fetched data from market wrapper returned as null");
                 throw new ApiException("Markets data fetched but return as null");
             }
-            Set<Market> marketSet = marketHolder.markets();
+            Set<Market> marketSet = marketHolder.markets()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(field -> Market.builder()
+                            .exchangeId(field.exchangeId())
+                            .rank(field.rank())
+                            .baseSymbol(field.baseSymbol())
+                            .baseId(field.baseId())
+                            .quoteSymbol(field.quoteSymbol())
+                            .quoteId(field.quoteId())
+                            .priceQuote(field.priceQuote())
+                            .priceUsd(field.priceUsd())
+                            .volumeUsd24Hr(field.volumeUsd24Hr())
+                            .percentExchangeVolume(field.percentExchangeVolume())
+                            .tradesCount24Hr(field.tradesCount24Hr())
+                            .updated(field.updated())
+                            .build())
+                    .collect(Collectors.toSet());
             if (marketSet.isEmpty()) {
                 log.warn("Market set returned as empty. Endpoint might be returning incomplete data");
                 throw new ApiException("Market set fetched but is empty");
