@@ -2,9 +2,11 @@ package com.example.data_ingestion_service.records;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 
+@Builder
 public record Asset(
         @Nonnull String id,
         @Nonnull Integer rank,
@@ -17,5 +19,6 @@ public record Asset(
         @Nonnull BigDecimal priceUsd,
         @Nonnull Double changePercent24Hr,
         @Nonnull BigDecimal vwap24Hr,
-        @Nonnull String explorer) {
+        @Nonnull String explorer,
+        @Nonnull Long timestamp) {
 }

@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,7 +31,25 @@ public class AssetServiceImpl implements AssetService {
             if (assetHolder == null) {
                 throw new ApiException("Asset wrapper model fetched but returned as null");
             }
-            Set<Asset> assetSet = assetHolder.assets();
+            Set<Asset> assetSet = assetHolder.assets()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(field -> Asset.builder()
+                            .id(field.id())
+                            .rank(field.rank())
+                            .symbol(field.symbol())
+                            .name(field.name())
+                            .supply(field.supply())
+                            .maxSupply(field.maxSupply())
+                            .marketCapUsd(field.marketCapUsd())
+                            .volumeUsd24Hr(field.volumeUsd24Hr())
+                            .priceUsd(field.priceUsd())
+                            .changePercent24Hr(field.changePercent24Hr())
+                            .vwap24Hr(field.vwap24Hr())
+                            .explorer(field.explorer())
+                            .timestamp(assetHolder.timestamp())
+                            .build())
+                    .collect(Collectors.toSet());
             if (assetSet.isEmpty()) {
                 log.warn("Asset set returned as empty. Endpoint might be returning incomplete data");
                 throw new ApiException("Asset set fetched but is empty");
