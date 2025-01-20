@@ -1,6 +1,7 @@
 package com.example.data_ingestion_service.records;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -18,5 +19,5 @@ public record Market(@Nonnull String exchangeId,
                      @Nonnull BigDecimal percentExchangeVolume,
                      @Nonnull Integer tradesCount24Hr,
                      @Nonnull Long updated,
-                     @Nonnull Long timestamp) {
+                     @Nullable Long timestamp) {
 }

@@ -16,5 +16,5 @@ public record Exchange(@Nonnull String exchangeId,
                        @Nullable Boolean socket,
                        @Nonnull String exchangeUrl,
                        @Nonnull Long updated,
-                       @Nonnull Long timestamp) {
+                       @Nullable Long timestamp) {
 }

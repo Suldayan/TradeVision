@@ -45,7 +45,8 @@ public class MarketServiceTest {
             new BigDecimal("300000000.00"),
             new BigDecimal("0.5"),
             100000,
-            System.currentTimeMillis()
+            1737246344774L,
+            1737247412551L
     );
 
     public static final Market market2 = new Market(
@@ -60,10 +61,11 @@ public class MarketServiceTest {
             new BigDecimal("150000000.00"),
             new BigDecimal("0.7"),
             50000,
-            System.currentTimeMillis()
+            1737246344774L,
+            1737247412551L
     );
 
-    public static final MarketWrapper mockMarketWrapper = new MarketWrapper(Set.of(market1, market2), 12235235L);
+    public static final MarketWrapper mockMarketWrapper = new MarketWrapper(Set.of(market1, market2), 1737247412551L);
 
     @Test
     void testGetMarketData_ReturnsValid_SetOfMarketRecords() {
@@ -121,6 +123,7 @@ public class MarketServiceTest {
                 .quoteId("USDT")
                 .baseSymbol("BTC")
                 .quoteSymbol("USDT")
+                .timestamp(1737247412551L)
                 .build();
 
         RawMarketModel rawMarketModel2 = RawMarketModel.builder()
@@ -137,6 +140,7 @@ public class MarketServiceTest {
                 .quoteId("USDT")
                 .baseSymbol("ETH")
                 .quoteSymbol("USDT")
+                .timestamp(1737247412551L)
                 .build();
 
         when(marketClient.getMarkets()).thenReturn(mockMarketWrapper);

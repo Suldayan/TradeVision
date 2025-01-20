@@ -7,5 +7,5 @@ import jakarta.annotation.Nonnull;
 import java.util.Set;
 
 public record MarketWrapper(@JsonProperty(value = "data") @Nonnull Set<Market> markets,
-                            @Nonnull Long timestamp) {
+                            @JsonProperty(value = "timestamp") @Nonnull Long timestamp) {
 }

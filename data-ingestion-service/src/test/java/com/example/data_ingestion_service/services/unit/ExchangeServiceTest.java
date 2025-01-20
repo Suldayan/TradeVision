@@ -43,7 +43,8 @@ public class ExchangeServiceTest {
             200,
             true,
             "https://www.mockexchangea.com",
-            System.currentTimeMillis()
+            System.currentTimeMillis(),
+            1737247412551L
     );
 
     public static final Exchange exchange2 = new Exchange(
@@ -55,7 +56,8 @@ public class ExchangeServiceTest {
             150,
             false,
             "https://www.mockexchangeb.com",
-            System.currentTimeMillis()
+            System.currentTimeMillis(),
+            1737247412551L
     );
 
     public static final ExchangeWrapper mockExchangeWrapper = new ExchangeWrapper(Set.of(exchange1, exchange2), 124324353L);

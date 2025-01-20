@@ -47,7 +47,8 @@ public class AssetServiceTest {
             new BigDecimal("20000"),
             5.0,
             new BigDecimal("19500"),
-            "https://bitcoin.org"
+            "https://bitcoin.org",
+            1231242325L
     );
 
     public static final Asset mockAsset2 = new Asset(
@@ -62,7 +63,8 @@ public class AssetServiceTest {
             new BigDecimal("1500"),
             3.0,
             new BigDecimal("1450"),
-            "https://ethereum.org"
+            "https://ethereum.org",
+            1232435345L
     );
 
     public static final AssetWrapper mockAssetWrapper = new AssetWrapper(Set.of(mockAsset1, mockAsset2), 133234325L);
@@ -124,6 +126,7 @@ public class AssetServiceTest {
                 .changePercent24Hr(BigDecimal.valueOf(mockAsset1.changePercent24Hr()))
                 .vwap24Hr(mockAsset1.vwap24Hr())
                 .explorer(mockAsset1.explorer())
+                .timestamp(mockAsset1.timestamp())
                 .build();
 
         RawAssetModel rawAssetModel2 = RawAssetModel.builder()
@@ -140,14 +143,13 @@ public class AssetServiceTest {
                 .changePercent24Hr(BigDecimal.valueOf(mockAsset2.changePercent24Hr()))
                 .vwap24Hr(mockAsset2.vwap24Hr())
                 .explorer(mockAsset2.explorer())
+                .timestamp(mockAsset2.timestamp())
                 .build();
 
         when(assetClient.getAssets()).thenReturn(mockAssetWrapper);
         when(assetMapper.assetRecordToEntity(assetService.getAssetData())).thenReturn(Set.of(rawAssetModel1, rawAssetModel2));
 
-        Set<RawAssetModel> result = assetService.convertToModel();
-
-        assertDoesNotThrow(() -> assetService.convertToModel());
+        Set<RawAssetModel> result = assertDoesNotThrow(() -> assetService.convertToModel());
         assertNotNull(result);
         assertEquals(2, result.size());
     }

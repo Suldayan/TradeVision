@@ -20,5 +20,5 @@ public record Asset(
         @Nonnull Double changePercent24Hr,
         @Nonnull BigDecimal vwap24Hr,
         @Nonnull String explorer,
-        @Nonnull Long timestamp) {
+        @Nullable Long timestamp) {
 }

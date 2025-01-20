@@ -7,36 +7,28 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(
         name = "raw_assets",
-        indexes = {
-                @Index(name = "idx_symbol", columnList = "symbol"),
-                @Index(name = "idx_rank", columnList = "rank"),
-                @Index(name = "idx_asset_id", columnList = "id", unique = true)
-        }
+        indexes = {@Index(name = "idx_timestamp", columnList = "timestamp")}
 )
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RawAssetModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String modelId;
+    private UUID modelId;
 
     @Column(name = "id", nullable = false)
     @Nonnull
@@ -100,11 +92,13 @@ public class RawAssetModel {
     private String explorer;
 
     @Column(name = "timestamp")
-    @Nonnull
+    @Nullable
+    @Min(value = 0, message = "Timestamp must be non-negative")
     private Long timestamp;
 
-    @Version
-    private Long version;
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    private Instant createdAt;
 
     @Override
     public boolean equals(Object o) {
