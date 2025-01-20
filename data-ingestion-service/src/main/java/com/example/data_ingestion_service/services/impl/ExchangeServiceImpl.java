@@ -44,6 +44,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                             .socket(field.socket())
                             .exchangeUrl(field.exchangeUrl())
                             .updated(field.updated())
+                            .timestamp(exchangeHolder.timestamp())
                             .build())
                     .collect(Collectors.toSet());
             if (exchangeSet.isEmpty()) {

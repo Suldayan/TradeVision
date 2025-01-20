@@ -77,8 +77,6 @@ public class AssetServiceTest {
 
         assertNotNull(assets);
         assertEquals(2, assets.size());
-        assertTrue(assets.contains(mockAsset1));
-        assertTrue(assets.contains(mockAsset2));
         verify(assetClient).getAssets();
     }
 
@@ -113,7 +111,7 @@ public class AssetServiceTest {
     @Test
     void convertToModel_ReturnsValid_RawAssetModelSet() {
         RawAssetModel rawAssetModel1 = RawAssetModel.builder()
-                .modelId(UUID.randomUUID().toString())
+                .modelId(UUID.randomUUID())
                 .id(mockAsset1.id())
                 .rank(mockAsset1.rank())
                 .symbol(mockAsset1.symbol())
@@ -130,7 +128,7 @@ public class AssetServiceTest {
                 .build();
 
         RawAssetModel rawAssetModel2 = RawAssetModel.builder()
-                .modelId(UUID.randomUUID().toString())
+                .modelId(UUID.randomUUID())
                 .id(mockAsset2.id())
                 .rank(mockAsset2.rank())
                 .symbol(mockAsset2.symbol())

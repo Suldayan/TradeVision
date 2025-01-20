@@ -48,6 +48,7 @@ public class MarketServiceImpl implements MarketService {
                             .percentExchangeVolume(field.percentExchangeVolume())
                             .tradesCount24Hr(field.tradesCount24Hr())
                             .updated(field.updated())
+                            .timestamp(marketHolder.timestamp())
                             .build())
                     .collect(Collectors.toSet());
             if (marketSet.isEmpty()) {
