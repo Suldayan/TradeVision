@@ -4,6 +4,8 @@ import com.example.data_ingestion_service.models.RawMarketModel;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface RawMarketModelRepository extends CrudRepository<RawMarketModel, String> {
+public interface RawMarketModelRepository extends CrudRepository<RawMarketModel, UUID> {
 }
