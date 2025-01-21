@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -38,4 +39,7 @@ public class MarketModel {
 
     private BigDecimal priceUsd;
     private Long updated;
+
+    private Long timestamp;
+    private Instant createdAt;
 }

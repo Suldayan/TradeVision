@@ -5,8 +5,6 @@ import com.example.data_processing_service.models.mapper.ExchangeMapper;
 import com.example.data_processing_service.models.processed.AssetModel;
 import com.example.data_processing_service.models.processed.ExchangesModel;
 import com.example.data_processing_service.models.processed.MarketModel;
-import com.example.data_processing_service.models.raw.RawAssetModel;
-import com.example.data_processing_service.models.raw.RawExchangesModel;
 import com.example.data_processing_service.models.raw.RawMarketModel;
 import com.example.data_processing_service.repository.processed.AssetModelRepository;
 import com.example.data_processing_service.repository.processed.ExchangeModelRepository;
@@ -40,16 +38,19 @@ public class TransformationServiceImpl implements TransformationService {
 
     private final FilterService filterService;
 
+    @Nonnull
     @Override
     public Set<ExchangesModel> rawToEntityExchange() {
         return exchangeMapper.rawToProcessedExchanges(filterService.exchangeIdsToModels());
     }
 
+    @Nonnull
     @Override
     public Set<AssetModel> rawToEntityAsset() {
         return assetMapper.rawToProcessedAssetSet(filterService.assetIdsToModels());
     }
 
+    @Nonnull
     @Override
     public Map<String, ExchangesModel> indexExchangesById() {
         Set<ExchangesModel> exchangeModels = rawToEntityExchange();
@@ -57,6 +58,7 @@ public class TransformationServiceImpl implements TransformationService {
                 .collect(Collectors.toMap(ExchangesModel::getExchangeId, Function.identity()));
     }
 
+    @Nonnull
     @Override
     public Map<String, AssetModel> indexAssetsById() {
         Set<AssetModel> assetModels = rawToEntityAsset();

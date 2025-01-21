@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,5 +23,7 @@ public class AssetModel {
     private String assetId;
 
     private BigDecimal priceUsd;
-    private LocalDateTime fetched;
+    private Long timestamp;
+
+    private Instant createdAt;
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -23,4 +24,8 @@ public class ExchangesModel {
     private BigDecimal percentTotalVolume;
     private BigDecimal volumeUsd;
     private Long updated;
+
+    private Long timestamp;
+
+    private Instant createdAt;
 }
