@@ -8,10 +8,10 @@ import jakarta.annotation.Nonnull;
 import java.util.Set;
 
 public interface FilterService {
-    Set<RawMarketModel> collectAndUpdateMarketState();
-    Set<String> filterExchangeIds();
-    Set<String> filterAssetIds();
-    Set<RawExchangesModel> exchangeIdsToModels();
-    Set<RawAssetModel> assetIdsToModels();
+    Set<RawMarketModel> collectAndUpdateMarketState(Long timestamp);
+    Set<String> filterExchangeIds(Set<RawMarketModel> filteredMarketModels);
+    Set<String> filterAssetIds(Set<RawMarketModel> filteredMarketModels);
+    Set<RawExchangesModel> exchangeIdsToModels(Set<String> exchangeIds, Long timestamp);
+    Set<RawAssetModel> assetIdsToModels(Set<String> assetIds, Long timestamp);
     Boolean isPriceChangeMeaningful(@Nonnull RawMarketModel cachedData);
 }

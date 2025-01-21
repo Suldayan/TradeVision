@@ -31,10 +31,11 @@ public class FilterServiceImpl implements FilterService {
      * Creates a new list of raw market models containing only markets with meaningful price changes
      * @return a list of market transfer objects that contain these changes
      * */
+    //TODO we can add a timestamp param to these functions and it will be grabbed via kafka consumer and provided via composeAsync service
     @Nonnull
     @Override
-    public Set<RawMarketModel> collectAndUpdateMarketState() {
-        Set<RawMarketModel> rawMarketData = rawMarketModelRepository.findAllByTimestamp();
+    public Set<RawMarketModel> collectAndUpdateMarketState(@Nonnull Long timestamp) {
+        Set<RawMarketModel> rawMarketData = rawMarketModelRepository.findAllByTimestamp(timestamp);
         return rawMarketData.stream()
                 .filter(this::isPriceChangeMeaningful)
                 .map(data -> RawMarketModel.builder()
@@ -56,8 +57,7 @@ public class FilterServiceImpl implements FilterService {
 
     @Nonnull
     @Override
-    public Set<String> filterExchangeIds() {
-        Set<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
+    public Set<String> filterExchangeIds(@Nonnull Set<RawMarketModel> filteredMarketModels) {
         return filteredMarketModels.stream()
                 .map(RawMarketModel::getExchangeId)
                 .collect(Collectors.toSet());
@@ -65,8 +65,7 @@ public class FilterServiceImpl implements FilterService {
 
     @Nonnull
     @Override
-    public Set<String> filterAssetIds() {
-        Set<RawMarketModel> filteredMarketModels = collectAndUpdateMarketState();
+    public Set<String> filterAssetIds(@Nonnull Set<RawMarketModel> filteredMarketModels) {
         Set<String> baseIds = filteredMarketModels.stream()
                 .map(RawMarketModel::getId)
                 .collect(Collectors.toSet());
@@ -79,9 +78,10 @@ public class FilterServiceImpl implements FilterService {
 
     @Nonnull
     @Override
-    public Set<RawExchangesModel> exchangeIdsToModels() {
-        Set<String> exchangeIds = filterExchangeIds();
-        Set<RawExchangesModel> unfilteredModels = rawExchangeModelRepository.findAllByTimestamp();
+    public Set<RawExchangesModel> exchangeIdsToModels(@Nonnull Set<String> exchangeIds, Long timestamp) {
+        //TODO from here, we might have to first index by timestamp, then findByID. a few flows to go but this is one of them
+        // Think this more through, lowkey tired but now that i think about it, this todo is not needed lmao
+        Set<RawExchangesModel> unfilteredModels = rawExchangeModelRepository.findAllByTimestamp(timestamp);
         return unfilteredModels.stream()
                 .filter(model -> exchangeIds.contains(model.getId()))
                 .collect(Collectors.toSet());
@@ -89,9 +89,8 @@ public class FilterServiceImpl implements FilterService {
 
     @Nonnull
     @Override
-    public Set<RawAssetModel> assetIdsToModels() {
-        Set<String> assetIds = filterAssetIds();
-        Set<RawAssetModel> unfilteredAssets = rawAssetModelRepository.findAllByTimestamp();
+    public Set<RawAssetModel> assetIdsToModels(@Nonnull Set<String> assetIds, Long timestamp) {
+        Set<RawAssetModel> unfilteredAssets = rawAssetModelRepository.findAllByTimestamp(timestamp);
         return unfilteredAssets.stream()
                 .filter(model -> assetIds.contains(model.getId()))
                 .collect(Collectors.toSet());
