@@ -42,32 +42,26 @@ public class TransformationServiceImpl implements TransformationService {
 
     @Override
     public Set<ExchangesModel> rawToEntityExchange() {
-        Set<RawExchangesModel> cachedExchanges = filterService.exchangeIdsToModels();
-        return cachedExchanges.stream()
-                .map(exchangeMapper::rawToProcessedExchanges)
-                .collect(Collectors.toSet());
+        return exchangeMapper.rawToProcessedExchanges(filterService.exchangeIdsToModels());
     }
 
     @Override
     public Set<AssetModel> rawToEntityAsset() {
-        Set<RawAssetModel> cachedAssets = filterService.assetIdsToModels();
-        return cachedAssets.stream()
-                .map(assetMapper::rawToProcessedAsset)
-                .collect(Collectors.toSet());
+        return assetMapper.rawToProcessedAssetSet(filterService.assetIdsToModels());
     }
 
     @Override
     public Map<String, ExchangesModel> indexExchangesById() {
         Set<ExchangesModel> exchangeModels = rawToEntityExchange();
         return exchangeModels.stream()
-                .collect(Collectors.toMap(ExchangesModel::getId, Function.identity()));
+                .collect(Collectors.toMap(ExchangesModel::getExchangeId, Function.identity()));
     }
 
     @Override
     public Map<String, AssetModel> indexAssetsById() {
         Set<AssetModel> assetModels = rawToEntityAsset();
         return assetModels.stream()
-                .collect(Collectors.toMap(AssetModel::getId, Function.identity()));
+                .collect(Collectors.toMap(AssetModel::getAssetId, Function.identity()));
     }
 
     /*

@@ -6,9 +6,11 @@ import jakarta.annotation.Nonnull;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Set;
+
 @Mapper
 public interface AssetMapper {
     AssetMapper INSTANCE = Mappers.getMapper(AssetMapper.class);
 
-    AssetModel rawToProcessedAsset(@Nonnull RawAssetModel rawAssetModel);
+    Set<AssetModel> rawToProcessedAssetSet(@Nonnull Set<RawAssetModel> rawAssetModel);
 }

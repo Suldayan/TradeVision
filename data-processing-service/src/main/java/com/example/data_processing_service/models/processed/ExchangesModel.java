@@ -1,16 +1,13 @@
 package com.example.data_processing_service.models.processed;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -18,7 +15,10 @@ import java.math.BigDecimal;
 @Table(name = "exchanges")
 public class ExchangesModel {
     @Id
-    String id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    private String exchangeId;
 
     private BigDecimal percentTotalVolume;
     private BigDecimal volumeUsd;

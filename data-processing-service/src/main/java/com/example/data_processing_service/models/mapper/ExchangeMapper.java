@@ -6,9 +6,11 @@ import jakarta.annotation.Nonnull;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Set;
+
 @Mapper
 public interface ExchangeMapper {
     ExchangeMapper INSTANCE = Mappers.getMapper(ExchangeMapper.class);
 
-    ExchangesModel rawToProcessedExchanges(@Nonnull RawExchangesModel rawExchangesModel);
+    Set<ExchangesModel> rawToProcessedExchanges(@Nonnull Set<RawExchangesModel> rawExchangesModel);
 }

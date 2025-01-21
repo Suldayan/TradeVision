@@ -2,14 +2,13 @@ package com.example.data_processing_service.models.processed;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -17,20 +16,23 @@ import java.math.BigDecimal;
 @Table(name = "markets")
 public class MarketModel {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    // TODO configure an id identifier for the market (something to define what market it is)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exchange_id", nullable = false)
+    @JoinColumn(name = "exchange_id")
     @Nullable
     private ExchangesModel exchange;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_asset_id", nullable = false)
+    @JoinColumn(name = "base_asset_id")
     @Nullable
     private AssetModel baseAsset;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_asset_id", nullable = false)
+    @JoinColumn(name = "quote_asset_id")
     @Nullable
     private AssetModel quoteAsset;
 

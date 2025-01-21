@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,18 +81,17 @@ public class FilterServiceImpl implements FilterService {
     @Override
     public Set<RawExchangesModel> exchangeIdsToModels() {
         Set<String> exchangeIds = filterExchangeIds();
-        List<RawExchangesModel> unfilteredModels = (List<RawExchangesModel>) rawExchangeModelRepository.findAll();
+        Set<RawExchangesModel> unfilteredModels = rawExchangeModelRepository.findAllByTimestamp();
         return unfilteredModels.stream()
                 .filter(model -> exchangeIds.contains(model.getId()))
                 .collect(Collectors.toSet());
     }
 
-    // TODO instead of findALl(), make a custom query for findALlByTimestamp
     @Nonnull
     @Override
     public Set<RawAssetModel> assetIdsToModels() {
         Set<String> assetIds = filterAssetIds();
-        List<RawAssetModel> unfilteredAssets = (List<RawAssetModel>) rawAssetModelRepository.findAll();
+        Set<RawAssetModel> unfilteredAssets = rawAssetModelRepository.findAllByTimestamp();
         return unfilteredAssets.stream()
                 .filter(model -> assetIds.contains(model.getId()))
                 .collect(Collectors.toSet());
@@ -106,6 +104,10 @@ public class FilterServiceImpl implements FilterService {
      * */
     @Override
     public Boolean isPriceChangeMeaningful(@Nonnull RawMarketModel cachedData) {
+        // TODO change this for fetching via previous timestamps
+        // If done correctly, then subtracting 5 minutes from the current timestamp should retrieve the last fetched data
+        // We should think about a proper check on whether to compare to a successful timestamp as apposed to a failed one
+        // For example, if 12345L isn't meaningful compared to 13456L but it is to 15678L, then that could deem valid and we move the comparison timestamp to this one
         Optional<RawMarketModel> lastSignificantChange = rawMarketModelRepository.findById(cachedData.getId());
         if (lastSignificantChange.isEmpty()) {
             return true;
