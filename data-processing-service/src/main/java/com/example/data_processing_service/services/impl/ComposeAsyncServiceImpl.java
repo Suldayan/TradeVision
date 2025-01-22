@@ -1,5 +1,6 @@
 package com.example.data_processing_service.services.impl;
 
+import com.example.data_processing_service.models.processed.ExchangesModel;
 import com.example.data_processing_service.models.raw.RawAssetModel;
 import com.example.data_processing_service.models.raw.RawExchangesModel;
 import com.example.data_processing_service.models.raw.RawMarketModel;
@@ -30,18 +31,53 @@ public class ComposeAsyncServiceImpl implements ComposeAsyncService {
         log.info("Consumed status from status topic at: {}", LocalTime.now());
     }
 
-    @Override
-    public CompletableFuture<Void> orchestrateFilterFlowAsync(@Nonnull Long timestamp) {
-        CompletableFuture<Set<RawMarketModel>> marketFutures = CompletableFuture.supplyAsync(filterService::filterMarkets)
+    @Nonnull
+    public CompletableFuture<Set<RawMarketModel>> marketFutures() {
+        return CompletableFuture.supplyAsync(filterService::filterMarkets)
                 .exceptionally(ex -> {
                     log.error("");
                     return null;
                 });
-        CompletableFuture<Set<String>> exchangeIdFutures = marketFutures.thenApply(filterService::filterExchangeIds);
-        CompletableFuture<Set<String>> assetIdFutures = marketFutures.thenApply(filterService::filterAssetIds);
-        CompletableFuture<Set<RawExchangesModel>> rawExchangeModelFutures = exchangeIdFutures.thenApply(filterService::exchangeIdsToModels);
-        CompletableFuture<Set<RawAssetModel>> rawAssetModelFutures = assetIdFutures.thenApply(filterService::assetIdsToModels);
+    }
 
+    @Nonnull
+    public CompletableFuture<Set<String>> exchangeIdFutures() {
+        return marketFutures().thenApply(filterService::filterExchangeIds)
+                .exceptionally(ex -> {
+                    log.error("");
+                    return null;
+                });
+    }
+
+    @Nonnull
+    public CompletableFuture<Set<String>> assetIdFutures() {
+        return marketFutures().thenApply(filterService::filterAssetIds)
+                .exceptionally(ex -> {
+                    log.error("");
+                    return null;
+                });
+    }
+
+    @Nonnull
+    public CompletableFuture<Set<RawExchangesModel>> rawExchangeModelFutures() {
+        return exchangeIdFutures().thenApply(filterService::exchangeIdsToModels)
+                .exceptionally(ex -> {
+                    log.error("");
+                    return null;
+                });
+    }
+
+    @Nonnull
+    public CompletableFuture<Set<RawAssetModel>> rawAssetModelFutures() {
+        return assetIdFutures().thenApply(filterService::assetIdsToModels)
+                .exceptionally(ex -> {
+                    log.error("");
+                    return null;
+                });
+    }
+
+    @Override
+    public CompletableFuture<Void> orchestrateFilterFlowAsync(@Nonnull Long timestamp) {
         return CompletableFuture.allOf(rawExchangeModelFutures, rawAssetModelFutures)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
@@ -55,7 +91,8 @@ public class ComposeAsyncServiceImpl implements ComposeAsyncService {
 
     @Override
     public CompletableFuture<Void> orchestrateTransformationFlowAsync() {
-        return null;
+        CompletableFuture<Set<ExchangesModel>> processedExchangeFutures = CompletableFuture
+                .supplyAsync(transformationService.indexExchangesById(rawExchangeModelFutures()));
     }
 
     private void handleError(String msg, Throwable ex) {

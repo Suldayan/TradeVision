@@ -40,28 +40,26 @@ public class TransformationServiceImpl implements TransformationService {
 
     @Nonnull
     @Override
-    public Set<ExchangesModel> rawToEntityExchange() {
-        return exchangeMapper.rawToProcessedExchanges(filterService.exchangeIdsToModels());
+    public Set<ExchangesModel> rawToEntityExchange(@Nonnull Set<String> ids) {
+        return exchangeMapper.rawToProcessedExchanges(filterService.exchangeIdsToModels(ids));
     }
 
     @Nonnull
     @Override
-    public Set<AssetModel> rawToEntityAsset() {
-        return assetMapper.rawToProcessedAssetSet(filterService.assetIdsToModels());
+    public Set<AssetModel> rawToEntityAsset(@Nonnull Set<String> ids) {
+        return assetMapper.rawToProcessedAssetSet(filterService.assetIdsToModels(ids));
     }
 
     @Nonnull
     @Override
-    public Map<String, ExchangesModel> indexExchangesById() {
-        Set<ExchangesModel> exchangeModels = rawToEntityExchange();
-        return exchangeModels.stream()
+    public Map<String, ExchangesModel> indexExchangesById(@Nonnull Set<ExchangesModel> exchangesModels) {
+        return exchangesModels.stream()
                 .collect(Collectors.toMap(ExchangesModel::getExchangeId, Function.identity()));
     }
 
     @Nonnull
     @Override
-    public Map<String, AssetModel> indexAssetsById() {
-        Set<AssetModel> assetModels = rawToEntityAsset();
+    public Map<String, AssetModel> indexAssetsById(@Nonnull Set<AssetModel> assetModels) {
         return assetModels.stream()
                 .collect(Collectors.toMap(AssetModel::getAssetId, Function.identity()));
     }
@@ -73,14 +71,13 @@ public class TransformationServiceImpl implements TransformationService {
     @CacheEvict(cacheNames = "marketApiResponse, exchangeApiResponse, assetApiResponse")
     @Override
     public void completeMarketAttributes() {
-        Set<RawMarketModel> filteredMarketModels = filterService.collectAndUpdateMarketState();
+        Set<RawMarketModel> filteredMarketModels = filterService.filterMarkets();
         Map<String, ExchangesModel> exchanges = indexExchangesById();
         Map<String, AssetModel> assets = indexAssetsById();
 
         Set<MarketModel> marketModels = filteredMarketModels
                 .stream()
                 .map(attribute -> MarketModel.builder()
-                        .id(attribute.getId())
                         .exchange(
                                 (ExchangesModel) exchanges.entrySet()
                                         .stream()
