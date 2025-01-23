@@ -1,6 +1,5 @@
 package com.example.data_ingestion_service.services.scheduler;
 
-import com.example.data_ingestion_service.services.DataAsyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -1,6 +1,5 @@
 package com.example.data_ingestion_service.services.unit;
 
-import com.example.data_ingestion_service.services.DataAsyncService;
 import com.example.data_ingestion_service.services.scheduler.DataScheduler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
