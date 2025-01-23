@@ -1,5 +1,6 @@
 package com.example.data_ingestion_service.services.scheduler;
 
+import com.example.data_ingestion_service.services.OrchestratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,18 +16,14 @@ import java.time.LocalTime;
 @Slf4j
 @RequiredArgsConstructor
 public class DataScheduler {
-    private final DataAsyncService dataAsyncService;
+    private final OrchestratorService orchestratorService;
 
     // 5-minute cron job
     @Scheduled(cron = "0 */5 * * * *")
     public void scheduler() {
         try {
             log.info("Starting scheduled fetch at: {}", LocalTime.now());
-            dataAsyncService.asyncFetch()
-                    .exceptionally(error -> {
-                        log.error("Scheduled fetch failed: {}", error.getMessage(), error);
-                        return null;
-                    });
+            orchestratorService.executeDataPipeline();
             log.info("Scheduled fetch completed successfully");
         } catch (Exception ex) {
             log.error("Failed to start scheduled task: {}", ex.getMessage(), ex);
