@@ -3,6 +3,7 @@ package com.example.data_ingestion_service.services.unit;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.MarketService;
+import com.example.data_ingestion_service.services.exceptions.OrchestratorException;
 import com.example.data_ingestion_service.services.impl.OrchestratorServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

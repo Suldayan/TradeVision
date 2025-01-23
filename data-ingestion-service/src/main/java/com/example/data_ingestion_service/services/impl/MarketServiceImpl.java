@@ -25,38 +25,14 @@ public class MarketServiceImpl implements MarketService {
 
     @Nonnull
     @Override
-    public Set<Market> getMarketsData() throws ApiException {
+    public MarketWrapper getMarketsData() {
         try {
             MarketWrapper marketHolder = marketClient.getMarkets();
             if (marketHolder == null) {
                 log.error("Fetched data from market wrapper returned as null");
                 throw new ApiException("Markets data fetched but return as null");
             }
-            Set<Market> marketSet = marketHolder.markets()
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(field -> Market.builder()
-                            .exchangeId(field.exchangeId())
-                            .rank(field.rank())
-                            .baseSymbol(field.baseSymbol())
-                            .baseId(field.baseId())
-                            .quoteSymbol(field.quoteSymbol())
-                            .quoteId(field.quoteId())
-                            .priceQuote(field.priceQuote())
-                            .priceUsd(field.priceUsd())
-                            .volumeUsd24Hr(field.volumeUsd24Hr())
-                            .percentExchangeVolume(field.percentExchangeVolume())
-                            .tradesCount24Hr(field.tradesCount24Hr())
-                            .updated(field.updated())
-                            .timestamp(marketHolder.timestamp())
-                            .build())
-                    .collect(Collectors.toSet());
-            if (marketSet.isEmpty()) {
-                log.warn("Market set returned as empty. Endpoint might be returning incomplete data");
-                throw new ApiException("Market set fetched but is empty");
-            }
-            log.info("Successfully fetched {} markets.", marketSet.size());
-            return marketSet;
+            return marketHolder;
         } catch (Exception e) {
             log.error("An error occurred while fetching markets data: {}", e.getMessage());
             throw new ApiException(String.format("Failed to fetch market wrapper data: %s", e));
@@ -65,7 +41,37 @@ public class MarketServiceImpl implements MarketService {
 
     @Nonnull
     @Override
-    public Set<RawMarketModel> convertToModel() {
-        return marketMapper.marketRecordToEntity(getMarketsData());
+    public Set<Market> convertWrapperDataToRecord(@Nonnull MarketWrapper data) throws ApiException {
+        Set<Market> marketSet = data.markets()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(field -> Market.builder()
+                        .exchangeId(field.exchangeId())
+                        .rank(field.rank())
+                        .baseSymbol(field.baseSymbol())
+                        .baseId(field.baseId())
+                        .quoteSymbol(field.quoteSymbol())
+                        .quoteId(field.quoteId())
+                        .priceQuote(field.priceQuote())
+                        .priceUsd(field.priceUsd())
+                        .volumeUsd24Hr(field.volumeUsd24Hr())
+                        .percentExchangeVolume(field.percentExchangeVolume())
+                        .tradesCount24Hr(field.tradesCount24Hr())
+                        .updated(field.updated())
+                        .timestamp(data.timestamp())
+                        .build())
+                .collect(Collectors.toSet());
+        if (marketSet.isEmpty()) {
+            log.warn("Market set returned as empty. Endpoint might be returning incomplete data");
+            throw new ApiException("Market set fetched but is empty");
+        }
+        log.info("Successfully fetched {} markets.", marketSet.size());
+        return marketSet;
+    }
+
+    @Nonnull
+    @Override
+    public Set<RawMarketModel> convertToModel(@Nonnull Set<Market> marketRecords) {
+        return marketMapper.marketRecordToEntity(marketRecords);
     }
 }
