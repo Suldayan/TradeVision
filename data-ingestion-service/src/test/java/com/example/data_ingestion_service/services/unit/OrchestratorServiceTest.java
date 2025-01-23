@@ -1,6 +1,7 @@
 package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.models.RawMarketModel;
+import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.MarketService;
 import com.example.data_ingestion_service.services.impl.OrchestratorServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -14,13 +15,16 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class OrchestratorServiceTest {
 
     @Mock
     MarketService marketService;
+
+    @Mock
+    DatabaseService databaseService;
 
     @InjectMocks
     OrchestratorServiceImpl orchestratorService;
@@ -59,10 +63,15 @@ public class OrchestratorServiceTest {
             .timestamp(1737247412551L)
             .build();
 
+    Set<RawMarketModel> mockMarketModels = Set.of(rawMarketModel1, rawMarketModel2);
+
     @Test
     void executeDataPipeline_SuccessfullyCompletesFlow() {
-        when(marketService.convertToModel()).thenReturn(Set.of(rawMarketModel1, rawMarketModel2));
+        when(marketService.convertToModel()).thenReturn(mockMarketModels);
 
         assertDoesNotThrow(() -> orchestratorService.executeDataPipeline());
+
+        verify(marketService).convertToModel();
+        verify(databaseService).saveToDatabase(mockMarketModels);
     }
 }
