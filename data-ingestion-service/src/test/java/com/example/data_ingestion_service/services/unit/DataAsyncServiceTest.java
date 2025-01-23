@@ -1,10 +1,7 @@
 package com.example.data_ingestion_service.services.unit;
 
-import com.example.data_ingestion_service.models.RawAssetModel;
-import com.example.data_ingestion_service.models.RawExchangesModel;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.*;
-import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.exceptions.AsyncException;
 import com.example.data_ingestion_service.services.exceptions.ValidationException;
 import com.example.data_ingestion_service.services.impl.DataAsyncServiceImpl;
@@ -16,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

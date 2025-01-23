@@ -1,10 +1,6 @@
 package com.example.data_ingestion_service.services.mapper;
 
-import com.example.data_ingestion_service.models.RawAssetModel;
-import com.example.data_ingestion_service.models.RawExchangesModel;
 import com.example.data_ingestion_service.models.RawMarketModel;
-import com.example.data_ingestion_service.repository.RawAssetModelRepository;
-import com.example.data_ingestion_service.repository.RawExchangeModelRepository;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

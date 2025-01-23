@@ -1,7 +1,5 @@
 package com.example.data_ingestion_service.configs;
 
-import com.example.data_ingestion_service.clients.AssetClient;
-import com.example.data_ingestion_service.clients.ExchangeClient;
 import com.example.data_ingestion_service.clients.MarketClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

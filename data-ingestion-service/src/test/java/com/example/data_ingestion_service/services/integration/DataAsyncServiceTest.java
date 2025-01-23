@@ -1,7 +1,5 @@
 package com.example.data_ingestion_service.services.integration;
 
-import com.example.data_ingestion_service.models.RawAssetModel;
-import com.example.data_ingestion_service.models.RawExchangesModel;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.services.DataAsyncService;
 import org.junit.jupiter.api.Test;
