@@ -26,7 +26,7 @@ public class DatabaseServiceImpl implements DatabaseService {
         if (marketModels.isEmpty()) {
             log.warn("The list of entities for saving has been passed but is empty");
         }
-        marketModelRepository.save(marketModels);
+        marketModelRepository.saveAll(marketModels);
         // Send completion status to data processing microservice to initialize the processing flow
         kafkaProducer.sendMessage(String.format("Status: Completed at %s", LocalTime.now()));
     }
