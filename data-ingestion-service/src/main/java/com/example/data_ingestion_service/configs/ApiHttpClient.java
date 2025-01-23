@@ -19,18 +19,4 @@ public class ApiHttpClient {
         HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(client)).build();
         return factory.createClient(MarketClient.class);
     }
-
-    @Bean
-    public ExchangeClient exchangeClient() {
-        RestClient client = restClientConfig.restClient();
-        HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(client)).build();
-        return factory.createClient(ExchangeClient.class);
-    }
-
-    @Bean
-    AssetClient assetClient() {
-        RestClient client = restClientConfig.restClient();
-        HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(client)).build();
-        return factory.createClient(AssetClient.class);
-    }
 }
