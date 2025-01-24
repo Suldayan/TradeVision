@@ -20,26 +20,11 @@ public class MarketModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // TODO configure an id identifier for the market (something to define what market it is)
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exchange_id")
-    @Nullable
-    private ExchangesModel exchange;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_asset_id")
-    @Nullable
-    private AssetModel baseAsset;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_asset_id")
-    @Nullable
-    private AssetModel quoteAsset;
-
     private BigDecimal priceUsd;
+
     private Long updated;
 
-    private Long timestamp;
+    private String timestamp;
+
     private Instant createdAt;
 }
