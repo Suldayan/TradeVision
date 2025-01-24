@@ -72,11 +72,10 @@ public class MarketServiceTest {
     void testGetMarketData_ReturnsValid_SetOfMarketRecords() {
         when(marketClient.getMarkets()).thenReturn(mockMarketWrapper);
 
-        Set<Market> result = marketService.getMarketsData();
+        MarketWrapper result = marketService.getMarketsData();
 
         assertDoesNotThrow(() -> marketService.getMarketsData());
         assertNotNull(result);
-        assertEquals(2, result.size(), "Set size should be 2");
     }
 
     @Test
@@ -145,9 +144,9 @@ public class MarketServiceTest {
         when(marketClient.getMarkets()).thenReturn(mockMarketWrapper);
         when(marketMapper.marketRecordToEntity(Set.of(market1, market2))).thenReturn(Set.of(rawMarketModel1, rawMarketModel2));
 
-        Set<RawMarketModel> result = marketService.convertToModel();
+        Set<RawMarketModel> result = marketService.convertToModel(mockMarketWrapper.markets());
 
-        assertDoesNotThrow(() -> marketService.convertToModel());
+        assertDoesNotThrow(() -> marketService.convertToModel(mockMarketWrapper.markets()));
         assertNotNull(result);
         assertEquals(2, result.size(), "Set size should be 2");
     }

@@ -1,6 +1,8 @@
 package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.models.RawMarketModel;
+import com.example.data_ingestion_service.records.Market;
+import com.example.data_ingestion_service.records.wrapper.MarketWrapper;
 import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.MarketService;
 import com.example.data_ingestion_service.services.exceptions.OrchestratorException;
@@ -29,6 +31,45 @@ public class OrchestratorServiceTest {
 
     @InjectMocks
     OrchestratorServiceImpl orchestratorService;
+
+    Market mockMarket1 = Market.builder()
+            .exchangeId("BINANCE")
+            .rank(1)
+            .baseSymbol("BTC")
+            .baseId("bitcoin")
+            .quoteSymbol("USDT")
+            .quoteId("tether")
+            .priceQuote(new BigDecimal("30345.67"))
+            .priceUsd(new BigDecimal("30340.50"))
+            .volumeUsd24Hr(new BigDecimal("1450023456.78"))
+            .percentExchangeVolume(new BigDecimal("22.75"))
+            .tradesCount24Hr(124500)
+            .updated(1717027200000L)
+            .timestamp(1717027200000L)
+            .build();
+
+    Market mockMarket2 = Market.builder()
+            .exchangeId("COINBASE")
+            .rank(2)
+            .baseSymbol("ETH")
+            .baseId("ethereum")
+            .quoteSymbol("USD")
+            .quoteId("usd")
+            .priceQuote(new BigDecimal("1856.30"))
+            .priceUsd(new BigDecimal("1856.25"))
+            .volumeUsd24Hr(new BigDecimal("890456123.45"))
+            .percentExchangeVolume(new BigDecimal("18.20"))
+            .tradesCount24Hr(87650)
+            .updated(1717023600000L)
+            .timestamp(null)
+            .build();
+
+    Set<Market> mockMarketSet = Set.of(mockMarket1, mockMarket2);
+
+    MarketWrapper mockMarketWrapper = MarketWrapper.builder()
+            .markets(Set.of(mockMarket1, mockMarket2))
+            .timestamp(1717027200000L)
+            .build();
 
     RawMarketModel rawMarketModel1 = RawMarketModel.builder()
             .modelId(UUID.randomUUID())
@@ -68,11 +109,12 @@ public class OrchestratorServiceTest {
 
     @Test
     void executeDataPipeline_SuccessfullyCompletesFlow() {
-        when(marketService.convertToModel()).thenReturn(mockMarketModels);
+        when(marketService.getMarketsData()).thenReturn(mockMarketWrapper);
+        when(marketService.convertToModel(mockMarketSet)).thenReturn(mockMarketModels);
 
         assertDoesNotThrow(() -> orchestratorService.executeDataPipeline());
 
-        verify(marketService).convertToModel();
+        verify(marketService).convertToModel(mockMarketSet);
         verify(databaseService).saveToDatabase(mockMarketModels);
     }
 }
