@@ -17,11 +17,10 @@ import java.time.LocalTime;
 public class ConsumerServiceImpl implements ConsumerService {
     private final DataNormalizationService dataNormalizationService;
 
-    //TODO configure proper group id
-    @KafkaListener(topics = "status", groupId = "")
+    @KafkaListener(topics = "status", groupId = "myGroup")
     @Override
     public void receiveStatus(@Nonnull EventDTO status) {
-        log.info("Status completion received at: {}", LocalTime.now());
+        log.info("{} received at: {}. Starting processing", status.getStatus(), LocalTime.now());
         dataNormalizationService.removeFields(status.getTimestamp());
     }
 }
