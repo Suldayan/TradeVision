@@ -2,6 +2,18 @@ spring:
   application:
     name: data-processing-service
 
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+
+  datasource:
+    url:
+      jdbc:
+        
+
   kafka:
     consumer:
       bootstrap-servers: localhost:9092
