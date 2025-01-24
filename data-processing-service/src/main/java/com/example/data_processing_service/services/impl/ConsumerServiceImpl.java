@@ -2,7 +2,7 @@ package com.example.data_processing_service.services.impl;
 
 import com.example.data_processing_service.dto.EventDTO;
 import com.example.data_processing_service.services.ConsumerService;
-import com.example.data_processing_service.services.DataNormalizationService;
+import com.example.data_processing_service.services.ProcessingOrchestratorService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +15,12 @@ import java.time.LocalTime;
 @Slf4j
 @RequiredArgsConstructor
 public class ConsumerServiceImpl implements ConsumerService {
-    private final DataNormalizationService dataNormalizationService;
+    private final ProcessingOrchestratorService processingOrchestratorService;
 
     @KafkaListener(topics = "status", groupId = "myGroup")
     @Override
     public void receiveStatus(@Nonnull EventDTO status) {
         log.info("{} received at: {}. Starting processing", status.getStatus(), LocalTime.now());
-        dataNormalizationService.removeFields(status.getTimestamp());
+        processingOrchestratorService.startProcessingFlow(status.getTimestamp());
     }
 }
