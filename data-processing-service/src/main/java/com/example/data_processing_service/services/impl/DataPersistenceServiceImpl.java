@@ -32,7 +32,7 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
         }
         try {
             marketModelRepository.saveAll(marketModels);
-            log.info("Successfully saved market models to database at: {}", LocalTime.now());
+            log.info("Successfully saved all models to database at: {}", LocalTime.now());
         } catch (Exception ex) {
             log.error("Failed to save to database at: {}", LocalTime.now());
         }

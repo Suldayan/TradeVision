@@ -23,3 +23,6 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+
+  retry:
+    enabled: true
