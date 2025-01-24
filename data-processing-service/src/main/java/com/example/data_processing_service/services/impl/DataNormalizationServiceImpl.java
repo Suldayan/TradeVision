@@ -22,9 +22,9 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
 
     @Nonnull
     @Override
-    public Set<MarketModel> removeFields() {
+    public Set<MarketModel> removeFields(@Nonnull Long timestamp) {
         // The timestamp will be served via status topic from kafka from the data ingestion service
-        Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp();
+        Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp(timestamp);
         return rawMarketModels.stream()
                 .map(field -> MarketModel
                         .builder()

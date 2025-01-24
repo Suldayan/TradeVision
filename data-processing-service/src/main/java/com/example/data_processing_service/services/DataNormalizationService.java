@@ -5,6 +5,6 @@ import com.example.data_processing_service.models.processed.MarketModel;
 import java.util.Set;
 
 public interface DataNormalizationService {
-    Set<MarketModel> removeFields();
+    Set<MarketModel> removeFields(Long timestammp);
     String transformTimeStamp(Long timestamp);
 }
