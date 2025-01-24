@@ -1,7 +1,7 @@
 package com.example.data_processing_service.services.impl;
 
-import com.example.data_processing_service.models.processed.MarketModel;
-import com.example.data_processing_service.repository.processed.MarketModelRepository;
+import com.example.data_processing_service.models.MarketModel;
+import com.example.data_processing_service.repository.MarketModelRepository;
 import com.example.data_processing_service.services.DataPersistenceService;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;

@@ -1,8 +1,8 @@
 package com.example.data_processing_service.services.impl;
 
-import com.example.data_processing_service.models.processed.MarketModel;
-import com.example.data_processing_service.models.raw.RawMarketModel;
-import com.example.data_processing_service.repository.raw.RawMarketModelRepository;
+import com.example.data_processing_service.models.MarketModel;
+import com.example.data_processing_service.models.RawMarketModel;
+import com.example.data_processing_service.repository.RawMarketModelRepository;
 import com.example.data_processing_service.services.DataNormalizationService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.data_processing_service.models.raw;
+package com.example.data_processing_service.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

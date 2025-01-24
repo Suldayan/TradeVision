@@ -1,6 +1,5 @@
-package com.example.data_processing_service.models.processed;
+package com.example.data_processing_service.models;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
