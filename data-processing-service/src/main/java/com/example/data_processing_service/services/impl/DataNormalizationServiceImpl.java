@@ -20,15 +20,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
     private final RawMarketModelRepository repository;
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     @Nonnull
     @Override
-    public Set<MarketModel> removeFields(@Nonnull Long timestamp) throws DataNotFoundException {
+    public Set<MarketModel> transformToMarketModel(@Nonnull Long timestamp) throws DataNotFoundException {
         // The timestamp will be served via status topic from kafka from the data ingestion service
         Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp(timestamp);
         if (rawMarketModels.isEmpty()) {
-            log.error("Market models fetched at: {} returned empty", timestamp);
-            throw new DataNotFoundException(String.format("Market Models returned empty at timestamp: %s", timestamp));
+            String errorMessage = String.format("No market data found for timestamp: %d", timestamp);
+            log.error(errorMessage);
+            throw new DataNotFoundException(errorMessage);
         }
         return rawMarketModels.stream()
                 .map(field -> MarketModel
@@ -44,7 +46,6 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     @Override
     public String transformTimeStamp(@Nonnull Long timestamp) {
         Instant instant = Instant.ofEpochMilli(timestamp);
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-        return formatter.format(instant);
+        return TIMESTAMP_FORMATTER.format(instant);
     }
 }

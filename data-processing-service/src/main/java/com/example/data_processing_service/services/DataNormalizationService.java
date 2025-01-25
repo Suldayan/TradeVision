@@ -6,6 +6,6 @@ import com.example.data_processing_service.services.exception.DataNotFoundExcept
 import java.util.Set;
 
 public interface DataNormalizationService {
-    Set<MarketModel> removeFields(Long timestamp) throws DataNotFoundException;
+    Set<MarketModel> transformToMarketModel(Long timestamp) throws DataNotFoundException;
     String transformTimeStamp(Long timestamp);
 }
