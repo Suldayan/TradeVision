@@ -3,6 +3,7 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.repository.MarketModelRepository;
 import com.example.data_processing_service.services.DataPersistenceService;
+import com.example.data_processing_service.services.exception.DataNotFoundException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,28 +25,26 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
 
     @Retryable(
             retryFor = DataAccessException.class,
+            maxAttempts = 5,
             backoff = @Backoff(delay = 1000)
     )
     @Transactional
     @Override
-    public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) {
+    public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) throws DataNotFoundException {
         if (marketModels.isEmpty()) {
-            log.warn("Empty marketModels set provided. No data saved");
-            return;
+            throw new DataNotFoundException("Market model set passed but is empty");
         }
-        try {
-            marketModelRepository.saveAll(marketModels);
-            log.info("Successfully saved all models to database at: {}", LocalDateTime.now());
-        } catch (Exception e) {
-            log.error("Failed to save to database at: {} for model size: {}. Error Message={}, Stack Trace={}",
-                    LocalDateTime.now(), marketModels.size(), e.getMessage(), e.getStackTrace());
-            throw e;
+        if (marketModels.size() != 100) {
+            log.error("Market model set passed but is missing data: {}/100 elements", marketModels.size());
+            throw new DataNotFoundException("Market model set passed but does not contain 100 elements");
         }
+        marketModelRepository.saveAll(marketModels);
+        log.info("Successfully saved all models to database at: {}", LocalDateTime.now());
     }
 
     @Recover
     private void recoverSaveToDatabase(DataAccessException e, @Nonnull Set<MarketModel> marketModels) {
-        log.error("Max number of retries reached! (3/3). Unable to save set size of: {}: {}",
-                marketModels.size(), e.getMessage());
+        log.error("Max number of retries reached! (5/5). Unable to save set size of: {}: {}",
+                marketModels.size(), e.getMostSpecificCause().getMessage());
     }
 }

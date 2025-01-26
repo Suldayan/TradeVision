@@ -28,10 +28,14 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
         // The timestamp will be served via data-ingestion-status topic
         Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp(timestamp);
         if (rawMarketModels.isEmpty()) {
-            String errorMessage = String.format("No market data found for timestamp: %d", timestamp);
-            log.error(errorMessage);
+            log.error("Market models fetched but is empty for timestamp: {}", timestamp);
             // We throw an exception here because it's expected that there is data available at the given timestamp
-            throw new DataNotFoundException(errorMessage);
+            throw new DataNotFoundException("Unable to push data forward due to empty market set");
+        }
+        if (rawMarketModels.size() != 100) {
+            log.error("Market models with timestamp: {} fetched but is missing data with size: {} of expected size: 100",
+                    timestamp, rawMarketModels.size());
+            throw new DataNotFoundException("Unable to push data forward due to missing data");
         }
         return rawMarketModels.stream()
                 .map(field -> MarketModel
