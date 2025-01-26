@@ -24,7 +24,7 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
     private final MarketModelRepository marketModelRepository;
 
     @Retryable(
-            retryFor = DataAccessException.class,
+            retryFor = {DataAccessException.class, RuntimeException.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 1000)
     )
