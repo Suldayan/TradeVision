@@ -25,11 +25,12 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     @Nonnull
     @Override
     public Set<MarketModel> transformToMarketModel(@Nonnull Long timestamp) throws DataNotFoundException {
-        // The timestamp will be served via status topic from kafka from the data ingestion service
+        // The timestamp will be served via data-ingestion-status topic
         Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp(timestamp);
         if (rawMarketModels.isEmpty()) {
             String errorMessage = String.format("No market data found for timestamp: %d", timestamp);
             log.error(errorMessage);
+            // We throw an exception here because it's expected that there is data available at the given timestamp
             throw new DataNotFoundException(errorMessage);
         }
         return rawMarketModels.stream()

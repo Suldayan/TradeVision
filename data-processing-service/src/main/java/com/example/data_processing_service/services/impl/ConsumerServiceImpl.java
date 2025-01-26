@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
@@ -17,10 +17,20 @@ import java.time.LocalTime;
 public class ConsumerServiceImpl implements ConsumerService {
     private final ProcessingOrchestratorService processingOrchestratorService;
 
-    @KafkaListener(topics = "status", groupId = "myGroup")
+    @KafkaListener(
+            topics = "${kafka.topics.data-ingestion-status:data-ingestion-status}",
+            groupId = "${kafka.consumer-group:myGroup}"
+    )
     @Override
     public void receiveStatus(@Nonnull EventDTO status) {
-        log.info("{} received at: {}. Starting processing", status.getStatus(), LocalTime.now());
-        processingOrchestratorService.startProcessingFlow(status.getTimestamp());
+        try {
+            log.info("{} received at: {}. Starting processing",
+                    status.getStatus(), LocalDateTime.now());
+            processingOrchestratorService.startProcessingFlow(status.getTimestamp());
+        } catch (Exception e) {
+            log.error("Error initiating orchestration service at: {} for data fetched at: {}",
+                    LocalDateTime.now(), status.getTimestamp());
+            throw e;
+        }
     }
 }
