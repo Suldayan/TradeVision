@@ -5,15 +5,12 @@ import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -24,17 +21,20 @@ public class MarketController {
     private final RawMarketModelRepository marketModelRepository;
 
     @Nonnull
-    @GetMapping("/markets/{timestamp}")
-    public ResponseEntity<Set<RawMarketModel>> fetchMarkets(@Nonnull @RequestParam Long timestamp) {
+    @GetMapping(
+            value = "/markets/{timestamp}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Set<RawMarketModel>> fetchMarkets(@Nonnull @PathVariable Long timestamp) {
         log.info("Fetching data for batch time: {}, at {}", timestamp, LocalDateTime.now());
         Set<RawMarketModel> marketModels = marketModelRepository.findAllByTimestamp(timestamp);
         if (marketModels.isEmpty()) {
-            log.error("Market models are empty");
+            log.warn("No market models found for timestamp: {}", timestamp);
             return ResponseEntity.ok(Collections.emptySet());
         }
         if (marketModels.size() != 100) {
-            log.error("Market set should be 100");
+            log.warn("Market set size is {} (expected 100) for timestamp: {}", marketModels.size(), timestamp);
         }
-        return ResponseEntity.of(Optional.of(marketModels));
+        return ResponseEntity.ok(marketModels);
     }
 }
