@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.repository.exception;
+package com.example.data_ingestion_service.controller.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 

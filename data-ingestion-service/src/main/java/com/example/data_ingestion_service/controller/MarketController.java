@@ -26,12 +26,15 @@ public class MarketController {
     @Nonnull
     @GetMapping("/markets/{timestamp}")
     public ResponseEntity<Set<RawMarketModel>> fetchMarkets(@Nonnull @RequestParam Long timestamp) {
-        try {
-            return ResponseEntity.of(Optional.ofNullable(marketModelRepository.findAllByTimestamp(timestamp)));
-        } catch (Exception e) {
-            log.error("Failed to fetch market data at: {} with timestamp: {}. {}",
-                    LocalDateTime.now(), timestamp, e.getMessage());
+        log.info("Fetching data for batch time: {}, at {}", timestamp, LocalDateTime.now());
+        Set<RawMarketModel> marketModels = marketModelRepository.findAllByTimestamp(timestamp);
+        if (marketModels.isEmpty()) {
+            log.error("Market models are empty");
             return ResponseEntity.ok(Collections.emptySet());
         }
+        if (marketModels.size() != 100) {
+            log.error("Market set should be 100");
+        }
+        return ResponseEntity.of(Optional.of(marketModels));
     }
 }
