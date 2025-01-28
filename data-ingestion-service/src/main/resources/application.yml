@@ -18,10 +18,14 @@ spring:
 
 
 kafka:
+  topic:
+    status
   producer:
     bootstrap-servers: localhost:9092
     key-serializer: org.apache.kafka.common.serialization.StringDeserializer
-    value-serializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-serializer: org.apache.kafka.common.serialization.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: "*"
 
 resilience4j.circuitbreaker:
   instances:

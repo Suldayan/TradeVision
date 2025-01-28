@@ -1,23 +1,41 @@
 package com.example.data_ingestion_service.services.producer;
 
+import com.example.data_ingestion_service.services.dto.EventDTO;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.type.SerializationException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducer {
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, EventDTO> kafkaTemplate;
 
-    public void sendMessage(String msg) {
+    @Value("${kafka.topic}")
+    private String topic;
+
+    public void sendMessage(@Nonnull EventDTO event) {
         try {
-            log.info("Sending message to status topic: {}", msg);
-            kafkaTemplate.send("status" ,msg);
+            log.info("Sending message to topic {}: {}", topic, event);
+            CompletableFuture<SendResult<String, EventDTO>> future = kafkaTemplate.send(topic, event);
+            future.thenAccept(result -> log.info("Sent message: {} with offset: {}", event, result.getRecordMetadata())).exceptionallyAsync(ex -> {
+                log.error("Unable to send message at: {}, {}", LocalDateTime.now(), ex.getMessage());
+                return null;
+            });
         } catch (SerializationException ex) {
-            log.error("Serialization error occurred while sending message to kafka");
+            log.error("Serialization error for event: {}", event, ex);
+        } catch (KafkaException ex) {
+            log.error("Failed to send event: {}", event, ex);
         }
     }
 }

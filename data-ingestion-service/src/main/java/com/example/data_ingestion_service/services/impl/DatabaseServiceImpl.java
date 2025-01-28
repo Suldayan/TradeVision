@@ -3,6 +3,7 @@ package com.example.data_ingestion_service.services.impl;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.DatabaseService;
+import com.example.data_ingestion_service.services.exceptions.DatabaseException;
 import com.example.data_ingestion_service.services.producer.KafkaProducer;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +21,14 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Transactional
     @Override
-    public boolean saveToDatabase(@Nonnull Set<RawMarketModel> marketModels) {
+    public void saveToDatabase(@Nonnull Set<RawMarketModel> marketModels) throws DatabaseException {
         if (marketModels.isEmpty()) {
             log.warn("The list of entities for saving has been passed but is empty");
-            return false;
         }
-        marketModelRepository.saveAll(marketModels);
-        return true;
+        try {
+            marketModelRepository.saveAll(marketModels);
+        } catch (Exception e) {
+            throw new DatabaseException("", e);
+        }
     }
 }
