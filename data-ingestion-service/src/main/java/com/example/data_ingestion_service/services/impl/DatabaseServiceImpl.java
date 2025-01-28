@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 import java.util.Set;
 
 @Service
@@ -18,16 +17,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class DatabaseServiceImpl implements DatabaseService {
     private final RawMarketModelRepository marketModelRepository;
-    private final KafkaProducer kafkaProducer;
 
     @Transactional
     @Override
-    public void saveToDatabase(@Nonnull Set<RawMarketModel> marketModels) {
+    public boolean saveToDatabase(@Nonnull Set<RawMarketModel> marketModels) {
         if (marketModels.isEmpty()) {
             log.warn("The list of entities for saving has been passed but is empty");
+            return false;
         }
         marketModelRepository.saveAll(marketModels);
-        // Send completion status to data processing microservice to initialize the processing flow
-        kafkaProducer.sendMessage(String.format("Status: Completed at %s", LocalTime.now()));
+        return true;
     }
 }

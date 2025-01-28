@@ -6,5 +6,5 @@ import jakarta.annotation.Nonnull;
 import java.util.Set;
 
 public interface DatabaseService {
-    void saveToDatabase(@Nonnull Set<RawMarketModel> marketModels);
+    boolean saveToDatabase(@Nonnull Set<RawMarketModel> marketModels);
 }

@@ -9,10 +9,13 @@ import com.example.data_ingestion_service.services.OrchestratorService;
 import com.example.data_ingestion_service.services.exceptions.ApiException;
 import com.example.data_ingestion_service.services.exceptions.OrchestratorException;
 import com.example.data_ingestion_service.services.exceptions.ValidationException;
+import com.example.data_ingestion_service.services.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Set;
 
 @Service
@@ -21,6 +24,7 @@ import java.util.Set;
 public class OrchestratorServiceImpl implements OrchestratorService {
     private final MarketService marketService;
     private final DatabaseService databaseService;
+    private final KafkaProducer kafkaProducer;
 
     @Override
     public void executeDataPipeline() throws OrchestratorException {
@@ -29,7 +33,12 @@ public class OrchestratorServiceImpl implements OrchestratorService {
             MarketWrapper marketWrapper = marketService.getMarketsData();
             Set<Market> marketRecords = marketService.convertWrapperDataToRecord(marketWrapper);
             Set<RawMarketModel> marketModels = marketService.convertToModel(marketRecords);
-            databaseService.saveToDatabase(marketModels);
+            if (!databaseService.saveToDatabase(marketModels)) {
+                log.error("Unable to save data to the database at: {} during the pipeline execution", LocalDateTime.now());
+            }
+            // Send completion status to data processing microservice to initialize the processing flow
+            // TODO change the string to a event status dto
+            kafkaProducer.sendMessage(String.format("Status: Completed at %s", LocalTime.now()));
             log.info("Pipeline execution has completed successfully");
         } catch (ApiException ex) {
             log.error("API call failed: {}", ex.getMessage());

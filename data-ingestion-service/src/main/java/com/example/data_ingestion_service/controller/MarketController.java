@@ -1,13 +1,16 @@
 package com.example.data_ingestion_service.controller;
 
+import com.example.data_ingestion_service.controller.exception.DataNotFoundException;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -27,14 +30,19 @@ public class MarketController {
     )
     public ResponseEntity<Set<RawMarketModel>> fetchMarkets(@Nonnull @PathVariable Long timestamp) {
         log.info("Fetching data for batch time: {}, at {}", timestamp, LocalDateTime.now());
-        Set<RawMarketModel> marketModels = marketModelRepository.findAllByTimestamp(timestamp);
-        if (marketModels.isEmpty()) {
-            log.warn("No market models found for timestamp: {}", timestamp);
-            return ResponseEntity.ok(Collections.emptySet());
+        try {
+            Set<RawMarketModel> marketModels = marketModelRepository.findAllByTimestamp(timestamp);
+            if (marketModels.isEmpty()) {
+                log.warn("No market models found for timestamp: {}", timestamp);
+                return ResponseEntity.ok(Collections.emptySet());
+            }
+            if (marketModels.size() != 100) {
+                log.warn("Market set size is {} (expected 100) for timestamp: {}", marketModels.size(), timestamp);
+            }
+            return ResponseEntity.ok(marketModels);
+        } catch (DataNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Data was not found in the given timestamp", e);
         }
-        if (marketModels.size() != 100) {
-            log.warn("Market set size is {} (expected 100) for timestamp: {}", marketModels.size(), timestamp);
-        }
-        return ResponseEntity.ok(marketModels);
     }
 }
