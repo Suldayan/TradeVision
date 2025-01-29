@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,10 +29,7 @@ public class MarketServiceImpl implements MarketService {
     public MarketWrapper getMarketsData() {
         try {
             MarketWrapper marketHolder = marketClient.getMarkets();
-            if (marketHolder == null) {
-                log.error("Fetched data from market wrapper returned as null");
-                throw new ApiException("Markets data fetched but return as null");
-            }
+            validateMarketWrapper(marketHolder);
             return marketHolder;
         } catch (Exception e) {
             log.error("An error occurred while fetching markets data: {}", e.getMessage());
@@ -73,5 +71,14 @@ public class MarketServiceImpl implements MarketService {
     @Override
     public Set<RawMarketModel> convertToModel(@Nonnull Set<Market> marketRecords) {
         return marketMapper.marketRecordToEntity(marketRecords);
+    }
+
+    private void validateMarketWrapper(@Nonnull MarketWrapper marketHolder) {
+        if (marketHolder.markets().isEmpty()) {
+            throw new ApiException("Market set from wrapper returned empty");
+        }
+        if (marketHolder.markets().stream().anyMatch(Objects::isNull)) {
+            throw new ApiException("An object in the market set has returned as null");
+        }
     }
 }

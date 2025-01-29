@@ -93,7 +93,7 @@ public class MarketServiceTest {
 
         ApiException exception = assertThrows(ApiException.class, () -> marketService.getMarketsData());
 
-        assertTrue(exception.getMessage().contains("Market set fetched but is empty"));
+        assertTrue(exception.getMessage().contains("Market set from wrapper returned empty"));
     }
 
     @Test
@@ -141,7 +141,6 @@ public class MarketServiceTest {
                 .timestamp(1737247412551L)
                 .build();
 
-        when(marketClient.getMarkets()).thenReturn(mockMarketWrapper);
         when(marketMapper.marketRecordToEntity(Set.of(market1, market2))).thenReturn(Set.of(rawMarketModel1, rawMarketModel2));
 
         Set<RawMarketModel> result = marketService.convertToModel(mockMarketWrapper.markets());

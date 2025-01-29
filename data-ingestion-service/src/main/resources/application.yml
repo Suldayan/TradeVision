@@ -16,7 +16,6 @@ spring:
     baseline-on-migration: true
     locations: classpath:db/migration
 
-
 kafka:
   topic:
     status
