@@ -1,4 +1,4 @@
-package com.example.data_ingestion_service.services.integration;
+package com.example.data_ingestion_service.services.unit;
 
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.records.Market;
