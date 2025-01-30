@@ -24,15 +24,35 @@ kafka:
     key-serializer: org.apache.kafka.common.serialization.StringDeserializer
     value-serializer: org.apache.kafka.common.serialization.JsonDeserializer
     properties:
+      retries: 3
+      delivery.timeout.ms: 120000
+      request.timeout.ms: 60000
       spring.json.trusted.packages: "*"
+      enable.idempotence: true
 
 resilience4j.circuitbreaker:
   instances:
-    apiCircuitBreaker:
-      registerHealthIndicator: true
-      sliding-window-size: 10
-      failure-rate-threshold: 3
-      wait-duration-in-open-state: 10s
+    marketService:
+      register-health-indicator: true
+      sliding-window-type: TIME_BASED
+      sliding-window-size: 300
+      minimum-number-of-calls: 1
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 60s
+      permitted-number-of-calls-in-half-open-state: 1
+    kafkaProducer:
+      register-health-indicator: true
+      sliding-window-type: TIME_BASED
+      sliding-window-size: 300
+      minimum-number-of-calls: 1
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 30s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,circuitbreakers
 
 logging:
   level:

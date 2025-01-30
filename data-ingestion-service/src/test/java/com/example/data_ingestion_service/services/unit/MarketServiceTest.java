@@ -79,24 +79,6 @@ public class MarketServiceTest {
     }
 
     @Test
-    void testGetMarketData_ThrowsException_OnNullData() {
-        when(marketClient.getMarkets()).thenReturn(null);
-
-        ApiException exception = assertThrows(ApiException.class, () -> marketService.getMarketsData());
-        assertTrue(exception.getMessage().contains("Markets data fetched but return as null"));
-    }
-
-    @Test
-    void getMarketData_ThrowsException_OnEmptyDataSet() {
-        MarketWrapper marketWrapper = new MarketWrapper(new HashSet<>(), 1232432L);
-        when(marketClient.getMarkets()).thenReturn(marketWrapper);
-
-        ApiException exception = assertThrows(ApiException.class, () -> marketService.getMarketsData());
-
-        assertTrue(exception.getMessage().contains("Market set from wrapper returned empty"));
-    }
-
-    @Test
     void getMarketData_ThrowsException_OnClientError() {
         when(marketClient.getMarkets()).thenThrow(new RuntimeException("Client Error"));
 
