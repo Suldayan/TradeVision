@@ -58,25 +58,19 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     }
 
     @CircuitBreaker(name = RESILIENCE_MARKET_INSTANCE, fallbackMethod = MARKET_FALLBACK)
-    @Retryable(
-            value = {ApiException.class},
-            maxAttempts = 4,
-            backoff = @Backoff(delay = 1000, multiplier = 2)
-    )
+    @Retryable(value = {ApiException.class}, backoff = @Backoff(delay = 2000, multiplier = 2))
     @Nonnull
-    private Set<RawMarketModel> fetchAndConvertData() {
+    @Override
+    public Set<RawMarketModel> fetchAndConvertData() {
         MarketWrapper wrapper = marketService.getMarketsData();
         validateMarketWrapper(wrapper);
         Set<Market> records = marketService.convertWrapperDataToRecord(wrapper);
         return marketService.convertToModel(records);
     }
 
-    @Retryable(
-            value = {DatabaseException.class},
-            maxAttempts = 4,
-            backoff = @Backoff(delay = 1000, multiplier = 2)
-    )
-    private void saveData(@Nonnull Set<RawMarketModel> models) throws DatabaseException {
+    @Retryable(value = {DatabaseException.class}, backoff = @Backoff(delay = 1000, multiplier = 2))
+    @Override
+    public void saveData(@Nonnull Set<RawMarketModel> models) throws DatabaseException {
         try {
             databaseService.saveToDatabase(models);
         } catch (DataAccessException ex) {
@@ -94,14 +88,15 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     }
 
     @CircuitBreaker(name = RESILIENCE_PRODUCER_INSTANCE, fallbackMethod = PRODUCER_FALLBACK)
-    private void notifyPipelineCompletion(@Nonnull Long timestamp) {
+    @Override
+    public void notifyPipelineCompletion(@Nonnull Long timestamp) {
         EventDTO event = EventDTO.builder()
                 .status("Completed successfully")
                 .timestamp(timestamp)
                 .build();
         try {
             kafkaProducer.sendMessage(event);
-            log.info("Kafka message event has successfully been sent");
+            log.info("Kafka message has successfully been sent");
         } catch (KafkaException ex) {
             log.error("Failed to send pipeline completion event", ex);
             throw ex;
