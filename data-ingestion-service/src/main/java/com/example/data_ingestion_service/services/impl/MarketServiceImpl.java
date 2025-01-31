@@ -10,6 +10,8 @@ import com.example.data_ingestion_service.services.mapper.MarketMapper;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,10 @@ public class MarketServiceImpl implements MarketService {
     private final MarketClient marketClient;
     private final MarketMapper marketMapper;
 
+    @Retryable(
+            retryFor = {ApiException.class},
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     @Nonnull
     @Override
     public MarketWrapper getMarketsData() {

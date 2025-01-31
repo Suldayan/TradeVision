@@ -54,7 +54,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
             throw new OrchestratorException("Pipeline failed: " + ex.getMessage(), ex);
         }
     }
-    
+
     @Nonnull
     @Override
     public Set<RawMarketModel> fetchAndConvertData() {
