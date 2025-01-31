@@ -34,12 +34,10 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     private final DatabaseService databaseService;
     private final KafkaProducer kafkaProducer;
 
-    private static final String RESILIENCE_MARKET_INSTANCE = "marketService";
-    private static final String RESILIENCE_PRODUCER_INSTANCE = "kafkaProducer";
+    private static final String RESILIENCE_PIPELINE_INSTANCE = "pipeline";
+    private static final String PIPELINE_FALLBACK = "handlePipelineFailure";
 
-    private static final String MARKET_FALLBACK = "handleMarketFailure";
-    private static final String PRODUCER_FALLBACK = "handleProducerFailure";
-
+    @CircuitBreaker(name = RESILIENCE_PIPELINE_INSTANCE, fallbackMethod = PIPELINE_FALLBACK)
     @Override
     public void executeDataPipeline() throws OrchestratorException {
         try {
@@ -56,9 +54,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
             throw new OrchestratorException("Pipeline failed: " + ex.getMessage(), ex);
         }
     }
-
-    @CircuitBreaker(name = RESILIENCE_MARKET_INSTANCE, fallbackMethod = MARKET_FALLBACK)
-    @Retryable(retryFor = {ApiException.class}, backoff = @Backoff(delay = 2000, multiplier = 2))
+    
     @Nonnull
     @Override
     public Set<RawMarketModel> fetchAndConvertData() {
@@ -68,12 +64,18 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         return marketService.convertToModel(records);
     }
 
-    @Retryable(retryFor = {DatabaseException.class}, backoff = @Backoff(delay = 1000, multiplier = 2))
+    @Retryable(
+            retryFor = {
+            DatabaseException.class,
+            DataAccessException.class},
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     @Override
     public void saveData(@Nonnull Set<RawMarketModel> models) throws DatabaseException {
         try {
             databaseService.saveToDatabase(models);
         } catch (DataAccessException ex) {
+            log.error("DataAccessException occurred, retrying...", ex);
             throw new DatabaseException("Failed to save market data", ex);
         }
     }
@@ -87,7 +89,6 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         return timestamp;
     }
 
-    @CircuitBreaker(name = RESILIENCE_PRODUCER_INSTANCE, fallbackMethod = PRODUCER_FALLBACK)
     @Override
     public void notifyPipelineCompletion(@Nonnull Long timestamp) {
         EventDTO event = EventDTO.builder()
@@ -112,13 +113,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         }
     }
 
-    private Set<RawMarketModel> handleMarketFailure(Exception ex) {
-        log.error("Market Service has tripped into OPEN STATE: {}", ex.getMessage());
-        return Collections.emptySet();
-    }
-
-    private void handleProducerFailure(Long timestamp, Exception ex) {
-        log.error("Kafka Producer has tripped into OPEN STATE trying to send event with api timestamp: {}. ERROR: {}",
-                timestamp, ex.getMessage());
+    private void handlePipelineFailure(Exception ex) {
+        log.error("Data ingestion pipeline has tripped into OPEN STATE: {}", ex.getMessage());
     }
 }

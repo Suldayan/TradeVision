@@ -134,15 +134,35 @@ class OrchestratorServiceTest {
                 .timestamp(null)
                 .build();
 
+        RawMarketModel validRawMarketModel = RawMarketModel.builder()
+                .exchangeId("binance")
+                .rank(1)
+                .baseSymbol("BTC")
+                .baseId("bitcoin")
+                .quoteSymbol("USDT")
+                .quoteId("tether")
+                .priceQuote(BigDecimal.ONE)
+                .priceUsd(BigDecimal.TEN)
+                .volumeUsd24Hr(new BigDecimal("50000.00"))
+                .percentExchangeVolume(new BigDecimal("0.5"))
+                .tradesCount24Hr(1500)
+                .updated(123456789L)
+                .timestamp(null)
+                .build();
+        /*
         when(marketService.getMarketsData())
                 .thenThrow(new ApiException("Temporary error"))
-                .thenThrow(new ApiException("Temporary error"))
                 .thenReturn(new MarketWrapper(Set.of(validMarket), 123234L));
+        */
+        when(marketService.convertToModel(Set.of(validMarket)))
+                .thenThrow(new ApiException("Temporary error"))
+                .thenReturn(Set.of(validRawMarketModel));
 
         Set<RawMarketModel> result = assertDoesNotThrow(() ->
                 orchestratorService.fetchAndConvertData()
         );
 
+        System.out.println(result.size());
         assertFalse(result.isEmpty());
         verify(marketService, times(3)).getMarketsData();
     }
