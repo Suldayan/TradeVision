@@ -58,7 +58,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     }
 
     @CircuitBreaker(name = RESILIENCE_MARKET_INSTANCE, fallbackMethod = MARKET_FALLBACK)
-    @Retryable(value = {ApiException.class}, backoff = @Backoff(delay = 2000, multiplier = 2))
+    @Retryable(retryFor = {ApiException.class}, backoff = @Backoff(delay = 2000, multiplier = 2))
     @Nonnull
     @Override
     public Set<RawMarketModel> fetchAndConvertData() {
@@ -68,7 +68,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         return marketService.convertToModel(records);
     }
 
-    @Retryable(value = {DatabaseException.class}, backoff = @Backoff(delay = 1000, multiplier = 2))
+    @Retryable(retryFor = {DatabaseException.class}, backoff = @Backoff(delay = 1000, multiplier = 2))
     @Override
     public void saveData(@Nonnull Set<RawMarketModel> models) throws DatabaseException {
         try {
