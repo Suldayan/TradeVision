@@ -26,6 +26,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     @Override
     public Set<MarketModel> transformToMarketModel(@Nonnull Long timestamp) throws DataNotFoundException {
         // The timestamp will be served via data-ingestion-status topic
+        // TODO configure this to fetch from the data ingestion rest api rather than the repo
         Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp(timestamp);
         if (rawMarketModels.isEmpty()) {
             log.error("Market models fetched but is empty for timestamp: {}", timestamp);
