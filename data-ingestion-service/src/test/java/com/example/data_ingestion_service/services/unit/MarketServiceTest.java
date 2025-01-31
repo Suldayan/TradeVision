@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -19,10 +21,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ExtendWith({MockitoExtension.class, SpringExtension.class})
 public class MarketServiceTest {
 
     @Mock
@@ -130,5 +132,16 @@ public class MarketServiceTest {
         assertDoesNotThrow(() -> marketService.convertToModel(mockMarketWrapper.markets()));
         assertNotNull(result);
         assertEquals(2, result.size(), "Set size should be 2");
+    }
+
+    @Test
+    void getMarketsData_RetriesOnFailure_RetrievesMarketWrapper() {
+        when(marketClient.getMarkets())
+                .thenThrow(new ApiException("Temporary Error"))
+                .thenReturn(mockMarketWrapper);
+
+        MarketWrapper result = assertDoesNotThrow(() -> marketService.getMarketsData());
+        assertNotNull(result);
+        verify(marketClient, times(2)).getMarkets();
     }
 }
