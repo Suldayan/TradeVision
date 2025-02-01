@@ -11,6 +11,6 @@ import java.util.Set;
 
 public interface MarketService {
     MarketWrapper getMarketsData();
-    Set<Market> convertWrapperDataToRecord(@Nonnull MarketWrapper data);
-    Set<RawMarketModel> convertToModel(@Nonnull Set<Market> marketRecords);
+    Set<Market> convertWrapperDataToRecord();
+    Set<RawMarketModel> convertToModel();
 }

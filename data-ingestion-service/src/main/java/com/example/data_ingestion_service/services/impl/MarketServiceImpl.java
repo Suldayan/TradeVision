@@ -44,8 +44,9 @@ public class MarketServiceImpl implements MarketService {
 
     @Nonnull
     @Override
-    public Set<Market> convertWrapperDataToRecord(@Nonnull MarketWrapper data) throws ApiException {
-        Set<Market> marketSet = data.markets()
+    public Set<Market> convertWrapperDataToRecord() throws ApiException {
+        MarketWrapper marketWrapper = getMarketsData();
+        Set<Market> marketSet = marketWrapper.markets()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(field -> Market.builder()
@@ -61,7 +62,7 @@ public class MarketServiceImpl implements MarketService {
                         .percentExchangeVolume(field.percentExchangeVolume())
                         .tradesCount24Hr(field.tradesCount24Hr())
                         .updated(field.updated())
-                        .timestamp(data.timestamp())
+                        .timestamp(marketWrapper.timestamp())
                         .build())
                 .collect(Collectors.toSet());
         if (marketSet.isEmpty()) {
@@ -74,7 +75,8 @@ public class MarketServiceImpl implements MarketService {
 
     @Nonnull
     @Override
-    public Set<RawMarketModel> convertToModel(@Nonnull Set<Market> marketRecords) {
+    public Set<RawMarketModel> convertToModel() {
+        Set<Market> marketRecords = convertWrapperDataToRecord();
         return marketMapper.marketRecordToEntity(marketRecords);
     }
 

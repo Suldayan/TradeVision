@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.KafkaException;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
@@ -114,5 +115,10 @@ public class OrchestratorServiceImpl implements OrchestratorService {
 
     private void handlePipelineFailure(Exception ex) {
         log.error("Data ingestion pipeline has tripped into OPEN STATE: {}", ex.getMessage());
+    }
+
+    @Recover
+    public void recoverSaveData() {
+        
     }
 }
