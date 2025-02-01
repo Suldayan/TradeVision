@@ -21,13 +21,12 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaProducer {
     private final KafkaTemplate<String, EventDTO> kafkaTemplate;
 
-    @Value("${kafka.topic}")
-    private String topic;
+    private static final String TOPIC = "status";
 
     public void sendMessage(@Nonnull EventDTO event) {
         try {
-            log.info("Sending message to topic {}: {}", topic, event);
-            CompletableFuture<SendResult<String, EventDTO>> future = kafkaTemplate.send(topic, event);
+            log.info("Sending message to topic {}: {}", TOPIC, event);
+            CompletableFuture<SendResult<String, EventDTO>> future = kafkaTemplate.send(TOPIC, event);
             future.thenAccept(result -> log.info("Sent message: {} with offset: {}", event, result.getRecordMetadata())).exceptionallyAsync(ex -> {
                 log.error("Unable to send message at: {}, {}", LocalDateTime.now(), ex.getMessage());
                 return null;

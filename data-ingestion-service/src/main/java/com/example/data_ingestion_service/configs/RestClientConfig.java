@@ -1,7 +1,6 @@
 package com.example.data_ingestion_service.configs;
 
 import com.example.data_ingestion_service.configs.exception.RestClientException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,15 +10,14 @@ import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class RestClientConfig {
 
-    private final String baseUrl = "https://api.coincap.io/v2";
+    private static final String BASE_URL = "https://api.coincap.io/v2";
 
     @Bean
     public RestClient restClient() {
         return RestClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(BASE_URL)
                 .defaultHeaders(this::configureHeaders)
                 .defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
                     String errorMessage = String.format(

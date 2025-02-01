@@ -8,9 +8,11 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaTopicConfig {
 
+    private static final String TOPIC = "status";
+
     @Bean
     public NewTopic statusTopic() {
-        return TopicBuilder.name("status")
+        return TopicBuilder.name(TOPIC)
                 .build();
     }
 }
