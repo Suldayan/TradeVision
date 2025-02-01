@@ -67,8 +67,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Recover
-    public void recoverSaveToDatabase(DatabaseException ex, @Nonnull Set<RawMarketModel> marketModels) {
+    public void recoverSaveToDatabase(DatabaseException ex) {
         log.error("All retries have been exhausted. Error: {}", ex.getMessage());
-        // TODO: figure out if we want to do something with the market models
     }
 }

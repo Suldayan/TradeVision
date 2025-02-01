@@ -36,6 +36,8 @@ public class MarketServiceImpl implements MarketService {
             MarketWrapper marketHolder = marketClient.getMarkets();
             validateMarketWrapper(marketHolder);
             return marketHolder;
+        } catch (ApiException ex) {
+            throw ex;
         } catch (Exception ex) {
             log.error("An error occurred while fetching markets data: {}", ex.getMessage());
             throw new ApiException("Failed to fetch market wrapper data:", ex);
