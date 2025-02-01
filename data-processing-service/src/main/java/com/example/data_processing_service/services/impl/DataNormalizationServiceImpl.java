@@ -3,7 +3,6 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.client.IngestionClient;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
-import com.example.data_processing_service.repository.RawMarketModelRepository;
 import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.exception.DataNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
-    private final RawMarketModelRepository repository;
     private final IngestionClient ingestionClient;
 
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_INSTANT;
