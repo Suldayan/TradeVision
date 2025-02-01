@@ -7,5 +7,6 @@ import jakarta.annotation.Nonnull;
 import java.util.Set;
 
 public interface DatabaseService {
-    void saveToDatabase(@Nonnull Set<RawMarketModel> marketModels) throws DatabaseException;
+    void saveToDatabase(Set<RawMarketModel> marketModels) throws DatabaseException;
+    void persistWithRetry(Set<RawMarketModel> marketModels) throws DatabaseException;
 }
