@@ -9,7 +9,6 @@ import java.util.Set;
 
 public interface OrchestratorService {
     void executeDataPipeline() throws OrchestratorException;
-    Set<RawMarketModel> fetchAndConvertData();
     void notifyPipelineCompletion(Long timestamp);
     void saveData(@Nonnull Set<RawMarketModel> models) throws DatabaseException;
 }

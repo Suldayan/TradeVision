@@ -1,8 +1,6 @@
 package com.example.data_ingestion_service.services.impl;
 
 import com.example.data_ingestion_service.models.RawMarketModel;
-import com.example.data_ingestion_service.records.Market;
-import com.example.data_ingestion_service.records.wrapper.MarketWrapper;
 import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.MarketService;
 import com.example.data_ingestion_service.services.OrchestratorService;
@@ -23,7 +21,6 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -42,7 +39,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     public void executeDataPipeline() throws OrchestratorException {
         try {
             log.info("Pipeline execution started");
-            Set<RawMarketModel> models = fetchAndConvertData();
+            Set<RawMarketModel> models = marketService.convertToModel();
             saveData(models);
             Long timestamp = getTimeStamp(models.iterator().next());
             notifyPipelineCompletion(timestamp);
@@ -54,22 +51,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
             throw new OrchestratorException("Pipeline failed: " + ex.getMessage(), ex);
         }
     }
-
-    @Nonnull
-    @Override
-    public Set<RawMarketModel> fetchAndConvertData() {
-        MarketWrapper wrapper = marketService.getMarketsData();
-        validateMarketWrapper(wrapper);
-        Set<Market> records = marketService.convertWrapperDataToRecord(wrapper);
-        return marketService.convertToModel(records);
-    }
-
-    @Retryable(
-            retryFor = {
-            DatabaseException.class,
-            DataAccessException.class},
-            backoff = @Backoff(delay = 1000, multiplier = 2)
-    )
+    
     @Override
     public void saveData(@Nonnull Set<RawMarketModel> models) throws DatabaseException {
         try {
@@ -101,15 +83,6 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         } catch (KafkaException ex) {
             log.error("Failed to send pipeline completion event", ex);
             throw ex;
-        }
-    }
-
-    private void validateMarketWrapper(@Nonnull MarketWrapper wrapper) {
-        if (wrapper.markets().isEmpty()) {
-            throw new ValidationException("Empty market data received");
-        }
-        if (wrapper.markets().stream().anyMatch(Objects::isNull)) {
-            throw new ValidationException("Null object found within market set");
         }
     }
 
