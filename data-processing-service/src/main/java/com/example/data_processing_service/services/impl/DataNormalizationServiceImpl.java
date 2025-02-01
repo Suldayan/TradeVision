@@ -1,5 +1,6 @@
 package com.example.data_processing_service.services.impl;
 
+import com.example.data_processing_service.client.IngestionClient;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.repository.RawMarketModelRepository;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
     private final RawMarketModelRepository repository;
+    private final IngestionClient ingestionClient;
+
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     @Nonnull
@@ -27,7 +30,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     public Set<MarketModel> transformToMarketModel(@Nonnull Long timestamp) throws DataNotFoundException {
         // The timestamp will be served via data-ingestion-status topic
         // TODO configure this to fetch from the data ingestion rest api rather than the repo
-        Set<RawMarketModel> rawMarketModels = repository.findAllByTimestamp(timestamp);
+        Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
         if (rawMarketModels.isEmpty()) {
             log.error("Market models fetched but is empty for timestamp: {}", timestamp);
             // We throw an exception here because it's expected that there is data available at the given timestamp
