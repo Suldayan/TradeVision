@@ -19,15 +19,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
-    private final IngestionClient ingestionClient;
-
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     @Nonnull
     @Override
-    public Set<MarketModel> transformToMarketModel(@Nonnull Long timestamp) throws DataNotFoundException {
-        // The timestamp will be served via data-ingestion-status topic (Look at consumer service)
-        Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
+    public Set<MarketModel> transformToMarketModel(
+            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Long timestamp)
+            throws DataNotFoundException {
         validateRawMarketModels(rawMarketModels, timestamp);
         return rawMarketModels.stream()
                 .map(field -> MarketModel
