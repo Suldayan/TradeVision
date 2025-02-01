@@ -28,19 +28,9 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     @Nonnull
     @Override
     public Set<MarketModel> transformToMarketModel(@Nonnull Long timestamp) throws DataNotFoundException {
-        // The timestamp will be served via data-ingestion-status topic
-        // TODO configure this to fetch from the data ingestion rest api rather than the repo
+        // The timestamp will be served via data-ingestion-status topic (Look at consumer service)
         Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
-        if (rawMarketModels.isEmpty()) {
-            log.error("Market models fetched but is empty for timestamp: {}", timestamp);
-            // We throw an exception here because it's expected that there is data available at the given timestamp
-            throw new DataNotFoundException("Unable to push data forward due to empty market set");
-        }
-        if (rawMarketModels.size() != 100) {
-            log.error("Market models with timestamp: {} fetched but is missing data with size: {} of expected size: 100",
-                    timestamp, rawMarketModels.size());
-            throw new DataNotFoundException("Unable to push data forward due to missing data");
-        }
+        validateRawMarketModels(rawMarketModels, timestamp);
         return rawMarketModels.stream()
                 .map(field -> MarketModel
                         .builder()
@@ -52,9 +42,24 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     }
 
     @Nonnull
-    @Override
-    public String transformTimeStamp(@Nonnull Long timestamp) {
+    private String transformTimeStamp(@Nonnull Long timestamp) {
         Instant instant = Instant.ofEpochMilli(timestamp);
         return TIMESTAMP_FORMATTER.format(instant);
+    }
+
+    private void validateRawMarketModels(
+            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Long timestamp) throws DataNotFoundException
+    {
+        if (rawMarketModels.isEmpty()) {
+            log.error("Market models fetched but is empty for timestamp: {}", timestamp);
+            // We throw an exception here because it's expected that there is data available at the given timestamp
+            throw new DataNotFoundException("Unable to push data forward due to empty market set");
+        }
+        if (rawMarketModels.size() != 100) {
+            log.error("Market models with timestamp: {} fetched but is missing data with size: {} of expected size: 100",
+                    timestamp, rawMarketModels.size());
+            throw new DataNotFoundException("Unable to push data forward due to missing data");
+        }
     }
 }

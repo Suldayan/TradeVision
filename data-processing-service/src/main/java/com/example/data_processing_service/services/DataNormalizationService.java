@@ -7,5 +7,4 @@ import java.util.Set;
 
 public interface DataNormalizationService {
     Set<MarketModel> transformToMarketModel(Long timestamp) throws DataNotFoundException;
-    String transformTimeStamp(Long timestamp);
 }
