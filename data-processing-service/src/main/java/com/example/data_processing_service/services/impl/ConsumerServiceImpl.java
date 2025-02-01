@@ -25,8 +25,6 @@ public class ConsumerServiceImpl implements ConsumerService {
     @Override
     public void receiveStatus(@Nonnull EventDTO status) {
         try {
-            log.info("{} received at: {}. Starting processing",
-                    status.getStatus(), LocalDateTime.now());
             processingOrchestratorService.startProcessingFlow(status.getTimestamp());
         } catch (Exception e) {
             log.error("Error initiating orchestration service at: {} for data fetched at: {}, {}",

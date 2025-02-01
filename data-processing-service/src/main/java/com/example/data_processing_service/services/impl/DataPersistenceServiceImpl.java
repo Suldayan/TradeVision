@@ -43,7 +43,7 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
     }
 
     @Recover
-    private void recoverSaveToDatabase(DataAccessException e, @Nonnull Set<MarketModel> marketModels) {
+    public void recoverSaveToDatabase(DataAccessException e, @Nonnull Set<MarketModel> marketModels) {
         log.error("Max number of retries reached! (5/5). Unable to save set size of: {}: {}",
                 marketModels.size(), e.getMostSpecificCause().getMessage());
     }

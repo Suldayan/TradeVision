@@ -31,11 +31,11 @@ public class ProcessingOrchestrationServiceImpl implements ProcessingOrchestrato
         log.info("Processing has started at: {}", LocalDateTime.now());
         try {
             Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
-            Set<MarketModel> marketModels = dataNormalizationService.transformToMarketModel(rawMarketModels ,timestamp);
+            Set<MarketModel> marketModels = dataNormalizationService.transformToMarketModel(rawMarketModels, timestamp);
             dataPersistenceService.saveToDatabase(marketModels);
             log.info("Processing completed successfully at: {}", LocalDateTime.now());
         } catch (DataNotFoundException e) {
-            log.error("Error fetching markets during the processing flow. Market data assumed to be empty: {}, {}", e.getMessage(), e.getStackTrace());
+            log.error("Error fetching markets during the processing flow. Market data assumed to be empty: {}", e.getMessage(), e);
             throw new DataNotFoundException("Failed to fetch market data during orchestration", e);
         } catch (Exception e) {
             log.error("Error processing overall service flow with data timestamp={}. Error Message={}",
