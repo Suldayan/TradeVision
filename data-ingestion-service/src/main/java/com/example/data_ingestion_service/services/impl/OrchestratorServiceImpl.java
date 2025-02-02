@@ -44,8 +44,15 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         } catch (ApiException ex) {
             log.error("API failure during pipeline execution", ex);
             throw new OrchestratorException("Pipeline failed: API error", ex);
-        } catch (ValidationException | DatabaseException | KafkaException ex) {
-            throw new OrchestratorException("Pipeline failed: " + ex.getMessage(), ex);
+        } catch (ValidationException ex) {
+            log.error("Validation failed: {}", ex.getMessage());
+            throw new OrchestratorException("Validation error in pipeline: " + ex.getMessage(), ex);
+        } catch (DatabaseException ex) {
+            log.error("Database operation failed: {}", ex.getMessage());
+            throw new OrchestratorException("Database error in pipeline: " + ex.getMessage(), ex);
+        } catch (KafkaException ex) {
+            log.error("Kafka operation failed: {}", ex.getMessage());
+            throw new OrchestratorException("Kafka error in pipeline: " + ex.getMessage(), ex);
         }
     }
 
