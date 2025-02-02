@@ -67,7 +67,10 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Recover
-    public void recoverSaveToDatabase(DatabaseException ex) {
+    public void recoverSaveToDatabase(DatabaseException ex) throws DatabaseException {
         log.error("All retries have been exhausted. Error: {}", ex.getMessage());
+
+        // For now, we throw an exception but there's definitely a better way to handle the data. Perhaps DLQ or something??
+        throw new DatabaseException("Failed to save market models through all retires", ex);
     }
 }
