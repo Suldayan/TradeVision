@@ -19,14 +19,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @EmbeddedKafka(partitions = 1,
-        topics = {"status"})
+        topics = {"status"}
+)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @ActiveProfiles("test")
@@ -44,13 +46,11 @@ public class OrchestratorServiceTest {
     private ConcurrentMessageListenerContainer<String, EventDTO> container;
 
     private static final String KAFKA_TOPIC = "status";
-    private List<EventDTO> receivedEvents;
-    private CountDownLatch latch;
+    private BlockingQueue<EventDTO> receivedEvents;
 
     @BeforeEach
     void setUp() {
-        receivedEvents = new ArrayList<>();
-        latch = new CountDownLatch(1);
+        receivedEvents = new LinkedBlockingQueue<>();
         repository.deleteAll();
         setupKafkaConsumer();
     }
@@ -66,7 +66,6 @@ public class OrchestratorServiceTest {
         ContainerProperties containerProps = new ContainerProperties(KAFKA_TOPIC);
         containerProps.setMessageListener((MessageListener<String, EventDTO>) record -> {
             receivedEvents.add(record.value());
-            latch.countDown();
         });
 
         container = new ConcurrentMessageListenerContainer<>(
@@ -80,15 +79,16 @@ public class OrchestratorServiceTest {
     void fullPipelineIntegrationTest() throws Exception {
         orchestratorService.executeDataPipeline();
 
-        boolean messageReceived = latch.await(10, TimeUnit.SECONDS);
+        EventDTO receivedEvent = receivedEvents.poll(10, TimeUnit.SECONDS);
 
-        assertTrue(messageReceived, "Kafka message should have been received");
+        assertNotNull(receivedEvent, "Should have received a message");
+        System.out.printf("Received event status from producer: %s%n", receivedEvent.getStatus());
+        System.out.println(receivedEvent.getTimestamp());
 
         List<RawMarketModel> savedModels = repository.findAll();
         assertFalse(savedModels.isEmpty(), "Database should contain saved models");
+        assertEquals(savedModels.size(), 100, "Model list size should be 100");
 
-        assertFalse(receivedEvents.isEmpty(), "Should have received pipeline completion event");
-        EventDTO receivedEvent = receivedEvents.getFirst();
         assertEquals("Completed successfully", receivedEvent.getStatus());
         assertNotNull(receivedEvent.getTimestamp());
     }
