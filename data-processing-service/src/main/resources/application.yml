@@ -14,6 +14,7 @@ spring:
       jdbc:
 
   kafka:
+    topic: status
     consumer:
       bootstrap-servers: localhost:9092
       group-id: statusGroup
@@ -21,7 +22,4 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "*"
-
-  retry:
-    enabled: true
+        spring.json.trusted.packages: com.example.data_processing_service.dto
