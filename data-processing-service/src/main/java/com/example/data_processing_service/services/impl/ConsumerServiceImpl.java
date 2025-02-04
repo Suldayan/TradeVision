@@ -18,9 +18,12 @@ import java.time.LocalDateTime;
 public class ConsumerServiceImpl implements ConsumerService {
     private final ProcessingOrchestratorService processingOrchestratorService;
 
+    private static final String TOPIC = "status";
+    private static final String GROUP = "processing";
+
     @KafkaListener(
-            topics = "${kafka.topics.data-ingestion-status:data-ingestion-status}",
-            groupId = "${kafka.consumer-group:myGroup}"
+            topics = TOPIC,
+            groupId = GROUP
     )
     @Override
     public void receiveStatus(@Nonnull EventDTO status) {

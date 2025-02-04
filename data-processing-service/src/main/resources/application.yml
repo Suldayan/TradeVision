@@ -17,7 +17,7 @@ spring:
     topic: status
     consumer:
       bootstrap-servers: localhost:9092
-      group-id: statusGroup
+      group-id: processing
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
