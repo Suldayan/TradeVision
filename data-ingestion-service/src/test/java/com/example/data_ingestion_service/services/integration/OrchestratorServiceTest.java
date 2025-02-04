@@ -2,10 +2,8 @@ package com.example.data_ingestion_service.services.integration;
 
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
-import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.OrchestratorService;
 import com.example.data_ingestion_service.services.dto.EventDTO;
-import com.example.data_ingestion_service.services.producer.KafkaProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
@@ -82,20 +78,15 @@ public class OrchestratorServiceTest {
 
     @Test
     void fullPipelineIntegrationTest() throws Exception {
-        // Act
         orchestratorService.executeDataPipeline();
 
-        // Wait for Kafka message
         boolean messageReceived = latch.await(10, TimeUnit.SECONDS);
 
-        // Assert
         assertTrue(messageReceived, "Kafka message should have been received");
 
-        // Verify database state
         List<RawMarketModel> savedModels = repository.findAll();
         assertFalse(savedModels.isEmpty(), "Database should contain saved models");
 
-        // Verify Kafka message
         assertFalse(receivedEvents.isEmpty(), "Should have received pipeline completion event");
         EventDTO receivedEvent = receivedEvents.getFirst();
         assertEquals("Completed successfully", receivedEvent.getStatus());
