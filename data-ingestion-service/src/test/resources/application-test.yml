@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  kafka:
+    topic: status
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        retries: 3
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 60000
+        enable.idempotence: true
+        spring.json.trusted.packages: com.example.data_ingestion_service.services.dto
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: com.example.data_ingestion_service.services.dto
+
+  resilience4j.circuitbreaker:
+    instances:
+      pipeline:
+        register-health-indicator: true
+        sliding-window-type: TIME_BASED
+        sliding-window-size: 300
+        minimum-number-of-calls: 1
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 300s # 5 minutes
+        permitted-number-of-calls-in-half-open-state: 1
+
+  flyway:
+    enabled: false

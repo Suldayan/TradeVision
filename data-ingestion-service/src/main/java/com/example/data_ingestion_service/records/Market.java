@@ -17,7 +17,7 @@ public record Market(@Nonnull String exchangeId,
                      @Nonnull BigDecimal priceUsd,
                      @Nonnull BigDecimal volumeUsd24Hr,
                      @Nonnull BigDecimal percentExchangeVolume,
-                     @Nonnull Integer tradesCount24Hr,
+                     @Nullable Integer tradesCount24Hr,
                      @Nonnull Long updated,
                      @Nullable Long timestamp) {
 }

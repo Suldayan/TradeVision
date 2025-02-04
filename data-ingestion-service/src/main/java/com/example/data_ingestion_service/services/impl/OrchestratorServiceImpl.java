@@ -34,13 +34,16 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     @CircuitBreaker(name = RESILIENCE_PIPELINE_INSTANCE, fallbackMethod = PIPELINE_FALLBACK)
     @Override
     public void executeDataPipeline() throws OrchestratorException {
+        log.info("Pipeline execution started");
         try {
-            log.info("Pipeline execution started");
+            log.info("PIPELINE: Fetching markets...");
             Set<RawMarketModel> models = marketService.convertToModel();
+            log.info("PIPELINE: Saving markets...");
             saveData(models);
             Long timestamp = getTimeStamp(models.iterator().next());
+            log.info("PIPELINE: Notifying completion...");
             notifyPipelineCompletion(timestamp);
-            log.info("Pipeline execution completed successfully");
+            log.info("Pipeline execution completed successfully!");
         } catch (ApiException ex) {
             log.error("API failure during pipeline execution", ex);
             throw new OrchestratorException("Pipeline failed: API error", ex);

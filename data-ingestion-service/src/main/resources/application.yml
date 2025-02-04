@@ -17,18 +17,17 @@ spring:
     locations: classpath:db/migration
 
 kafka:
-  topic:
-    status
+  topic: status
   producer:
     bootstrap-servers: localhost:9092
-    key-serializer: org.apache.kafka.common.serialization.StringDeserializer
-    value-serializer: org.apache.kafka.common.serialization.JsonDeserializer
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     properties:
       retries: 3
       delivery.timeout.ms: 120000
       request.timeout.ms: 60000
-      spring.json.trusted.packages: "*"
       enable.idempotence: true
+      spring.json.trusted.packages: com.example.data_ingestion_service.services.dto
 
 resilience4j.circuitbreaker:
   instances:

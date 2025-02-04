@@ -46,7 +46,7 @@ public class RawMarketModel {
 
     @Column(name = "base_id", nullable = false)
     @Nonnull
-    @Size(min = 1, max = 20, message = "Base ID must be between 1 and 20 characters")
+    @Size(min = 1, max = 30, message = "Base ID must be between 1 and 30 characters")
     private String baseId;
 
     @Column(name = "quote_symbol", nullable = false)
