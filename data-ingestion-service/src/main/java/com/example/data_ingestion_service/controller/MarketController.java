@@ -38,6 +38,7 @@ public class MarketController {
             }
             if (marketModels.size() != 100) {
                 log.warn("Market set size is {} (expected 100) for timestamp: {}", marketModels.size(), timestamp);
+                return ResponseEntity.ok(marketModels);
             }
             return ResponseEntity.ok(marketModels);
         } catch (DataNotFoundException e) {
