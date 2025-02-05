@@ -3,18 +3,21 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.repository.MarketModelRepository;
 import com.example.data_processing_service.services.DataPersistenceService;
-import com.example.data_processing_service.services.exception.DataNotFoundException;
+import com.example.data_processing_service.services.exception.DataValidationException;
+import com.example.data_processing_service.services.exception.DatabaseException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -23,23 +26,49 @@ import java.util.Set;
 public class DataPersistenceServiceImpl implements DataPersistenceService {
     private final MarketModelRepository marketModelRepository;
 
-    @Retryable(
-            retryFor = {DataAccessException.class, RuntimeException.class},
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 1000)
-    )
-    @Transactional
     @Override
-    public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) throws DataNotFoundException {
+    public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) throws DatabaseException, DataValidationException {
+        validateMarkets(marketModels);
+        persistWithRetry(marketModels);
+    }
+
+    private void validateMarkets(@Nonnull Set<MarketModel> marketModels) throws DataValidationException {
         if (marketModels.isEmpty()) {
-            throw new DataNotFoundException("Market model set passed but is empty");
+            log.warn("The list of entities for saving has been passed but is empty");
+            throw new DataValidationException("Market model set passed but is empty");
+        }
+        if (marketModels.stream().anyMatch(Objects::isNull)) {
+            throw new DataValidationException("Market models set contains null entries");
         }
         if (marketModels.size() != 100) {
             log.error("Market model set passed but is missing data: {}/100 elements", marketModels.size());
-            throw new DataNotFoundException("Market model set passed but does not contain 100 elements");
+            throw new DataValidationException("Market model set passed but does not contain 100 elements");
         }
-        marketModelRepository.saveAll(marketModels);
-        log.info("Successfully saved all models to database at: {}", LocalDateTime.now());
+    }
+
+    @Retryable(
+            retryFor = {
+                    DataAccessException.class,
+                    SQLException.class,
+                    TransientDataAccessException.class
+            },
+            noRetryFor = {
+                    IllegalArgumentException.class
+            },
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    @Transactional
+    @Override
+    public void persistWithRetry(Set<MarketModel> marketModels) throws DatabaseException {
+        try {
+            marketModelRepository.saveAll(marketModels);
+        } catch (DataAccessException ex) {
+            log.error("DataAccessException occurred while saving models. Attempting a retry", ex);
+            throw new DatabaseException("Failed to save market data due to database error", ex);
+        } catch (RuntimeException ex) {
+            log.error("Unexpected runtime error occurred while saving models", ex);
+            throw new DatabaseException("Unexpected runtime error while saving market data", ex);
+        }
     }
 
     @Recover
