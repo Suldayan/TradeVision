@@ -89,7 +89,7 @@ public class RawMarketModel {
     @Min(value = 0, message = "Updated must be non-negative")
     private Long updated;
 
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "timestamp")
     @Nullable
     @Min(value = 0, message = "Timestamp must be non-negative")
     private Long timestamp;
