@@ -1,10 +1,10 @@
 package com.example.data_processing_service.services.impl;
 
-import com.example.data_processing_service.client.IngestionClient;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.exception.DataNotFoundException;
+import com.example.data_processing_service.services.exception.DataValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     public Set<MarketModel> transformToMarketModel(
             @Nonnull Set<RawMarketModel> rawMarketModels,
             @Nonnull Long timestamp)
-            throws DataNotFoundException {
+            throws DataValidationException {
         validateRawMarketModels(rawMarketModels, timestamp);
         return rawMarketModels.stream()
                 .map(field -> MarketModel
@@ -46,17 +46,16 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
 
     private void validateRawMarketModels(
             @Nonnull Set<RawMarketModel> rawMarketModels,
-            @Nonnull Long timestamp) throws DataNotFoundException
-    {
+            @Nonnull Long timestamp) throws DataValidationException {
         if (rawMarketModels.isEmpty()) {
             log.error("Market models fetched but is empty for timestamp: {}", timestamp);
             // We throw an exception here because it's expected that there is data available at the given timestamp
-            throw new DataNotFoundException("Unable to push data forward due to empty market set");
+            throw new DataValidationException("Unable to push data forward due to empty market set");
         }
         if (rawMarketModels.size() != 100) {
             log.error("Market models with timestamp: {} fetched but is missing data with size: {} of expected size: 100",
                     timestamp, rawMarketModels.size());
-            throw new DataNotFoundException("Unable to push data forward due to missing data");
+            throw new DataValidationException("Unable to push data forward due to missing data");
         }
     }
 }
