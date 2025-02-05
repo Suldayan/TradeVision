@@ -4,10 +4,12 @@ import com.example.data_processing_service.client.IngestionClient;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.IngestionService;
 import com.example.data_processing_service.services.exception.DataValidationException;
+import com.example.data_processing_service.services.exception.IngestionException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Set;
 
@@ -17,24 +19,43 @@ import java.util.Set;
 public class IngestionServiceImpl implements IngestionService {
     private final IngestionClient ingestionClient;
 
+    private static final int EXPECTED_MARKET_COUNT = 100;
+
     @Nonnull
     @Override
     public Set<RawMarketModel> fetchRawMarkets(@Nonnull Long timestamp) throws DataValidationException {
+        log.info("Fetching raw markets for timestamp: {}", timestamp);
         try {
             Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
             validateMarkets(rawMarketModels);
+            log.info("Successfully fetched {} markets for timestamp: {}", rawMarketModels.size(), timestamp);
             return rawMarketModels;
-        } catch (DataValidationException ex) {
-            throw new DataValidationException("");
+        } catch (RestClientResponseException e) {
+            log.error("HTTP error while fetching markets. Status: {}, Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString(), e);
+            throw new IngestionException("Failed to fetch markets from external API", e);
+        } catch (DataValidationException e) {
+            log.error("Market data validation failed for timestamp: {}", timestamp, e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error while fetching markets for timestamp: {}", timestamp, e);
+            throw new IngestionException("Unexpected error during market ingestion", e);
         }
     }
 
     private void validateMarkets(@Nonnull Set<RawMarketModel> rawMarketModels) throws DataValidationException {
         if (rawMarketModels.isEmpty()) {
-            throw new DataValidationException("Market set is empty. Ingestion must have had an API issue");
+            throw new DataValidationException(
+                    "Received empty market set from ingestion service. This might indicate an API issue"
+            );
         }
-        if (rawMarketModels.size() != 100) {
-            throw new DataValidationException("Market set is not 100. Ingestion microservice may have returned incomplete API data");
+
+        if (rawMarketModels.size() != EXPECTED_MARKET_COUNT) {
+            throw new DataValidationException(String.format(
+                    "Expected %d markets but received %d. This indicates incomplete data from the data-ingestion microservice",
+                    EXPECTED_MARKET_COUNT,
+                    rawMarketModels.size()
+            ));
         }
     }
 }
