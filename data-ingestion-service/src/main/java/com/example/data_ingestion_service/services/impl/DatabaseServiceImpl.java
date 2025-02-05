@@ -4,6 +4,7 @@ import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.exceptions.DatabaseException;
+import com.example.data_ingestion_service.services.exceptions.ValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +35,14 @@ public class DatabaseServiceImpl implements DatabaseService {
     private void validateMarketModels(@Nonnull Set<RawMarketModel> marketModels) {
         if (marketModels.isEmpty()) {
             log.warn("The list of entities for saving has been passed but is empty");
-            throw new IllegalArgumentException("Market models passed null check but is empty");
+            throw new ValidationException("Market models passed null check but is empty");
         }
         if (marketModels.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("Market models set contains null entries");
+            throw new ValidationException("Market models set contains null entries");
+        }
+        if (marketModels.size() != 100) {
+            log.error("Market model set passed but is missing data: {}/100 elements", marketModels.size());
+            throw new ValidationException("Market model set passed but does not contain 100 elements");
         }
     }
 
