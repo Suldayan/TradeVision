@@ -1,6 +1,5 @@
 package com.example.data_processing_service.services.impl;
 
-import com.example.data_processing_service.client.IngestionClient;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
@@ -14,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Set;
 
 @Service
