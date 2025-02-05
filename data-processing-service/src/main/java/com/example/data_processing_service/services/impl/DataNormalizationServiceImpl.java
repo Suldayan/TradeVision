@@ -3,7 +3,6 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
-import com.example.data_processing_service.services.exception.DataNotFoundException;
 import com.example.data_processing_service.services.exception.DataValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.DataPersistenceService;
 import com.example.data_processing_service.services.IngestionService;
 import com.example.data_processing_service.services.ProcessingOrchestratorService;
-import com.example.data_processing_service.services.exception.DataNotFoundException;
+import com.example.data_processing_service.services.exception.DataValidationException;
 import com.example.data_processing_service.services.exception.ProcessingException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +25,16 @@ public class ProcessingOrchestrationServiceImpl implements ProcessingOrchestrato
     private final IngestionService ingestionService;
 
     @Override
-    public void startProcessingFlow(@Nonnull Long timestamp) throws DataNotFoundException, ProcessingException {
+    public void startProcessingFlow(@Nonnull Long timestamp) throws ProcessingException, DataValidationException {
         log.info("Processing has started at: {}", LocalDateTime.now());
         try {
             Set<RawMarketModel> rawMarketModels = ingestionService.fetchRawMarkets(timestamp);
             Set<MarketModel> marketModels = dataNormalizationService.transformToMarketModel(rawMarketModels, timestamp);
             dataPersistenceService.saveToDatabase(marketModels);
             log.info("Processing completed successfully at: {}", LocalDateTime.now());
-        } catch (DataNotFoundException e) {
+        } catch (DataValidationException e) {
             log.error("Error fetching markets during the processing flow. Market data assumed to be empty: {}", e.getMessage(), e);
-            throw new DataNotFoundException("Failed to fetch market data during orchestration", e);
+            throw new DataValidationException("Failed to fetch market data during orchestration", e);
         } catch (Exception e) {
             log.error("Error processing overall service flow with data timestamp={}. Error Message={}",
                     timestamp, e.getMessage(), e);
