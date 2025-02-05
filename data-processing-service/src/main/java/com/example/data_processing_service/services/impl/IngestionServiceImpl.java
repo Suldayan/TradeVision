@@ -3,6 +3,7 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.client.IngestionClient;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.IngestionService;
+import com.example.data_processing_service.services.exception.DataValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,21 +19,22 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Nonnull
     @Override
-    public Set<RawMarketModel> fetchRawMarkets(@Nonnull Long timestamp) {
+    public Set<RawMarketModel> fetchRawMarkets(@Nonnull Long timestamp) throws DataValidationException {
         try {
             Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
             validateMarkets(rawMarketModels);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+            return rawMarketModels;
+        } catch (DataValidationException ex) {
+            throw new DataValidationException("");
         }
     }
 
-    private void validateMarkets(@Nonnull Set<RawMarketModel> rawMarketModels) {
+    private void validateMarkets(@Nonnull Set<RawMarketModel> rawMarketModels) throws DataValidationException {
         if (rawMarketModels.isEmpty()) {
-            
+            throw new DataValidationException("Market set is empty. Ingestion must have had an API issue");
         }
         if (rawMarketModels.size() != 100) {
-            log.error("");
+            throw new DataValidationException("Market set is not 100. Ingestion microservice may have returned incomplete API data");
         }
     }
 }
