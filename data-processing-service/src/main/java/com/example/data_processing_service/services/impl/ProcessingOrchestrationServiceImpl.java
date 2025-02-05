@@ -5,6 +5,7 @@ import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.DataPersistenceService;
+import com.example.data_processing_service.services.IngestionService;
 import com.example.data_processing_service.services.ProcessingOrchestratorService;
 import com.example.data_processing_service.services.exception.DataNotFoundException;
 import com.example.data_processing_service.services.exception.ProcessingException;
@@ -24,13 +25,13 @@ import java.util.Set;
 public class ProcessingOrchestrationServiceImpl implements ProcessingOrchestratorService {
     private final DataNormalizationService dataNormalizationService;
     private final DataPersistenceService dataPersistenceService;
-    private final IngestionClient ingestionClient;
+    private final IngestionService ingestionService;
 
     @Override
     public void startProcessingFlow(@Nonnull Long timestamp) throws DataNotFoundException, ProcessingException {
         log.info("Processing has started at: {}", LocalDateTime.now());
         try {
-            Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
+            Set<RawMarketModel> rawMarketModels = ingestionService.fetchRawMarkets(timestamp);
             Set<MarketModel> marketModels = dataNormalizationService.transformToMarketModel(rawMarketModels, timestamp);
             dataPersistenceService.saveToDatabase(marketModels);
             log.info("Processing completed successfully at: {}", LocalDateTime.now());
