@@ -29,7 +29,7 @@ public class IngestionServiceImpl implements IngestionService {
 
     private void validateMarkets(@Nonnull Set<RawMarketModel> rawMarketModels) {
         if (rawMarketModels.isEmpty()) {
-            log.error("");
+            
         }
         if (rawMarketModels.size() != 100) {
             log.error("");
