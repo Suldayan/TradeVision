@@ -4,12 +4,16 @@ import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.exception.DataValidationException;
+import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_INSTANT;
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
 
     @Nonnull
     @Override
@@ -32,15 +36,17 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
                         .builder()
                         .priceUsd(field.getPriceUsd())
                         .updated(field.getUpdated())
-                        .timestamp(transformTimeStamp(field.getTimestamp()))
+                        .timestamp(transformTimestamp(field.getTimestamp()))
                         .build())
                 .collect(Collectors.toSet());
     }
 
     @Nonnull
-    private String transformTimeStamp(@Nonnull Long timestamp) {
-        Instant instant = Instant.ofEpochMilli(timestamp);
-        return TIMESTAMP_FORMATTER.format(instant);
+    private ZonedDateTime transformTimestamp(@Nonnull Long timestamp) {
+        return ZonedDateTime.ofInstant(
+                Instant.ofEpochMilli(timestamp),
+                ZoneOffset.UTC
+        );
     }
 
     private void validateRawMarketModels(
