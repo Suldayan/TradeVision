@@ -31,7 +31,7 @@ public class MarketController {
         ZonedDateTime start = convertLongToZonedDateTime(dateOne);
         ZonedDateTime end = convertLongToZonedDateTime(dateTwo);
 
-        
+
 
     }
 
