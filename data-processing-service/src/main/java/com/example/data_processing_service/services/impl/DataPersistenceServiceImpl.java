@@ -34,15 +34,14 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
 
     private void validateMarkets(@Nonnull Set<MarketModel> marketModels) throws DataValidationException {
         if (marketModels.isEmpty()) {
-            log.warn("The list of entities for saving has been passed but is empty");
             throw new DataValidationException("Market model set passed but is empty");
         }
         if (marketModels.stream().anyMatch(Objects::isNull)) {
             throw new DataValidationException("Market models set contains null entries");
         }
         if (marketModels.size() != 100) {
-            log.error("Market model set passed but is missing data: {}/100 elements", marketModels.size());
-            throw new DataValidationException("Market model set passed but does not contain 100 elements");
+            throw new DataValidationException(String.format("Market model set passed but is missing data: %s/100 elements",
+                    marketModels.size()));
         }
     }
 
@@ -62,11 +61,12 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
     public void persistWithRetry(Set<MarketModel> marketModels) throws DatabaseException {
         try {
             marketModelRepository.saveAll(marketModels);
+
+            log.info("Successfully saved all market models");
         } catch (DataAccessException ex) {
             log.error("DataAccessException occurred while saving models. Attempting a retry", ex);
             throw new DatabaseException("Failed to save market data due to database error", ex);
         } catch (RuntimeException ex) {
-            log.error("Unexpected runtime error occurred while saving models", ex);
             throw new DatabaseException("Unexpected runtime error while saving market data", ex);
         }
     }

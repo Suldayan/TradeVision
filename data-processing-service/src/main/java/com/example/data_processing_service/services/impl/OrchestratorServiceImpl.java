@@ -40,7 +40,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
             dataPersistenceService.saveToDatabase(marketModels);
             log.info("Successfully completed processing flow for {} at {}. Persisted {} records.",
                     context, LocalDateTime.now(), marketModels.size());
-            
+
         } catch (IngestionException ex) {
             throw new OrchestratorException(String.format("Data ingestion failed for %s", context), ex);
         } catch (DataValidationException ex) {

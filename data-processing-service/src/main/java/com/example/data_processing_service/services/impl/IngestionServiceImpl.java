@@ -28,18 +28,17 @@ public class IngestionServiceImpl implements IngestionService {
         try {
             Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
             validateMarkets(rawMarketModels);
+
             log.info("Successfully fetched {} markets for timestamp: {}", rawMarketModels.size(), timestamp);
             return rawMarketModels;
         } catch (RestClientResponseException e) {
-            log.error("HTTP error while fetching markets. Status: {}, Body: {}",
-                    e.getStatusCode(), e.getResponseBodyAsString(), e);
-            throw new IngestionException("Failed to fetch markets from external API", e);
+            throw new IngestionException(String.format("HTTP error while fetching markets. Status: %s, Body: %s",
+                    e.getStatusCode(), e.getResponseBodyAsString()), e);
         } catch (DataValidationException e) {
             log.error("Market data validation failed for timestamp: {}", timestamp, e);
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error while fetching markets for timestamp: {}", timestamp, e);
-            throw new IngestionException("Unexpected error during market ingestion", e);
+            throw new IngestionException(String.format("Unexpected error while fetching markets for timestamp: %s", timestamp), e);
         }
     }
 
