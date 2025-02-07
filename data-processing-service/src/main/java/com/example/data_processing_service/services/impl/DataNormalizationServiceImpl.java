@@ -4,17 +4,14 @@ import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.exception.DataValidationException;
-import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,6 +49,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
             @Nonnull Set<RawMarketModel> rawMarketModels,
             @Nonnull Long timestamp) throws DataValidationException {
         if (rawMarketModels.isEmpty()) {
+            String
             log.error("Market models fetched but is empty for timestamp: {}", timestamp);
             // We throw an exception here because it's expected that there is data available at the given timestamp
             throw new DataValidationException("Unable to push data forward due to empty market set");

@@ -40,22 +40,15 @@ public class OrchestratorServiceImpl implements OrchestratorService {
             dataPersistenceService.saveToDatabase(marketModels);
             log.info("Successfully completed processing flow for {} at {}. Persisted {} records.",
                     context, LocalDateTime.now(), marketModels.size());
+            
         } catch (IngestionException ex) {
-            String errorMsg = String.format("Data ingestion failed for %s", context);
-            log.error("{} - Reason: {}", errorMsg, ex.getMessage(), ex);
-            throw new OrchestratorException(errorMsg, ex);
+            throw new OrchestratorException(String.format("Data ingestion failed for %s", context), ex);
         } catch (DataValidationException ex) {
-            String errorMsg = String.format("Data validation failed for %s", context);
-            log.error("{} - Invalid records detected: {}", errorMsg, ex.getMessage(), ex);
-            throw new OrchestratorException(errorMsg, ex);
+            throw new OrchestratorException(String.format("Data validation failed for %s", context), ex);
         } catch (DatabaseException ex) {
-            String errorMsg = String.format("Database operation failed for %s", context);
-            log.error("{} - Persistence error: {}", errorMsg, ex.getMessage(), ex);
-            throw new OrchestratorException(errorMsg, ex);
+            throw new OrchestratorException(String.format("Database operation failed for %s", context), ex);
         } catch (Exception ex) {
-            String errorMsg = String.format("Unexpected error in processing flow for %s", context);
-            log.error("{} - Root cause: {}", errorMsg, ex.getMessage(), ex);
-            throw new OrchestratorException(errorMsg, ex);
+            throw new OrchestratorException(String.format("Unexpected error in processing flow for %s", context), ex);
         }
     }
 }
