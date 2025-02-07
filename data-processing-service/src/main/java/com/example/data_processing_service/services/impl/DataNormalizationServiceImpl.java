@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
 
     @Nonnull
     @Override
