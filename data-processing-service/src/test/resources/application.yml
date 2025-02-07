@@ -1,0 +1,22 @@
+spring:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  kafka:
+    topic: status
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    consumer:
+      group-id: processing
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.data_processing_service.dto
+
+  flyway:
+    enabled: false
