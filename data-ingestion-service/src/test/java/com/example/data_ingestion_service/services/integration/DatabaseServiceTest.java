@@ -4,6 +4,7 @@ import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.DatabaseService;
 import com.example.data_ingestion_service.services.exceptions.DatabaseException;
+import com.example.data_ingestion_service.services.exceptions.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,9 +73,9 @@ class DatabaseServiceTest {
     @Test
     @Transactional
     void shouldSaveMarketDataSuccessfully() throws DatabaseException {
-        databaseService.saveToDatabase(testMarketModels);
+        databaseService.saveToDatabase(createTestBatch());
 
-        assertEquals(5, marketModelRepository.count());
+        assertEquals(100, marketModelRepository.count());
 
         Set<String> savedExchangeIds = new HashSet<>();
         marketModelRepository.findAll().forEach(model -> savedExchangeIds.add(model.getExchangeId()));
@@ -118,9 +119,9 @@ class DatabaseServiceTest {
             } catch (Exception ignored) {}
         });
 
-        databaseService.saveToDatabase(testMarketModels);
+        databaseService.saveToDatabase(createTestBatch());
 
-        assertEquals(testMarketModels.size(), marketModelRepository.count());
+        assertEquals(100, marketModelRepository.count());
     }
 
     @Test
@@ -143,9 +144,17 @@ class DatabaseServiceTest {
                 "Should have attempted multiple times, got: " + attempts.get());
     }
 
+    @Test
+    void throwsValidationException_OnMissingData() {
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> databaseService.saveToDatabase(testMarketModels));
+
+        assertTrue(exception.getMessage().contains("Market model set passed but does not contain 100 elements"));
+    }
+
     private Set<RawMarketModel> createTestBatch() {
         Set<RawMarketModel> batch = new HashSet<>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 100; i++) {
             batch.add(RawMarketModel.builder()
                     .modelId(UUID.randomUUID())
                     .baseId("BTC")
