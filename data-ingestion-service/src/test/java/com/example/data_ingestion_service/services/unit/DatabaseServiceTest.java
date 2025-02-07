@@ -3,6 +3,7 @@ package com.example.data_ingestion_service.services.unit;
 import com.example.data_ingestion_service.models.RawMarketModel;
 import com.example.data_ingestion_service.repository.RawMarketModelRepository;
 import com.example.data_ingestion_service.services.exceptions.DatabaseException;
+import com.example.data_ingestion_service.services.exceptions.ValidationException;
 import com.example.data_ingestion_service.services.impl.DatabaseServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -39,48 +39,50 @@ class DatabaseServiceTest {
         marketModelRepository.deleteAll();
 
         validMarketModels = new HashSet<>();
-        RawMarketModel model = RawMarketModel.builder()
-                .modelId(UUID.randomUUID())
-                .baseId("BTC")
-                .rank(1)
-                .priceQuote(new BigDecimal("45000.50"))
-                .priceUsd(new BigDecimal("45000.50"))
-                .volumeUsd24Hr(new BigDecimal("300000000.00"))
-                .percentExchangeVolume(new BigDecimal("0.5"))
-                .tradesCount24Hr(100000)
-                .updated(System.currentTimeMillis())
-                .exchangeId("Binance")
-                .quoteId("USDT")
-                .baseSymbol("BTC")
-                .quoteSymbol("USDT")
-                .timestamp(1737247412551L)
-                .build();
-        validMarketModels.add(model);
+        for (int i = 0; i < 100; i++) {
+            RawMarketModel model = RawMarketModel.builder()
+                    .modelId(UUID.randomUUID())
+                    .baseId("BTC")
+                    .rank(1)
+                    .priceQuote(new BigDecimal("45000.50"))
+                    .priceUsd(new BigDecimal("45000.50"))
+                    .volumeUsd24Hr(new BigDecimal("300000000.00"))
+                    .percentExchangeVolume(new BigDecimal("0.5"))
+                    .tradesCount24Hr(100000)
+                    .updated(System.currentTimeMillis())
+                    .exchangeId("Binance")
+                    .quoteId("USDT")
+                    .baseSymbol("BTC")
+                    .quoteSymbol("USDT")
+                    .timestamp(1737247412551L)
+                    .build();
+            validMarketModels.add(model);
+        }
     }
 
     @Test
     void saveToDatabase_WithValidData_ShouldSaveSuccessfully() throws DatabaseException {
         databaseService.saveToDatabase(validMarketModels);
 
-        assertEquals(1, marketModelRepository.count());
+        assertEquals(100, marketModelRepository.count());
         RawMarketModel savedModel = marketModelRepository.findAll().getFirst();
         assertEquals("BTC", savedModel.getBaseId());
     }
 
     @Test
-    void saveToDatabase_WithEmptySet_ShouldThrowIllegalArgumentException() {
+    void saveToDatabase_WithEmptySet_ShouldThrowValidationException() {
         Set<RawMarketModel> emptySet = new HashSet<>();
 
-        assertThrows(IllegalArgumentException.class, () -> databaseService.saveToDatabase(emptySet));
+        assertThrows(ValidationException.class, () -> databaseService.saveToDatabase(emptySet));
     }
 
     @Test
-    void saveToDatabase_WithNullEntry_ShouldThrowIllegalArgumentException() {
+    void saveToDatabase_WithNullEntry_ShouldThrowValidationException() {
         Set<RawMarketModel> modelsWithNull = new HashSet<>();
         modelsWithNull.add(null);
         modelsWithNull.add(validMarketModels.iterator().next());
 
-        assertThrows(IllegalArgumentException.class, () -> databaseService.saveToDatabase(modelsWithNull));
+        assertThrows(ValidationException.class, () -> databaseService.saveToDatabase(modelsWithNull));
     }
 
     @Test
