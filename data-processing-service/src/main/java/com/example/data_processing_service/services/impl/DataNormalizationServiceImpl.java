@@ -26,17 +26,22 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
             @Nonnull Set<RawMarketModel> rawMarketModels,
             @Nonnull Long timestamp)
             throws DataValidationException {
-        validateRawMarketModels(rawMarketModels, timestamp);
+        try {
+            validateRawMarketModels(rawMarketModels, timestamp);
 
-        log.debug("Successfully validated models");
-        return rawMarketModels.stream()
-                .map(field -> MarketModel
-                        .builder()
-                        .priceUsd(field.getPriceUsd())
-                        .updated(field.getUpdated())
-                        .timestamp(transformTimestamp(field.getTimestamp()))
-                        .build())
-                .collect(Collectors.toSet());
+            log.debug("Successfully validated models");
+            return rawMarketModels.stream()
+                    .map(field -> MarketModel
+                            .builder()
+                            .priceUsd(field.getPriceUsd())
+                            .updated(field.getUpdated())
+                            .timestamp(transformTimestamp(field.getTimestamp()))
+                            .build())
+                    .collect(Collectors.toSet());
+        } catch (DataValidationException ex) {
+            throw new DataValidationException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
+                    timestamp), ex);
+        }
     }
 
     @Nonnull
