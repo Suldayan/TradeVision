@@ -8,7 +8,6 @@ import com.example.data_processing_service.services.IngestionService;
 import com.example.data_processing_service.services.OrchestratorService;
 import com.example.data_processing_service.services.exception.DataValidationException;
 import com.example.data_processing_service.services.exception.DatabaseException;
-import com.example.data_processing_service.services.exception.ProcessingException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         }catch (Exception e) {
             log.error("Error processing overall service flow with data timestamp={}. Error Message={}",
                     timestamp, e.getMessage(), e);
-            throw new ProcessingException("Failed to initiate processing flow", e);
+            throw new ("Failed to initiate processing flow", e);
         }
     }
 }
