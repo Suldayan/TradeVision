@@ -1,7 +1,7 @@
-package com.example.data_processing_service.kafka.consumer;
+package com.example.data_processing_service.kafka;
 
 import com.example.data_processing_service.dto.EventDTO;
-import com.example.data_processing_service.services.ProcessingOrchestratorService;
+import com.example.data_processing_service.services.OrchestratorService;
 import com.example.data_processing_service.services.exception.EventProcessingException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 public class StatusConsumer {
-    private final ProcessingOrchestratorService orchestratorService;
+    private final OrchestratorService orchestratorService;
 
     private static final String TOPIC = "status";
     private static final String GROUP = "processing";
@@ -27,10 +27,10 @@ public class StatusConsumer {
     public void receiveStatus(@Nonnull EventDTO status) {
         try {
             orchestratorService.startProcessingFlow(status.getTimestamp());
-        } catch (Exception e) {
+        } catch (Exception ex) {
             log.error("Error initiating orchestration service at: {} for data fetched at: {}, {}",
-                    LocalDateTime.now(), status.getTimestamp(), e.getMessage());
-            throw new EventProcessingException("Unexpected error occurred while receiving event status", status.getTimestamp(), e);
+                    LocalDateTime.now(), status.getTimestamp(), ex.getMessage());
+            throw new EventProcessingException("Unexpected error occurred while receiving event status", status.getTimestamp(), ex);
         }
     }
 }

@@ -2,19 +2,18 @@ package com.example.data_processing_service.controller;
 
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.repository.MarketModelRepository;
+import com.example.data_processing_service.services.exception.DataValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Set;
 
 @RestController
@@ -24,22 +23,36 @@ import java.util.Set;
 public class MarketController {
     private final MarketModelRepository marketModelRepository;
 
-    @GetMapping("/markets/{start}/{end}")
+    @GetMapping("/markets")
     ResponseEntity<Set<MarketModel>> fetchMarketModelsByFilteredTimestamps(
-            @PathVariable @Nonnull Long dateOne,
-            @PathVariable @Nonnull Long dateTwo) {
-        ZonedDateTime start = convertLongToZonedDateTime(dateOne);
-        ZonedDateTime end = convertLongToZonedDateTime(dateTwo);
+            @RequestParam @Nonnull Long startDate,
+            @RequestParam @Nonnull Long endDate) throws DataValidationException {
 
+        validateTimestamps(startDate, endDate);
+        ZonedDateTime start = convertLongToZonedDateTime(startDate);
+        ZonedDateTime end = convertLongToZonedDateTime(endDate);
 
+        log.debug("Fetching market models between {} and {}", start, end);
+        Set<MarketModel> marketModels = marketModelRepository.findAllByTimestampBetween(start, end);
 
+        if (isEmpty(marketModels)) {
+            return ResponseEntity.ok(Collections.emptySet());
+        }
+        return ResponseEntity.ok(marketModels);
+    }
+
+    private boolean isEmpty(@Nonnull Set<MarketModel> marketModels) {
+        return marketModels.isEmpty();
+    }
+
+    private void validateTimestamps(@Nonnull Long start, @Nonnull Long end) throws DataValidationException {
+        if (start >= end) {
+            throw new DataValidationException("Start date must be before end date");
+        }
     }
 
     @Nonnull
     private ZonedDateTime convertLongToZonedDateTime(@Nonnull Long date) {
-        return ZonedDateTime.ofInstant(
-                Instant.ofEpochMilli(date),
-                ZoneOffset.UTC
-        );
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneOffset.UTC);
     }
 }
