@@ -1,7 +1,5 @@
-package com.example.data_processing_service.models;
+package com.example.data_processing_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
@@ -24,7 +22,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RawMarketModel {
+public class RawMarketDTO {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID modelId;
@@ -101,7 +99,7 @@ public class RawMarketModel {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RawMarketModel that)) return false;
+        if (!(o instanceof RawMarketDTO that)) return false;
         return modelId != null && modelId.equals(that.modelId);
     }
 

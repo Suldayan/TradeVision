@@ -1,7 +1,7 @@
 package com.example.data_processing_service.services.impl;
 
 import com.example.data_processing_service.models.MarketModel;
-import com.example.data_processing_service.models.RawMarketModel;
+import com.example.data_processing_service.dto.RawMarketDTO;
 import com.example.data_processing_service.services.DataNormalizationService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     @Nonnull
     @Override
     public Set<MarketModel> transformToMarketModel(
-            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Set<RawMarketDTO> rawMarketModels,
             @Nonnull Long timestamp)
             throws IllegalArgumentException {
         try {
@@ -39,7 +39,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     }
 
     @Nonnull
-    private Set<MarketModel> buildMarketModel(@Nonnull Set<RawMarketModel> rawMarketModels) {
+    private Set<MarketModel> buildMarketModel(@Nonnull Set<RawMarketDTO> rawMarketModels) {
         return rawMarketModels.stream()
                 .map(field -> MarketModel.builder()
                         .baseId(field.getBaseId())
@@ -60,7 +60,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     }
 
     private void validateRawMarketModels(
-            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Set<RawMarketDTO> rawMarketModels,
             @Nonnull Long timestamp) throws IllegalArgumentException {
         if (rawMarketModels.isEmpty()) {
             // We throw an exception here because it's expected that there is data available at the given timestamp

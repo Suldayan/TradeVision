@@ -1,7 +1,7 @@
 package com.example.data_processing_service.unit;
 
 import com.example.data_processing_service.client.IngestionClient;
-import com.example.data_processing_service.models.RawMarketModel;
+import com.example.data_processing_service.dto.RawMarketDTO;
 import com.example.data_processing_service.services.impl.IngestionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,8 @@ public class IngestionServiceTest {
     @InjectMocks
     private IngestionServiceImpl ingestionService;
 
-    private Set<RawMarketModel> validMarketModels;
-    private Set<RawMarketModel> invalidMarketModels;
+    private Set<RawMarketDTO> validMarketModels;
+    private Set<RawMarketDTO> invalidMarketModels;
 
     @BeforeEach
     void setup() {
@@ -36,7 +36,7 @@ public class IngestionServiceTest {
         invalidMarketModels = new HashSet<>();
 
         for (int i = 0; i < 100; i++) {
-            RawMarketModel model = RawMarketModel.builder()
+            RawMarketDTO model = RawMarketDTO.builder()
                     .modelId(UUID.randomUUID())
                     .baseId("BTC")
                     .rank(1)
@@ -62,7 +62,7 @@ public class IngestionServiceTest {
 
         when(ingestionService.fetchRawMarkets(timestamp)).thenReturn(validMarketModels);
 
-        Set<RawMarketModel> result = assertDoesNotThrow(() -> ingestionService.fetchRawMarkets(timestamp));
+        Set<RawMarketDTO> result = assertDoesNotThrow(() -> ingestionService.fetchRawMarkets(timestamp));
 
         assertNotNull(result, "Result should not be null");
         assertEquals(100, result.size(), "Result size should be 100");

@@ -1,7 +1,7 @@
 package com.example.data_processing_service.unit;
 
 import com.example.data_processing_service.models.MarketModel;
-import com.example.data_processing_service.models.RawMarketModel;
+import com.example.data_processing_service.dto.RawMarketDTO;
 import com.example.data_processing_service.services.impl.DataNormalizationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +28,8 @@ public class DataNormalizationServiceTest {
     private static final String EXPECTED_EXCEPTION_MESSAGE =
             "Failed to transform model from raw to processed for timestamped data: 123456789";
 
-    private Set<RawMarketModel> validMarketModels;
-    private Set<RawMarketModel> invalidMarketModels;
+    private Set<RawMarketDTO> validMarketModels;
+    private Set<RawMarketDTO> invalidMarketModels;
 
     @BeforeEach
     void setup() {
@@ -37,7 +37,7 @@ public class DataNormalizationServiceTest {
         invalidMarketModels = new HashSet<>();
 
         for (int i = 0; i < 100; i++) {
-            RawMarketModel model = RawMarketModel.builder()
+            RawMarketDTO model = RawMarketDTO.builder()
                     .modelId(UUID.randomUUID())
                     .baseId("BTC")
                     .rank(1)

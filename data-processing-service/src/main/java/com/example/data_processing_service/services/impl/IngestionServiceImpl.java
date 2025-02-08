@@ -1,7 +1,7 @@
 package com.example.data_processing_service.services.impl;
 
 import com.example.data_processing_service.client.IngestionClient;
-import com.example.data_processing_service.models.RawMarketModel;
+import com.example.data_processing_service.dto.RawMarketDTO;
 import com.example.data_processing_service.services.IngestionService;
 import com.example.data_processing_service.services.exception.IngestionException;
 import jakarta.annotation.Nonnull;
@@ -22,10 +22,10 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Nonnull
     @Override
-    public Set<RawMarketModel> fetchRawMarkets(@Nonnull Long timestamp) throws IllegalArgumentException {
+    public Set<RawMarketDTO> fetchRawMarkets(@Nonnull Long timestamp) throws IllegalArgumentException {
         log.info("Fetching raw markets for timestamp: {}", timestamp);
         try {
-            Set<RawMarketModel> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
+            Set<RawMarketDTO> rawMarketModels = ingestionClient.getRawMarketModels(timestamp);
             validateMarkets(rawMarketModels);
 
             log.info("Successfully fetched {} markets for timestamp: {}", rawMarketModels.size(), timestamp);
@@ -41,7 +41,7 @@ public class IngestionServiceImpl implements IngestionService {
         }
     }
 
-    private void validateMarkets(@Nonnull Set<RawMarketModel> rawMarketModels) throws IllegalArgumentException {
+    private void validateMarkets(@Nonnull Set<RawMarketDTO> rawMarketModels) throws IllegalArgumentException {
         if (rawMarketModels.isEmpty()) {
             throw new IllegalArgumentException(
                     "Received empty market set from ingestion service. This might indicate an API issue"

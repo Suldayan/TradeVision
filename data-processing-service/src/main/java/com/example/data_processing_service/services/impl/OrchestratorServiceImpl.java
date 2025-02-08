@@ -1,7 +1,7 @@
 package com.example.data_processing_service.services.impl;
 
 import com.example.data_processing_service.models.MarketModel;
-import com.example.data_processing_service.models.RawMarketModel;
+import com.example.data_processing_service.dto.RawMarketDTO;
 import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.DataPersistenceService;
 import com.example.data_processing_service.services.IngestionService;
@@ -32,7 +32,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         final String context = String.format(PROCESSING_CONTEXT, timestamp);
         log.info("Starting processing flow for {} at {}", context, LocalDateTime.now());
         try {
-            Set<RawMarketModel> rawMarketModels = ingestionService.fetchRawMarkets(timestamp);
+            Set<RawMarketDTO> rawMarketModels = ingestionService.fetchRawMarkets(timestamp);
             log.debug("Successfully fetched {} raw market records for {}", rawMarketModels.size(), context);
             Set<MarketModel> marketModels = dataNormalizationService.transformToMarketModel(rawMarketModels, timestamp);
             log.debug("Transformed {} raw records to normalized models for {}", marketModels.size(), context);
