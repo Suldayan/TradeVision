@@ -18,7 +18,7 @@ import java.util.Set;
 public class IngestionServiceImpl implements IngestionService {
     private final IngestionClient ingestionClient;
 
-    private static final int EXPECTED_MARKET_COUNT = 100;
+    private static final Integer EXPECTED_MARKET_SIZE = 100;
 
     @Nonnull
     @Override
@@ -30,14 +30,14 @@ public class IngestionServiceImpl implements IngestionService {
 
             log.info("Successfully fetched {} markets for timestamp: {}", rawMarketModels.size(), timestamp);
             return rawMarketModels;
-        } catch (RestClientResponseException e) {
+        } catch (RestClientResponseException ex) {
             throw new IngestionException(String.format("HTTP error while fetching markets. Status: %s, Body: %s",
-                    e.getStatusCode(), e.getResponseBodyAsString()), e);
-        } catch (IllegalArgumentException e) {
-            log.error("Market data validation failed for timestamp: {}", timestamp, e);
-            throw e;
-        } catch (Exception e) {
-            throw new IngestionException(String.format("Unexpected error while fetching markets for timestamp: %s", timestamp), e);
+                    ex.getStatusCode(), ex.getResponseBodyAsString()), ex);
+        } catch (IllegalArgumentException ex) {
+            log.error("Market data validation failed for timestamp: {}", timestamp, ex);
+            throw ex;
+        } catch (Exception ex) {
+            throw new IngestionException(String.format("Unexpected error while fetching markets for timestamp: %s", timestamp), ex);
         }
     }
 
@@ -48,10 +48,10 @@ public class IngestionServiceImpl implements IngestionService {
             );
         }
 
-        if (rawMarketModels.size() != EXPECTED_MARKET_COUNT) {
+        if (rawMarketModels.size() != EXPECTED_MARKET_SIZE) {
             throw new IllegalArgumentException(String.format(
                     "Expected %d markets but received %d. This indicates incomplete data from the data-ingestion microservice",
-                    EXPECTED_MARKET_COUNT,
+                    EXPECTED_MARKET_SIZE,
                     rawMarketModels.size()
             ));
         }

@@ -25,6 +25,8 @@ import java.util.Set;
 public class DataPersistenceServiceImpl implements DataPersistenceService {
     private final MarketModelRepository marketModelRepository;
 
+    private static final Integer EXPECTED_MARKET_SIZE = 100;
+
     @Override
     public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) throws DatabaseException, IllegalArgumentException {
         validateMarkets(marketModels);
@@ -35,10 +37,7 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
         if (marketModels.isEmpty()) {
             throw new IllegalArgumentException("Market model set passed but is empty");
         }
-        if (marketModels.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("Market models set contains null entries");
-        }
-        if (marketModels.size() != 100) {
+        if (marketModels.size() != EXPECTED_MARKET_SIZE) {
             throw new IllegalArgumentException(String.format("Market model set passed but is missing data: %s/100 elements",
                     marketModels.size()));
         }

@@ -42,7 +42,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
 
         } catch (IngestionException ex) {
             throw new OrchestratorException(String.format("Data ingestion failed for %s", context), ex);
-        } catch (DataValidationException ex) {
+        } catch (IllegalArgumentException ex) {
             throw new OrchestratorException(String.format("Data validation failed for %s", context), ex);
         } catch (DatabaseException ex) {
             throw new OrchestratorException(String.format("Database operation failed for %s", context), ex);

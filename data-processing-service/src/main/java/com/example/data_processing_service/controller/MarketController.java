@@ -27,7 +27,7 @@ public class MarketController {
     @GetMapping("/markets")
     ResponseEntity<Set<MarketModel>> fetchAllMarketModelsByTimeRange(
             @RequestParam @Nonnull Long startDate,
-            @RequestParam @Nonnull Long endDate) throws DataValidationException {
+            @RequestParam @Nonnull Long endDate) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
@@ -47,7 +47,7 @@ public class MarketController {
     ResponseEntity<Set<MarketModel>> fetchMarketModelByIdAndTimeRange(
             @RequestParam @Nonnull Long startDate,
             @RequestParam @Nonnull Long endDate,
-            @RequestParam @Nonnull String id) throws DataValidationException {
+            @RequestParam @Nonnull String id) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
@@ -68,9 +68,9 @@ public class MarketController {
         return marketModels.isEmpty();
     }
 
-    private void validateTimestamps(@Nonnull Long start, @Nonnull Long end) throws DataValidationException {
+    private void validateTimestamps(@Nonnull Long start, @Nonnull Long end) throws IllegalArgumentException {
         if (start >= end) {
-            throw new DataValidationException("Start date must be before end date");
+            throw new IllegalArgumentException("Start date must be before end date");
         }
     }
 

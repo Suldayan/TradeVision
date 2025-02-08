@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DataNormalizationServiceImpl implements DataNormalizationService {
 
+    private static final Integer EXPECTED_MARKET_SIZE = 100;
+
     @Nonnull
     @Override
     public Set<MarketModel> transformToMarketModel(
@@ -29,20 +31,24 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
             validateRawMarketModels(rawMarketModels, timestamp);
 
             log.debug("Successfully validated models");
-            return rawMarketModels.stream()
-                    .map(field -> MarketModel
-                            .builder()
-                            .baseId(field.getBaseId())
-                            .quoteId(field.getQuoteId())
-                            .priceUsd(field.getPriceUsd())
-                            .updated(field.getUpdated())
-                            .timestamp(transformTimestamp(field.getTimestamp()))
-                            .build())
-                    .collect(Collectors.toSet());
+            return buildMarketModel(rawMarketModels);
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
                     timestamp), ex);
         }
+    }
+
+    @Nonnull
+    private Set<MarketModel> buildMarketModel(@Nonnull Set<RawMarketModel> rawMarketModels) {
+        return rawMarketModels.stream()
+                .map(field -> MarketModel.builder()
+                        .baseId(field.getBaseId())
+                        .quoteId(field.getQuoteId())
+                        .priceUsd(field.getPriceUsd())
+                        .updated(field.getUpdated())
+                        .timestamp(transformTimestamp(field.getTimestamp()))
+                        .build())
+                .collect(Collectors.toSet());
     }
 
     @Nonnull
@@ -60,7 +66,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
             // We throw an exception here because it's expected that there is data available at the given timestamp
             throw new IllegalArgumentException(String.format("Unable to push data forward due to empty market set for timestamp: %s", timestamp));
         }
-        if (rawMarketModels.size() != 100) {
+        if (rawMarketModels.size() != EXPECTED_MARKET_SIZE) {
             throw new IllegalArgumentException(String.format("Market models with timestamp: %s fetched but is missing data with size: %s of expected size: 100",
                     timestamp, rawMarketModels.size()));
         }
