@@ -75,5 +75,9 @@ public class DataPersistenceServiceTest {
                     .build();
             invalidMarketModels.add(model);
         }
+
+        marketModelRepository.deleteAll();
     }
+
+
 }
