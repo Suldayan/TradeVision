@@ -9,7 +9,13 @@ import java.util.Set;
 
 @Repository
 public interface MarketModelRepository extends JpaRepository<MarketModel, String> {
-    Set<MarketModel> findAllByTimestampBetween(
+    Set<MarketModel> findAllByTimeRange(
             ZonedDateTime start,
             ZonedDateTime end);
+
+    Set<MarketModel> findByMarketIdAndTimeRange(
+            ZonedDateTime start,
+            ZonedDateTime end,
+            String id
+    );
 }

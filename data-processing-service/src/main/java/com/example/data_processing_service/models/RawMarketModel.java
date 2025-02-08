@@ -3,7 +3,6 @@ package com.example.data_processing_service.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +15,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RawMarketModel {
-    @Id
     @JsonProperty("baseId")
-    private String id;
+    private String baseId;
 
     @JsonProperty("rank")
     @JsonIgnore

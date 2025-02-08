@@ -6,7 +6,6 @@ import com.example.data_processing_service.services.DataNormalizationService;
 import com.example.data_processing_service.services.DataPersistenceService;
 import com.example.data_processing_service.services.IngestionService;
 import com.example.data_processing_service.services.OrchestratorService;
-import com.example.data_processing_service.services.exception.DataValidationException;
 import com.example.data_processing_service.services.exception.DatabaseException;
 import com.example.data_processing_service.services.exception.IngestionException;
 import com.example.data_processing_service.services.exception.OrchestratorException;

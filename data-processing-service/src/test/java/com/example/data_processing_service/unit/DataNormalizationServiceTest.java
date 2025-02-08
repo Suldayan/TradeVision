@@ -2,7 +2,6 @@ package com.example.data_processing_service.unit;
 
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
-import com.example.data_processing_service.services.exception.DataValidationException;
 import com.example.data_processing_service.services.impl.DataNormalizationServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,24 +23,23 @@ public class DataNormalizationServiceTest {
     DataNormalizationServiceImpl dataNormalizationService;
 
     private static final RawMarketModel mockRawMarketModel = RawMarketModel.builder().build();
-    private static final MarketModel mockMarketModel = MarketModel.builder().build();
 
     private static final Long mockTimestamp = 123456789L;
 
     @Test
-    void transformToModel_SuccessfullyTransforms() throws DataValidationException {
+    void transformToModel_SuccessfullyTransforms() throws IllegalArgumentException {
         Set<MarketModel> result = assertDoesNotThrow(() ->
                 dataNormalizationService.transformToMarketModel(createRawMarketModelSet(), mockTimestamp));
 
         assertNotNull(result, "Result should not be null");
         assertFalse(result.isEmpty(), "Result should not be empty");
-        assertEquals(1, result.size(), "Result size should be 1");
+        assertEquals(100, result.size(), "Result size should be 100");
         verify(dataNormalizationService, times(1)).transformToMarketModel(createRawMarketModelSet(), mockTimestamp);
     }
 
     @Test
     void transformToModel_ThrowsValidationException_OnEmptySet() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dataNormalizationService.transformToMarketModel(Collections.emptySet(), mockTimestamp));
 
         assertTrue(exception.getMessage().contains("Unable to push data forward due to empty market set for timestamp"));
@@ -49,13 +47,13 @@ public class DataNormalizationServiceTest {
 
     @Test
     void transformToModel_ThrowsValidationException_OnInvalidSetSize() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dataNormalizationService.transformToMarketModel(createInvalidRawMarketModelSet(), mockTimestamp));
 
         assertTrue(exception.getMessage().contains("Market models with timestamp: %s fetched but is missing data with size"));
     }
 
-    private Set<RawMarketModel> createRawMarketModelSet() {
+    private static Set<RawMarketModel> createRawMarketModelSet() {
         Set<RawMarketModel> rawMarketModelSet = new HashSet<>();
         for (int i = 0; i <= 100; i++) {
             rawMarketModelSet.add(mockRawMarketModel);
@@ -64,7 +62,7 @@ public class DataNormalizationServiceTest {
         return rawMarketModelSet;
     }
 
-    private Set<RawMarketModel> createInvalidRawMarketModelSet() {
+    private static Set<RawMarketModel> createInvalidRawMarketModelSet() {
         Set<RawMarketModel> rawMarketModelSet = new HashSet<>();
         for (int i = 0; i <= 10; i++) {
             rawMarketModelSet.add(mockRawMarketModel);

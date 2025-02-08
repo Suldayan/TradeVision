@@ -2,11 +2,9 @@ package com.example.data_processing_service.controller;
 
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.repository.MarketModelRepository;
-import com.example.data_processing_service.services.exception.DataValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +12,10 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "api/v1/processing")
@@ -24,7 +25,7 @@ public class MarketController {
     private final MarketModelRepository marketModelRepository;
 
     @GetMapping("/markets")
-    ResponseEntity<Set<MarketModel>> fetchMarketModelsByFilteredTimestamps(
+    ResponseEntity<Set<MarketModel>> fetchAllMarketModelsByTimeRange(
             @RequestParam @Nonnull Long startDate,
             @RequestParam @Nonnull Long endDate) throws DataValidationException {
 
@@ -33,12 +34,34 @@ public class MarketController {
         ZonedDateTime end = convertLongToZonedDateTime(endDate);
 
         log.debug("Fetching market models between {} and {}", start, end);
-        Set<MarketModel> marketModels = marketModelRepository.findAllByTimestampBetween(start, end);
-
+        Set<MarketModel> marketModels = marketModelRepository.findAllByTimeRange(start, end);
         if (isEmpty(marketModels)) {
             return ResponseEntity.ok(Collections.emptySet());
         }
-        return ResponseEntity.ok(marketModels);
+        Set<MarketModel> sortedMarketModels = sortMarketModelsByTimestamp(marketModels);
+
+        return ResponseEntity.ok(sortedMarketModels);
+    }
+
+    @GetMapping("/market")
+    ResponseEntity<Set<MarketModel>> fetchMarketModelByIdAndTimeRange(
+            @RequestParam @Nonnull Long startDate,
+            @RequestParam @Nonnull Long endDate,
+            @RequestParam @Nonnull String id) throws DataValidationException {
+
+        validateTimestamps(startDate, endDate);
+        ZonedDateTime start = convertLongToZonedDateTime(startDate);
+        ZonedDateTime end = convertLongToZonedDateTime(endDate);
+
+        log.debug("Fetching market models between {} and {} with id: {}",
+                start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByMarketIdAndTimeRange(start, end, id);
+        if (isEmpty(marketModels)) {
+            return ResponseEntity.ok(Collections.emptySet());
+        }
+        Set<MarketModel> sortedMarketModels = sortMarketModelsByTimestamp(marketModels);
+
+        return ResponseEntity.ok(sortedMarketModels);
     }
 
     private boolean isEmpty(@Nonnull Set<MarketModel> marketModels) {
@@ -49,6 +72,13 @@ public class MarketController {
         if (start >= end) {
             throw new DataValidationException("Start date must be before end date");
         }
+    }
+
+    @Nonnull
+    private Set<MarketModel> sortMarketModelsByTimestamp(@Nonnull Set<MarketModel> marketModels) {
+        return marketModels.stream()
+                .sorted(Comparator.comparing(MarketModel::getTimestamp))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Nonnull

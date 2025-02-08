@@ -3,7 +3,6 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.repository.MarketModelRepository;
 import com.example.data_processing_service.services.DataPersistenceService;
-import com.example.data_processing_service.services.exception.DataValidationException;
 import com.example.data_processing_service.services.exception.DatabaseException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -27,20 +26,20 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
     private final MarketModelRepository marketModelRepository;
 
     @Override
-    public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) throws DatabaseException, DataValidationException {
+    public void saveToDatabase(@Nonnull Set<MarketModel> marketModels) throws DatabaseException, IllegalArgumentException {
         validateMarkets(marketModels);
         persistWithRetry(marketModels);
     }
 
-    private void validateMarkets(@Nonnull Set<MarketModel> marketModels) throws DataValidationException {
+    private void validateMarkets(@Nonnull Set<MarketModel> marketModels) throws IllegalArgumentException {
         if (marketModels.isEmpty()) {
-            throw new DataValidationException("Market model set passed but is empty");
+            throw new IllegalArgumentException("Market model set passed but is empty");
         }
         if (marketModels.stream().anyMatch(Objects::isNull)) {
-            throw new DataValidationException("Market models set contains null entries");
+            throw new IllegalArgumentException("Market models set contains null entries");
         }
         if (marketModels.size() != 100) {
-            throw new DataValidationException(String.format("Market model set passed but is missing data: %s/100 elements",
+            throw new IllegalArgumentException(String.format("Market model set passed but is missing data: %s/100 elements",
                     marketModels.size()));
         }
     }

@@ -3,7 +3,6 @@ package com.example.data_processing_service.services.impl;
 import com.example.data_processing_service.models.MarketModel;
 import com.example.data_processing_service.models.RawMarketModel;
 import com.example.data_processing_service.services.DataNormalizationService;
-import com.example.data_processing_service.services.exception.DataValidationException;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
     public Set<MarketModel> transformToMarketModel(
             @Nonnull Set<RawMarketModel> rawMarketModels,
             @Nonnull Long timestamp)
-            throws DataValidationException {
+            throws IllegalArgumentException {
         try {
             validateRawMarketModels(rawMarketModels, timestamp);
 
@@ -33,13 +32,15 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
             return rawMarketModels.stream()
                     .map(field -> MarketModel
                             .builder()
+                            .baseId(field.getBaseId())
+                            .quoteId(field.getQuoteId())
                             .priceUsd(field.getPriceUsd())
                             .updated(field.getUpdated())
                             .timestamp(transformTimestamp(field.getTimestamp()))
                             .build())
                     .collect(Collectors.toSet());
-        } catch (DataValidationException ex) {
-            throw new DataValidationException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
                     timestamp), ex);
         }
     }
@@ -54,13 +55,13 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
 
     private void validateRawMarketModels(
             @Nonnull Set<RawMarketModel> rawMarketModels,
-            @Nonnull Long timestamp) throws DataValidationException {
+            @Nonnull Long timestamp) throws IllegalArgumentException {
         if (rawMarketModels.isEmpty()) {
             // We throw an exception here because it's expected that there is data available at the given timestamp
-            throw new DataValidationException(String.format("Unable to push data forward due to empty market set for timestamp: %s", timestamp));
+            throw new IllegalArgumentException(String.format("Unable to push data forward due to empty market set for timestamp: %s", timestamp));
         }
         if (rawMarketModels.size() != 100) {
-            throw new DataValidationException(String.format("Market models with timestamp: %s fetched but is missing data with size: %s of expected size: 100",
+            throw new IllegalArgumentException(String.format("Market models with timestamp: %s fetched but is missing data with size: %s of expected size: 100",
                     timestamp, rawMarketModels.size()));
         }
     }

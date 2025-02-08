@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -20,6 +19,12 @@ public class MarketModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "baseId", nullable = false)
+    private String baseId;
+
+    @Column(name = "quoteId", nullable = false)
+    private String quoteId;
 
     @Column(name = "priceUsd", nullable = false)
     private BigDecimal priceUsd;
