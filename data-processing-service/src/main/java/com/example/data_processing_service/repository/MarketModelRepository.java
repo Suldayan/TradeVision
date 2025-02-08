@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Repository
-public interface MarketModelRepository extends JpaRepository<MarketModel, String> {
+public interface MarketModelRepository extends JpaRepository<MarketModel, UUID> {
     Set<MarketModel> findAllByTimeRange(
             ZonedDateTime start,
             ZonedDateTime end);
