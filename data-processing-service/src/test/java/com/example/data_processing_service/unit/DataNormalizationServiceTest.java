@@ -58,7 +58,7 @@ public class DataNormalizationServiceTest {
     }
 
     @Test
-    void transformToModel_SuccessfullyTransforms() {
+    void transformToModel_SuccessfullyTransformsAllModels() {
         Set<MarketModel> result = assertDoesNotThrow(() ->
                 dataNormalizationService.transformToMarketModel(validMarketModels, mockTimestamp));
 

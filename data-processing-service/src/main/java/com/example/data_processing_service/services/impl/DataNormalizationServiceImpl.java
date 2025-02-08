@@ -30,7 +30,7 @@ public class DataNormalizationServiceImpl implements DataNormalizationService {
         try {
             validateRawMarketModels(rawMarketModels, timestamp);
 
-            log.debug("Successfully validated models");
+            log.info("Successfully transformed all models");
             return buildMarketModel(rawMarketModels);
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
