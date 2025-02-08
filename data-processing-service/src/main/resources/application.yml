@@ -17,7 +17,6 @@ spring:
     locations: classpath:db/migration
 
   kafka:
-    topic: status
     consumer:
       bootstrap-servers: localhost:9092
       group-id: processing

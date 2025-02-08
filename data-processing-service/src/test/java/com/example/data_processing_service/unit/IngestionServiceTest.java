@@ -11,12 +11,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class IngestionServiceTest {
@@ -29,6 +30,8 @@ public class IngestionServiceTest {
 
     private Set<RawMarketDTO> validMarketModels;
     private Set<RawMarketDTO> invalidMarketModels;
+
+    private static final Long TIMESTAMP = 1737247412551L;
 
     @BeforeEach
     void setup() {
@@ -50,21 +53,61 @@ public class IngestionServiceTest {
                     .quoteId("USDT")
                     .baseSymbol("BTC")
                     .quoteSymbol("USDT")
-                    .timestamp(1737247412551L)
+                    .timestamp(TIMESTAMP)
                     .build();
             validMarketModels.add(model);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            RawMarketDTO model = RawMarketDTO.builder()
+                    .modelId(UUID.randomUUID())
+                    .baseId("BTC")
+                    .rank(1)
+                    .priceQuote(new BigDecimal("45000.50"))
+                    .priceUsd(new BigDecimal("45000.50"))
+                    .volumeUsd24Hr(new BigDecimal("300000000.00"))
+                    .percentExchangeVolume(new BigDecimal("0.5"))
+                    .tradesCount24Hr(100000)
+                    .updated(System.currentTimeMillis())
+                    .exchangeId("Binance")
+                    .quoteId("USDT")
+                    .baseSymbol("BTC")
+                    .quoteSymbol("USDT")
+                    .timestamp(TIMESTAMP)
+                    .build();
+            invalidMarketModels.add(model);
         }
     }
 
     @Test
     void fetchRawMarkets_SuccessfullyFetchesAllMarkets() {
-        Long timestamp = 1737247412551L;
+        when(ingestionClient.getRawMarketModels(TIMESTAMP)).thenReturn(validMarketModels);
 
-        when(ingestionService.fetchRawMarkets(timestamp)).thenReturn(validMarketModels);
-
-        Set<RawMarketDTO> result = assertDoesNotThrow(() -> ingestionService.fetchRawMarkets(timestamp));
+        Set<RawMarketDTO> result = assertDoesNotThrow(() -> ingestionService.fetchRawMarkets(TIMESTAMP));
 
         assertNotNull(result, "Result should not be null");
         assertEquals(100, result.size(), "Result size should be 100");
+
+        verify(ingestionClient, times(1)).getRawMarketModels(TIMESTAMP);
+    }
+
+    @Test
+    void fetchRawMarkets_ThrowsIllegalArgumentException_OnEmptySet() {
+        when(ingestionClient.getRawMarketModels(TIMESTAMP)).thenReturn(Collections.emptySet());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> ingestionService.fetchRawMarkets(TIMESTAMP));
+
+        assertEquals("Received empty market set from ingestion service. This might indicate an API issue", exception.getMessage());
+    }
+
+    @Test
+    void fetchRawMarkets_ThrowsIllegalArgumentException_OnMissingData() {
+        when(ingestionClient.getRawMarketModels(TIMESTAMP)).thenReturn(invalidMarketModels);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> ingestionService.fetchRawMarkets(TIMESTAMP));
+
+        assertTrue(exception.getMessage().contains("This indicates incomplete data from the data-ingestion microservice"));
     }
 }
