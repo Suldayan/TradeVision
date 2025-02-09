@@ -26,6 +26,9 @@ public class MarketModel {
     @Column(name = "quoteId", nullable = false)
     private String quoteId;
 
+    @Column(name = "exchangeId", nullable = false)
+    private String exchangeId;
+
     @Column(name = "priceUsd", nullable = false)
     private BigDecimal priceUsd;
 

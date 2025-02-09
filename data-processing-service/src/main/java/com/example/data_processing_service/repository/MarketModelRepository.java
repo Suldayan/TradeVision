@@ -14,7 +14,19 @@ public interface MarketModelRepository extends JpaRepository<MarketModel, UUID> 
             ZonedDateTime start,
             ZonedDateTime end);
 
-    Set<MarketModel> findByMarketIdAndTimeRange(
+    Set<MarketModel> findByBaseIdAndTimeRange(
+            ZonedDateTime start,
+            ZonedDateTime end,
+            String id
+    );
+
+    Set<MarketModel> findByQuoteIdAndTimeRange(
+            ZonedDateTime start,
+            ZonedDateTime end,
+            String id
+    );
+
+    Set<MarketModel> findByExchangeIdAndTimeRange(
             ZonedDateTime start,
             ZonedDateTime end,
             String id

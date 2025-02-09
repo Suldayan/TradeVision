@@ -43,8 +43,8 @@ public class MarketController {
         return ResponseEntity.ok(sortedMarketModels);
     }
 
-    @GetMapping("/market")
-    ResponseEntity<Set<MarketModel>> fetchMarketModelByIdAndTimeRange(
+    @GetMapping("/market/base")
+    ResponseEntity<Set<MarketModel>> fetchModelByBaseIdAndTimeRange(
             @RequestParam @Nonnull Long startDate,
             @RequestParam @Nonnull Long endDate,
             @RequestParam @Nonnull String id) throws IllegalArgumentException {
@@ -53,9 +53,51 @@ public class MarketController {
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
         ZonedDateTime end = convertLongToZonedDateTime(endDate);
 
-        log.debug("Fetching market models between {} and {} with id: {}",
+        log.debug("Fetching base market models between {} and {} with id: {}",
                 start, end, id);
-        Set<MarketModel> marketModels = marketModelRepository.findByMarketIdAndTimeRange(start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByBaseIdAndTimeRange(start, end, id);
+        if (isEmpty(marketModels)) {
+            return ResponseEntity.ok(Collections.emptySet());
+        }
+        Set<MarketModel> sortedMarketModels = sortMarketModelsByTimestamp(marketModels);
+
+        return ResponseEntity.ok(sortedMarketModels);
+    }
+
+    @GetMapping("/market/quote")
+    ResponseEntity<Set<MarketModel>> fetchModelByQuoteIdAndTimeRange(
+            @RequestParam @Nonnull Long startDate,
+            @RequestParam @Nonnull Long endDate,
+            @RequestParam @Nonnull String id) throws IllegalArgumentException {
+
+        validateTimestamps(startDate, endDate);
+        ZonedDateTime start = convertLongToZonedDateTime(startDate);
+        ZonedDateTime end = convertLongToZonedDateTime(endDate);
+
+        log.debug("Fetching quote market models between {} and {} with id: {}",
+                start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByQuoteIdAndTimeRange(start, end, id);
+        if (isEmpty(marketModels)) {
+            return ResponseEntity.ok(Collections.emptySet());
+        }
+        Set<MarketModel> sortedMarketModels = sortMarketModelsByTimestamp(marketModels);
+
+        return ResponseEntity.ok(sortedMarketModels);
+    }
+
+    @GetMapping("/market/exchange")
+    ResponseEntity<Set<MarketModel>> fetchModelByExchangeIdAndTimeRange(
+            @RequestParam @Nonnull Long startDate,
+            @RequestParam @Nonnull Long endDate,
+            @RequestParam @Nonnull String id) throws IllegalArgumentException {
+
+        validateTimestamps(startDate, endDate);
+        ZonedDateTime start = convertLongToZonedDateTime(startDate);
+        ZonedDateTime end = convertLongToZonedDateTime(endDate);
+
+        log.debug("Fetching exchange market models between {} and {} with id: {}",
+                start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByExchangeIdAndTimeRange(start, end, id);
         if (isEmpty(marketModels)) {
             return ResponseEntity.ok(Collections.emptySet());
         }
