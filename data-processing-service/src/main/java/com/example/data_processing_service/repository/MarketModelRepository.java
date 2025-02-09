@@ -15,20 +15,20 @@ public interface MarketModelRepository extends JpaRepository<MarketModel, UUID> 
             ZonedDateTime endTimestamp);
 
     Set<MarketModel> findByBaseIdAndTimestampBetween(
+            String baseId,
             ZonedDateTime startTimestamp,
-            ZonedDateTime endTimestamp,
-            String baseId
+            ZonedDateTime endTimestamp
     );
 
     Set<MarketModel> findByQuoteIdAndTimestampBetween(
+            String quoteId,
             ZonedDateTime startTimestamp,
-            ZonedDateTime endTimestamp,
-            String quoteId
+            ZonedDateTime endTimestamp
     );
 
     Set<MarketModel> findByExchangeIdAndTimestampBetween(
+            String exchangeId,
             ZonedDateTime startTimestamp,
-            ZonedDateTime endTimestamp,
-            String exchangeId
+            ZonedDateTime endTimestamp
     );
 }

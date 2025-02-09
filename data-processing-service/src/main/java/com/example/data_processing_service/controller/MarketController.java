@@ -34,7 +34,7 @@ public class MarketController {
         ZonedDateTime end = convertLongToZonedDateTime(endDate);
 
         log.debug("Fetching market models between {} and {}", start, end);
-        Set<MarketModel> marketModels = marketModelRepository.findAllByTimeRange(start, end);
+        Set<MarketModel> marketModels = marketModelRepository.findAllByTimestampBetween(start, end);
         if (isEmpty(marketModels)) {
             return ResponseEntity.ok(Collections.emptySet());
         }
@@ -55,7 +55,7 @@ public class MarketController {
 
         log.debug("Fetching base market models between {} and {} with id: {}",
                 start, end, id);
-        Set<MarketModel> marketModels = marketModelRepository.findByBaseIdAndTimeRange(start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByBaseIdAndTimestampBetween(id, start, end);
         if (isEmpty(marketModels)) {
             return ResponseEntity.ok(Collections.emptySet());
         }
@@ -76,7 +76,7 @@ public class MarketController {
 
         log.debug("Fetching quote market models between {} and {} with id: {}",
                 start, end, id);
-        Set<MarketModel> marketModels = marketModelRepository.findByQuoteIdAndTimeRange(start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByQuoteIdAndTimestampBetween(id, start, end);
         if (isEmpty(marketModels)) {
             return ResponseEntity.ok(Collections.emptySet());
         }
@@ -97,7 +97,7 @@ public class MarketController {
 
         log.debug("Fetching exchange market models between {} and {} with id: {}",
                 start, end, id);
-        Set<MarketModel> marketModels = marketModelRepository.findByExchangeIdAndTimeRange(start, end, id);
+        Set<MarketModel> marketModels = marketModelRepository.findByExchangeIdAndTimestampBetween(id, start, end);
         if (isEmpty(marketModels)) {
             return ResponseEntity.ok(Collections.emptySet());
         }
