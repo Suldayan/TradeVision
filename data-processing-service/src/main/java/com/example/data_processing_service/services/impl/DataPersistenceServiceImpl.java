@@ -60,7 +60,7 @@ public class DataPersistenceServiceImpl implements DataPersistenceService {
         try {
             marketModelRepository.saveAll(marketModels);
 
-            log.info("Successfully saved all market models");
+            log.info("Successfully saved {} market models", marketModels.size());
         } catch (DataAccessException ex) {
             log.error("DataAccessException occurred while saving models. Attempting a retry", ex);
             throw new DatabaseException("Failed to save market data due to database error", ex);

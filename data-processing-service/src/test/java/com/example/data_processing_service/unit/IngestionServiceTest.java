@@ -40,7 +40,6 @@ public class IngestionServiceTest {
 
         for (int i = 0; i < 100; i++) {
             RawMarketDTO model = RawMarketDTO.builder()
-                    .modelId(UUID.randomUUID())
                     .baseId("BTC")
                     .rank(1)
                     .priceQuote(new BigDecimal("45000.50"))
@@ -60,7 +59,6 @@ public class IngestionServiceTest {
 
         for (int i = 0; i < 5; i++) {
             RawMarketDTO model = RawMarketDTO.builder()
-                    .modelId(UUID.randomUUID())
                     .baseId("BTC")
                     .rank(1)
                     .priceQuote(new BigDecimal("45000.50"))

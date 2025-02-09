@@ -9,9 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 public class DataPersistenceServiceTest {
 
-    @Mock
+    @Autowired
     private MarketModelRepository marketModelRepository;
 
-    @InjectMocks
+    @Autowired
     private DataPersistenceServiceImpl dataPersistenceService;
 
     private Set<MarketModel> validMarketModels;
@@ -44,6 +46,8 @@ public class DataPersistenceServiceTest {
 
     @BeforeEach
     void setup() {
+        marketModelRepository.deleteAll();
+
         validMarketModels = new HashSet<>();
         invalidMarketModels = new HashSet<>();
 
@@ -56,6 +60,7 @@ public class DataPersistenceServiceTest {
                     .exchangeId("Binance")
                     .quoteId("USDT")
                     .timestamp(ZONED_DATE_TIME)
+                    .createdAt(Instant.now())
                     .build();
             validMarketModels.add(model);
         }
@@ -69,11 +74,10 @@ public class DataPersistenceServiceTest {
                     .exchangeId("Binance")
                     .quoteId("USDT")
                     .timestamp(ZONED_DATE_TIME)
+                    .createdAt(Instant.now())
                     .build();
             invalidMarketModels.add(model);
         }
-
-        marketModelRepository.deleteAll();
     }
 
     @Test
