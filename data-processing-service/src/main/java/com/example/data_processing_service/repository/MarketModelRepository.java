@@ -10,25 +10,25 @@ import java.util.UUID;
 
 @Repository
 public interface MarketModelRepository extends JpaRepository<MarketModel, UUID> {
-    Set<MarketModel> findAllByTimeRange(
-            ZonedDateTime start,
-            ZonedDateTime end);
+    Set<MarketModel> findAllByTimestampBetween(
+            ZonedDateTime startTimestamp,
+            ZonedDateTime endTimestamp);
 
-    Set<MarketModel> findByBaseIdAndTimeRange(
-            ZonedDateTime start,
-            ZonedDateTime end,
-            String id
+    Set<MarketModel> findByBaseIdAndTimestampBetween(
+            ZonedDateTime startTimestamp,
+            ZonedDateTime endTimestamp,
+            String baseId
     );
 
-    Set<MarketModel> findByQuoteIdAndTimeRange(
-            ZonedDateTime start,
-            ZonedDateTime end,
-            String id
+    Set<MarketModel> findByQuoteIdAndTimestampBetween(
+            ZonedDateTime startTimestamp,
+            ZonedDateTime endTimestamp,
+            String quoteId
     );
 
-    Set<MarketModel> findByExchangeIdAndTimeRange(
-            ZonedDateTime start,
-            ZonedDateTime end,
-            String id
+    Set<MarketModel> findByExchangeIdAndTimestampBetween(
+            ZonedDateTime startTimestamp,
+            ZonedDateTime endTimestamp,
+            String exchangeId
     );
 }
