@@ -17,7 +17,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "markets")
+@Table(name = "markets",
+        indexes = {@Index(name = "idx_timestamp", columnList = "timestamp")})
 public class MarketModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
