@@ -13,7 +13,7 @@ import org.springframework.web.client.RestClientException;
 public class RestClientConfig {
 
     // TODO configure this with the right data processing microservice url
-    private static final String BASE_URL = "https://localhost:8081";
+    private static final String BASE_URL = "https://localhost:8081/api/v1/processing";
 
     @Bean
     public RestClient restClient() {
