@@ -13,13 +13,22 @@ spring:
   kafka:
     topic: status
     bootstrap-servers: ${spring.embedded.kafka.brokers}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        retries: 3
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 60000
+        enable.idempotence: true
+        spring.json.trusted.packages: com.example.data_processing_service.kafka.dto
     consumer:
-      group-id: processing
+      group-id: test-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: com.example.data_processing_service.dto
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: com.example.data_processing_service.kafka.dto
 
   flyway:
     enabled: false

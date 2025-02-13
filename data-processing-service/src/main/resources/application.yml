@@ -17,14 +17,15 @@ spring:
     locations: classpath:db/migration
 
   kafka:
+    topic: status
+    bootstrap-servers: localhost:9092
     consumer:
-      bootstrap-servers: localhost:9092
       group-id: processing
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: com.example.data_processing_service.dto
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: com.example.data_processing_service.kafka.dto
 
 management:
   endpoints:

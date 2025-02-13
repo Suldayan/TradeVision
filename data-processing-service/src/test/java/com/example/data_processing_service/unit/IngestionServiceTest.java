@@ -1,8 +1,8 @@
 package com.example.data_processing_service.unit;
 
-import com.example.data_processing_service.client.IngestionClient;
-import com.example.data_processing_service.dto.RawMarketDTO;
-import com.example.data_processing_service.services.impl.IngestionServiceImpl;
+import com.example.data_processing_service.features.ingestion.client.IngestionClient;
+import com.example.data_processing_service.features.ingestion.service.impl.IngestionServiceImpl;
+import com.example.data_processing_service.features.shared.dto.RawMarketDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +14,10 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class IngestionServiceTest {

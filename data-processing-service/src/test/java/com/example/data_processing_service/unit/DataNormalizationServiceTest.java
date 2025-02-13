@@ -1,8 +1,8 @@
 package com.example.data_processing_service.unit;
 
-import com.example.data_processing_service.models.MarketModel;
-import com.example.data_processing_service.dto.RawMarketDTO;
-import com.example.data_processing_service.services.impl.DataNormalizationServiceImpl;
+import com.example.data_processing_service.database.model.MarketModel;
+import com.example.data_processing_service.features.shared.dto.RawMarketDTO;
+import com.example.data_processing_service.features.processing.service.impl.DataNormalizationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
