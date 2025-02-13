@@ -26,6 +26,7 @@ public class StatusConsumer {
     )
     public void receiveStatus(@Nonnull EventDTO status) {
         try {
+            log.info("Status: {}, now starting orchestrator", status);
             orchestratorService.startProcessingFlow(status.getTimestamp());
         } catch (Exception ex) {
             log.error("Error initiating orchestration service at: {} for data fetched at: {}, {}",

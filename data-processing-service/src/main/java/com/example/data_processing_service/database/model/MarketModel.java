@@ -38,6 +38,6 @@ public class MarketModel {
     @Column(name = "timestamp", nullable = false)
     private ZonedDateTime timestamp;
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "createdAt")
     private Instant createdAt;
 }
