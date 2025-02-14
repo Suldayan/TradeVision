@@ -135,4 +135,33 @@ public class MarketControllerTest {
                 jsonMarketModel.write(batch).getJson()
         );
     }
+
+    @Test
+    void canRetrieveByTimestampAndQuoteId() throws Exception {
+        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
+        long endDateMillis = Instant.now().toEpochMilli();
+
+        final String quoteId = "USDT";
+
+        ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
+        ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
+
+        given(repository.findByQuoteIdAndTimestampBetween(quoteId, zonedStartDate ,zonedEndDate))
+                .willReturn(batch);
+
+        MockHttpServletResponse response = mvc.perform(
+                        MockMvcRequestBuilders.get(BASE_URL + "/quote/" + quoteId)
+                                .param("startDate", String.valueOf(startDateMillis))
+                                .param("endDate", String.valueOf(endDateMillis))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        String responseContent = response.getContentAsString();
+
+        assertEquals(response.getStatus(), HttpStatus.OK.value());
+        assertNotNull(responseContent);
+        assertThat(responseContent).isEqualTo(
+                jsonMarketModel.write(batch).getJson()
+        );
+    }
 }
