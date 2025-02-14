@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class MarketController {
     private final MarketModelRepository marketModelRepository;
 
-    @GetMapping("/markets")
+    @GetMapping("/all")
     ResponseEntity<Set<MarketModel>> fetchAllMarketModelsByTimeRange(
             @RequestParam @Valid @Nonnull Long startDate,
             @RequestParam @Valid @Nonnull Long endDate) throws IllegalArgumentException {
@@ -47,7 +47,7 @@ public class MarketController {
         return ResponseEntity.ok(sortedMarketModels);
     }
 
-    @GetMapping("/market/base/{id}")
+    @GetMapping("/base/{id}")
     ResponseEntity<Set<MarketModel>> fetchModelByBaseIdAndTimeRange(
             @RequestParam @Valid @Nonnull Long startDate,
             @RequestParam @Valid @Nonnull Long endDate,
@@ -68,11 +68,11 @@ public class MarketController {
         return ResponseEntity.ok(sortedMarketModels);
     }
 
-    @GetMapping("/market/quote")
+    @GetMapping("/quote/{id}")
     ResponseEntity<Set<MarketModel>> fetchModelByQuoteIdAndTimeRange(
             @RequestParam @Valid @Nonnull Long startDate,
             @RequestParam @Valid @Nonnull Long endDate,
-            @RequestParam @Valid @Nonnull String id) throws IllegalArgumentException {
+            @PathVariable @Valid @Nonnull String id) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
@@ -89,7 +89,7 @@ public class MarketController {
         return ResponseEntity.ok(sortedMarketModels);
     }
 
-    @GetMapping("/market/exchange")
+    @GetMapping("/exchange/{id}")
     ResponseEntity<Set<MarketModel>> fetchModelByExchangeIdAndTimeRange(
             @RequestParam @Valid @Nonnull Long startDate,
             @RequestParam @Valid @Nonnull Long endDate,
