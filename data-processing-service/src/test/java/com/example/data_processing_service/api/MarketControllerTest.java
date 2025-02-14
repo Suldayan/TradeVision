@@ -4,6 +4,7 @@ import com.example.data_processing_service.controller.MarketController;
 import com.example.data_processing_service.database.model.MarketModel;
 import com.example.data_processing_service.database.repository.MarketModelRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +58,9 @@ public class MarketControllerTest {
 
     @BeforeEach
     public void setup() {
-        JacksonTester.initFields(this, new ObjectMapper());
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        JacksonTester.initFields(this, objectMapper);
         mvc = MockMvcBuilders.standaloneSetup(marketController)
                 .build();
 
