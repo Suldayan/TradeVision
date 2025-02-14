@@ -3,13 +3,12 @@ package com.example.data_processing_service.controller;
 import com.example.data_processing_service.database.model.MarketModel;
 import com.example.data_processing_service.database.repository.MarketModelRepository;
 import jakarta.annotation.Nonnull;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -21,7 +20,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/v1/processing")
+@RequestMapping(
+        value = "api/v1/processing",
+        produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @RequiredArgsConstructor
 public class MarketController {
@@ -29,8 +30,8 @@ public class MarketController {
 
     @GetMapping("/markets")
     ResponseEntity<Set<MarketModel>> fetchAllMarketModelsByTimeRange(
-            @RequestParam @Nonnull Long startDate,
-            @RequestParam @Nonnull Long endDate) throws IllegalArgumentException {
+            @RequestParam @Valid @Nonnull Long startDate,
+            @RequestParam @Valid @Nonnull Long endDate) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
@@ -46,11 +47,11 @@ public class MarketController {
         return ResponseEntity.ok(sortedMarketModels);
     }
 
-    @GetMapping("/market/base")
+    @GetMapping("/market/base/{id}")
     ResponseEntity<Set<MarketModel>> fetchModelByBaseIdAndTimeRange(
-            @RequestParam @Nonnull Long startDate,
-            @RequestParam @Nonnull Long endDate,
-            @RequestParam @Nonnull String id) throws IllegalArgumentException {
+            @RequestParam @Valid @Nonnull Long startDate,
+            @RequestParam @Valid @Nonnull Long endDate,
+            @PathVariable @Valid @Nonnull String id) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
@@ -69,9 +70,9 @@ public class MarketController {
 
     @GetMapping("/market/quote")
     ResponseEntity<Set<MarketModel>> fetchModelByQuoteIdAndTimeRange(
-            @RequestParam @Nonnull Long startDate,
-            @RequestParam @Nonnull Long endDate,
-            @RequestParam @Nonnull String id) throws IllegalArgumentException {
+            @RequestParam @Valid @Nonnull Long startDate,
+            @RequestParam @Valid @Nonnull Long endDate,
+            @RequestParam @Valid @Nonnull String id) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
@@ -90,9 +91,9 @@ public class MarketController {
 
     @GetMapping("/market/exchange")
     ResponseEntity<Set<MarketModel>> fetchModelByExchangeIdAndTimeRange(
-            @RequestParam @Nonnull Long startDate,
-            @RequestParam @Nonnull Long endDate,
-            @RequestParam @Nonnull String id) throws IllegalArgumentException {
+            @RequestParam @Valid @Nonnull Long startDate,
+            @RequestParam @Valid @Nonnull Long endDate,
+            @RequestParam @Valid @Nonnull String id) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
