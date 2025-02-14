@@ -80,7 +80,7 @@ public class MarketControllerTest {
     }
 
     @Test
-    void canRetrieveByTimestampWhenExists() throws Exception {
+    void canRetrieveByTimestampWhenExistsOnAllEndpoint() throws Exception {
         long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
         // Seconds to subtract is equal to a year
         long endDateMillis = Instant.now().toEpochMilli();
@@ -96,6 +96,35 @@ public class MarketControllerTest {
                         .param("startDate", String.valueOf(startDateMillis))
                         .param("endDate", String.valueOf(endDateMillis))
                         .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        String responseContent = response.getContentAsString();
+
+        assertEquals(response.getStatus(), HttpStatus.OK.value());
+        assertNotNull(responseContent);
+        assertThat(responseContent).isEqualTo(
+                jsonMarketModel.write(batch).getJson()
+        );
+    }
+
+    @Test
+    void canRetrieveByTimestampAndBaseId() throws Exception {
+        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
+        long endDateMillis = Instant.now().toEpochMilli();
+
+        final String baseId = "BTC";
+
+        ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
+        ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
+
+        given(repository.findByBaseIdAndTimestampBetween(baseId, zonedStartDate ,zonedEndDate))
+                .willReturn(batch);
+
+        MockHttpServletResponse response = mvc.perform(
+                        MockMvcRequestBuilders.get(BASE_URL + "/base/" + baseId)
+                                .param("startDate", String.valueOf(startDateMillis))
+                                .param("endDate", String.valueOf(endDateMillis))
+                                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         String responseContent = response.getContentAsString();
