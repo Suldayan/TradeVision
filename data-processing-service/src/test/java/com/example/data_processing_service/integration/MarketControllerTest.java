@@ -14,18 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -74,6 +71,34 @@ public class MarketControllerTest {
                         .toUriString();
 
         given(repository.findAllByTimestampBetween(zonedStartDate, zonedEndDate))
+                .willReturn(batch);
+
+        ResponseEntity<Set<MarketModel>> marketModelResponse = template.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        assertThat(marketModelResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(marketModelResponse.getBody()).isEqualTo(batch);
+    }
+
+    @Test
+    void canRetrieveByTimestampAndBaseId() {
+        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
+        long endDateMillis = Instant.now().toEpochMilli();
+
+        final String baseId = "BTC";
+
+        ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
+        ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
+
+        String url = UriComponentsBuilder.fromPath(BASE_URL + "/base/" + baseId)
+                .queryParam("startDate", startDateMillis)
+                .queryParam("endDate", endDateMillis)
+                .toUriString();
+
+        given(repository.findByBaseIdAndTimestampBetween(baseId, zonedStartDate, zonedEndDate))
                 .willReturn(batch);
 
         ResponseEntity<Set<MarketModel>> marketModelResponse = template.exchange(url,
