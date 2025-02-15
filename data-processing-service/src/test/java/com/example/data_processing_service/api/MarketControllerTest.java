@@ -18,11 +18,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -81,8 +83,8 @@ public class MarketControllerTest {
 
     @Test
     void canRetrieveByTimestampWhenExistsOnAllEndpoint() throws Exception {
-        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
         // Seconds to subtract is equal to a year
+        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
         long endDateMillis = Instant.now().toEpochMilli();
 
         ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
@@ -191,6 +193,30 @@ public class MarketControllerTest {
         assertNotNull(responseContent);
         assertThat(responseContent).isEqualTo(
                 jsonMarketModel.write(batch).getJson()
+        );
+    }
+
+    @Transactional
+    @Test
+    void returnsEmptySetOnNonExistingTimestampedDataOnAllEndpoint() throws Exception {
+        long startDateMillis = Instant.now().minusSeconds(1000).toEpochMilli();
+        long endDateMillis = Instant.now().toEpochMilli();
+
+        repository.saveAll(batch);
+
+        MockHttpServletResponse response = mvc.perform(
+                        MockMvcRequestBuilders.get(BASE_URL + "/all")
+                                .param("startDate", String.valueOf(startDateMillis))
+                                .param("endDate", String.valueOf(endDateMillis))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        String responseContent = response.getContentAsString();
+
+        assertEquals(response.getStatus(), HttpStatus.OK.value());
+        assertNotNull(responseContent);
+        assertThat(responseContent).isEqualTo(
+                jsonMarketModel.write(Collections.emptySet()).getJson()
         );
     }
 }
