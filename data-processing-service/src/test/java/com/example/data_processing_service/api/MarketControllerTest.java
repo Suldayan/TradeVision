@@ -143,7 +143,7 @@ public class MarketControllerTest {
         long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
         long endDateMillis = Instant.now().toEpochMilli();
 
-        final String quoteId = "Binance";
+        final String quoteId = "USDT";
 
         ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
         ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
@@ -172,12 +172,12 @@ public class MarketControllerTest {
         long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
         long endDateMillis = Instant.now().toEpochMilli();
 
-        final String exchangeId = "USDT";
+        final String exchangeId = "Binance";
 
         ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
         ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
 
-        given(repository.findByQuoteIdAndTimestampBetween(exchangeId, zonedStartDate ,zonedEndDate))
+        given(repository.findByExchangeIdAndTimestampBetween(exchangeId, zonedStartDate ,zonedEndDate))
                 .willReturn(batch);
 
         MockHttpServletResponse response = mvc.perform(
