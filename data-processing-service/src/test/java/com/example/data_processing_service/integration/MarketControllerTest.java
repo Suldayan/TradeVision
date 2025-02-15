@@ -110,4 +110,60 @@ public class MarketControllerTest {
         assertThat(marketModelResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(marketModelResponse.getBody()).isEqualTo(batch);
     }
+
+    @Test
+    void canRetrieveByTimestampAndQuoteId() {
+        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
+        long endDateMillis = Instant.now().toEpochMilli();
+
+        final String quoteId = "USDT";
+
+        ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
+        ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
+
+        String url = UriComponentsBuilder.fromPath(BASE_URL + "/quote/" + quoteId)
+                .queryParam("startDate", startDateMillis)
+                .queryParam("endDate", endDateMillis)
+                .toUriString();
+
+        given(repository.findByQuoteIdAndTimestampBetween(quoteId, zonedStartDate, zonedEndDate))
+                .willReturn(batch);
+
+        ResponseEntity<Set<MarketModel>> marketModelResponse = template.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        assertThat(marketModelResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(marketModelResponse.getBody()).isEqualTo(batch);
+    }
+
+    @Test
+    void canRetrieveByTimestampAndExchangeId() {
+        long startDateMillis = Instant.now().minusSeconds(31536000).toEpochMilli();
+        long endDateMillis = Instant.now().toEpochMilli();
+
+        final String exchangeId = "Binance";
+
+        ZonedDateTime zonedStartDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDateMillis), ZoneOffset.UTC);
+        ZonedDateTime zonedEndDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDateMillis), ZoneOffset.UTC);
+
+        String url = UriComponentsBuilder.fromPath(BASE_URL + "/exchange/" + exchangeId)
+                .queryParam("startDate", startDateMillis)
+                .queryParam("endDate", endDateMillis)
+                .toUriString();
+
+        given(repository.findByExchangeIdAndTimestampBetween(exchangeId, zonedStartDate, zonedEndDate))
+                .willReturn(batch);
+
+        ResponseEntity<Set<MarketModel>> marketModelResponse = template.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        assertThat(marketModelResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(marketModelResponse.getBody()).isEqualTo(batch);
+    }
 }
