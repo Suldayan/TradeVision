@@ -34,12 +34,13 @@ public class MarketController {
             @RequestParam @Valid @Nonnull Long endDate) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
-        ZonedDateTime start = convertLongToZonedDateTime(startDate);
-        ZonedDateTime end = convertLongToZonedDateTime(endDate);
+        ZonedDateTime zonedStartDate = convertLongToZonedDateTime(startDate);
+        ZonedDateTime zonedEndDate = convertLongToZonedDateTime(endDate);
 
-        log.debug("Fetching market models between {} and {}", start, end);
-        Set<MarketModel> marketModels = marketModelRepository.findAllByTimestampBetween(start, end);
+        log.info("Fetching market models between {} and {}", zonedStartDate, zonedEndDate);
+        Set<MarketModel> marketModels = marketModelRepository.findAllByTimestampBetween(zonedStartDate, zonedEndDate);
         if (isEmpty(marketModels)) {
+            log.info("Market Models don't exist within: {} - {}, returning empty data",startDate, endDate);
             return ResponseEntity.ok(Collections.emptySet());
         }
         Set<MarketModel> sortedMarketModels = sortMarketModelsByTimestamp(marketModels);
@@ -93,7 +94,7 @@ public class MarketController {
     ResponseEntity<Set<MarketModel>> fetchModelByExchangeIdAndTimeRange(
             @RequestParam @Valid @Nonnull Long startDate,
             @RequestParam @Valid @Nonnull Long endDate,
-            @RequestParam @Valid @Nonnull String id) throws IllegalArgumentException {
+            @PathVariable @Valid @Nonnull String id) throws IllegalArgumentException {
 
         validateTimestamps(startDate, endDate);
         ZonedDateTime start = convertLongToZonedDateTime(startDate);
