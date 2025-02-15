@@ -15,6 +15,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "markets")
+@EqualsAndHashCode(of = {"baseId", "quoteId", "exchangeId"})
 public class MarketModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
