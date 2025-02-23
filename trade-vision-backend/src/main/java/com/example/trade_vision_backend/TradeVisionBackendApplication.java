@@ -2,7 +2,9 @@ package com.example.trade_vision_backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.modulith.Modulith;
 
+@Modulith
 @SpringBootApplication
 public class TradeVisionBackendApplication {
 

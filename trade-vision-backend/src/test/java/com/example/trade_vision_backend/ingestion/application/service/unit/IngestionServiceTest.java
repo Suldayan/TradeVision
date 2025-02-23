@@ -1,6 +1,6 @@
 package com.example.trade_vision_backend.ingestion.application.service.unit;
 
-import com.example.trade_vision_backend.ingestion.application.IngestionManagement;
+import com.example.trade_vision_backend.ingestion.application.management.IngestionManagement;
 import com.example.trade_vision_backend.ingestion.application.service.IngestionServiceImpl;
 import com.example.trade_vision_backend.ingestion.infrastructure.client.IngestionClient;
 import com.example.trade_vision_backend.ingestion.infrastructure.dto.MarketWrapperDTO;

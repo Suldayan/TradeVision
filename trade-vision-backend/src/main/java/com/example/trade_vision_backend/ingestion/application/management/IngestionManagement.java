@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.application;
+package com.example.trade_vision_backend.ingestion.application.management;
 
 import com.example.trade_vision_backend.ingestion.core.event.IngestionCompleted;
 import com.example.trade_vision_backend.ingestion.infrastructure.dto.RawMarketDTO;
