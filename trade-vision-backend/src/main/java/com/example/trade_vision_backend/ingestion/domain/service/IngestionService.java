@@ -1,7 +1,7 @@
-package com.example.trade_vision_backend.ingestion.core.service;
+package com.example.trade_vision_backend.ingestion.domain.service;
 
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.domain.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.domain.RawMarketDTO;
 
 import java.util.Set;
 

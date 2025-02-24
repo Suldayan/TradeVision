@@ -3,8 +3,8 @@ package com.example.trade_vision_backend.ingestion.application.service.unit;
 import com.example.trade_vision_backend.ingestion.application.management.IngestionManagement;
 import com.example.trade_vision_backend.ingestion.application.service.IngestionServiceImpl;
 import com.example.trade_vision_backend.ingestion.infrastructure.client.IngestionClient;
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.domain.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.domain.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -113,8 +113,11 @@ public class IngestionServiceTest {
         Set<RawMarketDTO> result = assertDoesNotThrow(
                 () -> ingestionService.convertWrapperDataToRecord(wrapperDTO));
 
+        RawMarketDTO marketDTO = result.iterator().next();
+
         assertNotNull(result);
         assertFalse(result.isEmpty());
+        assertEquals(wrapperDTO.timestamp(), marketDTO.timestamp());
         assertEquals(100, result.size());
     }
 

@@ -2,9 +2,9 @@ package com.example.trade_vision_backend.ingestion.application.service;
 
 import com.example.trade_vision_backend.ingestion.application.management.IngestionManagement;
 import com.example.trade_vision_backend.ingestion.infrastructure.client.IngestionClient;
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.RawMarketDTO;
-import com.example.trade_vision_backend.ingestion.core.service.IngestionService;
+import com.example.trade_vision_backend.ingestion.domain.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.domain.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.domain.service.IngestionService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

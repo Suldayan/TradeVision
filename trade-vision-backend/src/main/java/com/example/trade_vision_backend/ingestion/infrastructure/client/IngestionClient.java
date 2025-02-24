@@ -1,6 +1,6 @@
 package com.example.trade_vision_backend.ingestion.infrastructure.client;
 
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.domain.MarketWrapperDTO;
 import org.springframework.web.service.annotation.GetExchange;
 
 public interface IngestionClient {

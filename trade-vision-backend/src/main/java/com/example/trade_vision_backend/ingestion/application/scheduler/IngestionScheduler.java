@@ -1,6 +1,6 @@
 package com.example.trade_vision_backend.ingestion.application.scheduler;
 
-import com.example.trade_vision_backend.ingestion.core.service.IngestionService;
+import com.example.trade_vision_backend.ingestion.domain.service.IngestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

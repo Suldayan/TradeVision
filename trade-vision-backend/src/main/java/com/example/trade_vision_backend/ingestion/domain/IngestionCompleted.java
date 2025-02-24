@@ -1,6 +1,5 @@
-package com.example.trade_vision_backend.ingestion.core.event;
+package com.example.trade_vision_backend.ingestion.domain;
 
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.RawMarketDTO;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.modulith.NamedInterface;

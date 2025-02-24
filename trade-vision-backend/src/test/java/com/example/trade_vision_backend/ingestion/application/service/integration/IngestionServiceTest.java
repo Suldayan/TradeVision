@@ -1,10 +1,10 @@
 package com.example.trade_vision_backend.ingestion.application.service.integration;
 
 import com.example.trade_vision_backend.ingestion.application.management.IngestionManagement;
-import com.example.trade_vision_backend.ingestion.core.event.IngestionCompleted;
-import com.example.trade_vision_backend.ingestion.core.service.IngestionService;
+import com.example.trade_vision_backend.ingestion.domain.IngestionCompleted;
+import com.example.trade_vision_backend.ingestion.domain.service.IngestionService;
 import com.example.trade_vision_backend.ingestion.infrastructure.client.IngestionClient;
-import com.example.trade_vision_backend.ingestion.infrastructure.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.domain.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.modulith.test.ApplicationModuleTest;
