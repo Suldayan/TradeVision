@@ -1,6 +1,6 @@
-package com.example.trade_vision_backend.ingestion.infrastructure.config;
+package com.example.trade_vision_backend.ingestion.internal.config;
 
-import com.example.trade_vision_backend.ingestion.infrastructure.client.IngestionClient;
+import com.example.trade_vision_backend.ingestion.internal.domain.client.IngestionClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

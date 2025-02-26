@@ -1,7 +1,6 @@
-package com.example.trade_vision_backend.ingestion.application.management;
+package com.example.trade_vision_backend.ingestion;
 
-import com.example.trade_vision_backend.ingestion.domain.IngestionCompleted;
-import com.example.trade_vision_backend.ingestion.domain.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

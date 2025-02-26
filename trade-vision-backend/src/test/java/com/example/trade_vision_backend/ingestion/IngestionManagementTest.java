@@ -1,12 +1,7 @@
-package com.example.trade_vision_backend.ingestion.application.service.integration;
+package com.example.trade_vision_backend.ingestion;
 
-import com.example.trade_vision_backend.ingestion.application.management.IngestionManagement;
-import com.example.trade_vision_backend.ingestion.domain.IngestionCompleted;
-import com.example.trade_vision_backend.ingestion.domain.service.IngestionService;
-import com.example.trade_vision_backend.ingestion.infrastructure.client.IngestionClient;
-import com.example.trade_vision_backend.ingestion.domain.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -17,34 +12,27 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ApplicationModuleTest(ApplicationModuleTest.BootstrapMode.DIRECT_DEPENDENCIES)
-public class IngestionServiceTest {
-
-    @Autowired
-    private Scenario scenario;
-
-    @MockitoBean
-    private IngestionClient ingestionClient;
+@ApplicationModuleTest
+public class IngestionManagementTest {
 
     @MockitoBean
     private IngestionManagement ingestionManagement;
 
-    @Autowired
-    private IngestionService ingestionService;
-
     @Test
-    void executeIngestion_SuccessfullyExecutesFullIngestionFlow() {
+    void shouldPublishIngestionCompletedEvent(Scenario scenario) {
         Set<RawMarketDTO> marketDTOS = createValidMarketDTOs();
 
-        assertDoesNotThrow(() -> ingestionService.executeIngestion());
-
-        scenario.publish(new IngestionCompleted(this, marketDTOS))
+        scenario.stimulate(() -> ingestionManagement.complete(marketDTOS))
                 .andWaitForEventOfType(IngestionCompleted.class)
-                .matching(event -> event.getRawMarketDTOS().equals(marketDTOS))
+                .matching(event -> {
+                    Set<RawMarketDTO> eventData = event.getRawMarketDTOS();
+                    return eventData.equals(marketDTOS);
+                })
                 .toArriveAndVerify(event -> {
                     assertNotNull(event);
+                    assertFalse(event.getRawMarketDTOS().isEmpty());
                     assertEquals(marketDTOS, event.getRawMarketDTOS());
-        });
+                });
     }
 
     private static Set<RawMarketDTO> createValidMarketDTOs() {

@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.infrastructure.config;
+package com.example.trade_vision_backend.ingestion.internal.config;
 
 import org.springframework.scheduling.annotation.EnableScheduling;
 

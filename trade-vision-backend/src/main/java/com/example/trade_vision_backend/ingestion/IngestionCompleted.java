@@ -1,13 +1,12 @@
-package com.example.trade_vision_backend.ingestion.domain;
+package com.example.trade_vision_backend.ingestion;
 
+import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.modulith.NamedInterface;
 
 import java.util.Set;
 
 @Getter
-@NamedInterface("event")
 public class IngestionCompleted extends ApplicationEvent {
     private final Set<RawMarketDTO> rawMarketDTOS;
 
