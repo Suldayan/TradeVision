@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.internal.config;
+package com.example.trade_vision_backend.ingestion.internal.infrastructure.config;
 
 import com.example.trade_vision_backend.ingestion.internal.domain.client.IngestionClient;
 import lombok.extern.slf4j.Slf4j;

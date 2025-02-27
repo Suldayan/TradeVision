@@ -17,7 +17,7 @@ public class IngestionManagement {
     private final ApplicationEventPublisher eventPublisher;
 
     public void complete(Set<RawMarketDTO> data) {
-        data.forEach(eventPublisher::publishEvent);
+        eventPublisher.publishEvent(new IngestionCompleted(this, data));
         log.info("Ingestion event sent");
     }
 }

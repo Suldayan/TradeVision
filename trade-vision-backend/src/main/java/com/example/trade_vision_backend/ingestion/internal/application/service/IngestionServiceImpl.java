@@ -4,7 +4,6 @@ import com.example.trade_vision_backend.ingestion.IngestionManagement;
 import com.example.trade_vision_backend.ingestion.internal.domain.client.IngestionClient;
 import com.example.trade_vision_backend.ingestion.internal.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
-import com.example.trade_vision_backend.ingestion.internal.domain.IngestionService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

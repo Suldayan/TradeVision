@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.internal.domain;
+package com.example.trade_vision_backend.ingestion.internal.application.service;
 
 import com.example.trade_vision_backend.ingestion.internal.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
