@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+@Transactional
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class IngestionManagement {
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional
     public void complete(Set<RawMarketDTO> data) {
         eventPublisher.publishEvent(new IngestionCompleted(this, data));
         log.info("Ingestion event sent");

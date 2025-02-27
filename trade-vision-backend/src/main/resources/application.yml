@@ -2,6 +2,11 @@ spring:
   application:
     name: trade-vision-backend
 
+  modulith:
+    events:
+      completion:
+        mode: delete
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

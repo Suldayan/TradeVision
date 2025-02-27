@@ -4,6 +4,7 @@ import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketD
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ApplicationModuleTest
+@ActiveProfiles("test")
 public class IngestionManagementTest {
 
     @MockitoBean

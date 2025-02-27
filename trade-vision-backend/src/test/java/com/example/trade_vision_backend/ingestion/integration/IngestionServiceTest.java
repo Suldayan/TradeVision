@@ -1,6 +1,7 @@
 package com.example.trade_vision_backend.ingestion.integration;
 
 import com.example.trade_vision_backend.ingestion.internal.domain.IngestionService;
+import com.example.trade_vision_backend.ingestion.internal.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,14 @@ public class IngestionServiceTest {
     private IngestionService ingestionService;
 
     @Test
-    void 
+    void getMarketsData_ReturnsValidMarketWrapperDTO() {
+        MarketWrapperDTO result = assertDoesNotThrow(() -> ingestionService.getMarketsData());
+
+        assertNotNull(result);
+        assertNotNull(result.markets());
+        assertFalse(result.markets().isEmpty());
+        assertEquals(100, result.markets().size());
+    }
 
     private static Set<RawMarketDTO> createValidMarketDTOs() {
         Set<RawMarketDTO> set = new HashSet<>();
