@@ -1,5 +1,6 @@
 package com.example.trade_vision_backend.ingestion;
 
+import com.example.trade_vision_backend.ingestion.internal.domain.IngestionService;
 import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.test.ApplicationModuleTest;
@@ -19,6 +20,27 @@ public class IngestionManagementTest {
 
     @MockitoBean
     private IngestionManagement ingestionManagement;
+
+    @MockitoBean
+    private IngestionService ingestionService;
+
+    @Test
+    void getMarketData_ShouldSuccessfullyRunFullIngestionFlowAndPublishEvent(Scenario scenario) {
+        Set<RawMarketDTO> marketDTOS = createValidMarketDTOs();
+
+        scenario.stimulate(() -> ingestionService.executeIngestion())
+                .andWaitForEventOfType(IngestionCompleted.class)
+                .matching(event -> {
+                    Set<RawMarketDTO> eventData = event.getRawMarketDTOS();
+                    return eventData.equals(marketDTOS);
+                })
+                .toArriveAndVerify(event -> {
+                    assertNotNull(event);
+                    assertNotNull(event.getRawMarketDTOS());
+                    assertFalse(event.getRawMarketDTOS().isEmpty());
+                    assertEquals(marketDTOS, event.getRawMarketDTOS());
+                });
+    }
 
     @Test
     void shouldPublishIngestionCompletedEvent(Scenario scenario) {
