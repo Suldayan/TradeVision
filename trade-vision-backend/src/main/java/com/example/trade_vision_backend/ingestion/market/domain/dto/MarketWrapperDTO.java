@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.internal.domain.dto;
+package com.example.trade_vision_backend.ingestion.market.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;

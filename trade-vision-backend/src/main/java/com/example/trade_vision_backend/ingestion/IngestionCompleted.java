@@ -1,17 +1,26 @@
 package com.example.trade_vision_backend.ingestion;
 
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
-import lombok.Getter;
-import org.springframework.context.ApplicationEvent;
+import java.time.Instant;
+import java.util.UUID;
 
-import java.util.Set;
-
-@Getter
-public class IngestionCompleted extends ApplicationEvent {
-    private final Set<RawMarketDTO> rawMarketDTOS;
-
-    public IngestionCompleted(Object source, Set<RawMarketDTO> rawMarketDTOS) {
-        super(source);
-        this.rawMarketDTOS = rawMarketDTOS;
+public record IngestionCompleted(
+        UUID id,
+        int marketCount,
+        Instant completedAt,
+        Long ingestedTimestamp,
+        String source
+) {
+    public IngestionCompleted(
+            UUID ingestionId,
+            int marketCount,
+            Long ingestedTimestamp,
+            Object source) {
+        this(
+                ingestionId,
+                marketCount,
+                Instant.now(),
+                ingestedTimestamp,
+                source.getClass().getSimpleName()
+        );
     }
 }

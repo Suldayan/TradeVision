@@ -1,6 +1,6 @@
-package com.example.trade_vision_backend.ingestion.internal.infrastructure.config;
+package com.example.trade_vision_backend.ingestion.market.infrastructure.config;
 
-import com.example.trade_vision_backend.ingestion.internal.domain.client.IngestionClient;
+import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,9 +56,9 @@ public class RestClientConfig {
     }
 
     @Bean
-    public IngestionClient marketClient() {
+    public MarketClient marketClient() {
         RestClient client = restClient();
         HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(client)).build();
-        return factory.createClient(IngestionClient.class);
+        return factory.createClient(MarketClient.class);
     }
 }

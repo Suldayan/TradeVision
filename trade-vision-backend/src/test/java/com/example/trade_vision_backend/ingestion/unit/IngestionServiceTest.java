@@ -1,10 +1,10 @@
 package com.example.trade_vision_backend.ingestion.unit;
 
 import com.example.trade_vision_backend.ingestion.IngestionManagement;
-import com.example.trade_vision_backend.ingestion.internal.application.service.IngestionServiceImpl;
-import com.example.trade_vision_backend.ingestion.internal.domain.client.IngestionClient;
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.internal.application.IngestionServiceImpl;
+import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
+import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class IngestionServiceTest {
     @Mock
-    private IngestionClient ingestionClient;
+    private MarketClient marketClient;
 
     @Mock
     private IngestionManagement ingestionManagement;
@@ -40,10 +40,10 @@ public class IngestionServiceTest {
                 TIMESTAMP
         );
 
-        when(ingestionClient.getMarkets()).thenReturn(wrapperDTO);
+        when(marketClient.getMarkets()).thenReturn(wrapperDTO);
 
         MarketWrapperDTO result = assertDoesNotThrow(() ->
-                ingestionClient.getMarkets());
+                marketClient.getMarkets());
 
         assertNotNull(result);
         assertFalse(result.markets().isEmpty());
@@ -57,7 +57,7 @@ public class IngestionServiceTest {
                 TIMESTAMP
         );
 
-        when(ingestionClient.getMarkets()).thenReturn(wrapperDTO);
+        when(marketClient.getMarkets()).thenReturn(wrapperDTO);
 
         RestClientException exception = assertThrows(RestClientException.class,
                 () -> ingestionService.getMarketsData());
@@ -86,7 +86,7 @@ public class IngestionServiceTest {
                 TIMESTAMP
         );
 
-        when(ingestionClient.getMarkets()).thenReturn(wrapperDTO);
+        when(marketClient.getMarkets()).thenReturn(wrapperDTO);
 
         RestClientException exception = assertThrows(RestClientException.class,
                 () -> ingestionService.getMarketsData());
@@ -98,7 +98,7 @@ public class IngestionServiceTest {
     void getMarketsData_ThrowsRestClientExceptionOnNullData() {
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(null, TIMESTAMP);
 
-        when(ingestionClient.getMarkets()).thenReturn(wrapperDTO);
+        when(marketClient.getMarkets()).thenReturn(wrapperDTO);
 
         RestClientException exception = assertThrows(RestClientException.class,
                 () -> ingestionService.getMarketsData());
@@ -135,7 +135,7 @@ public class IngestionServiceTest {
         Set<RawMarketDTO> marketDTOS = createValidMarketDTOs();
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(marketDTOS, TIMESTAMP);
 
-        when(ingestionClient.getMarkets()).thenReturn(wrapperDTO);
+        when(marketClient.getMarkets()).thenReturn(wrapperDTO);
 
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
 

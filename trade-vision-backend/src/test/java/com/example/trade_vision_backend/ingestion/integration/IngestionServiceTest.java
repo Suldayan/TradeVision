@@ -1,8 +1,8 @@
 package com.example.trade_vision_backend.ingestion.integration;
 
-import com.example.trade_vision_backend.ingestion.internal.application.service.IngestionService;
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.internal.application.IngestionService;
+import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

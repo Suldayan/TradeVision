@@ -1,9 +1,10 @@
-package com.example.trade_vision_backend.ingestion.internal.application.service;
+package com.example.trade_vision_backend.ingestion.market.application.service;
 
-import com.example.trade_vision_backend.ingestion.IngestionManagement;
-import com.example.trade_vision_backend.ingestion.internal.domain.client.IngestionClient;
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.internal.domain.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
+import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
+import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.market.domain.mapper.RawMarketMapper;
+import com.example.trade_vision_backend.ingestion.market.infrastructure.model.RawMarketModel;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,16 +19,17 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class IngestionServiceImpl implements IngestionService {
-    private final IngestionClient ingestionClient;
-    private final IngestionManagement ingestionManagement;
+public class MarketServiceImpl implements MarketService {
+    private final MarketClient marketClient;
+    private final RawMarketMapper mapper;
 
-    //TODO figure out spring retry
+    private static final Integer EXPECTED_MARKET_SIZE = 100;
+
     @Nonnull
     @Override
     public MarketWrapperDTO getMarketsData() {
         try {
-            MarketWrapperDTO marketHolder = ingestionClient.getMarkets();
+            MarketWrapperDTO marketHolder = marketClient.getMarkets();
             validateMarketWrapper(marketHolder);
             return marketHolder;
         } catch (RestClientResponseException ex) {
@@ -73,20 +75,8 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     @Override
-    public void sendEvent(@Nonnull Set<RawMarketDTO> marketDTOS) {
-        ingestionManagement.complete(marketDTOS);
-    }
-
-    @Override
-    public void executeIngestion() {
-        try {
-            MarketWrapperDTO marketWrapper = getMarketsData();
-            Set<RawMarketDTO> rawMarketDTOS = convertWrapperDataToRecord(marketWrapper);
-            sendEvent(rawMarketDTOS);
-            log.info("Successfully completed market ingestion flow");
-        } catch (Exception ex) {
-            throw new RestClientException("Market ingestion failed", ex);
-        }
+    public Set<RawMarketModel> rawMarketDTOToModel(Set<RawMarketDTO> marketDTOS) {
+        return mapper.dtoSetToEntitySet(marketDTOS);
     }
 
     private void validateMarketWrapper(@Nonnull MarketWrapperDTO marketHolder) {
@@ -96,7 +86,7 @@ public class IngestionServiceImpl implements IngestionService {
         if (marketHolder.markets().isEmpty()) {
             throw new RestClientException("Market set from wrapper returned empty");
         }
-        if (marketHolder.markets().size() != 100) {
+        if (marketHolder.markets().size() != EXPECTED_MARKET_SIZE) {
             throw new RestClientException("Market set from wrapper is not equal to 100");
         }
     }
