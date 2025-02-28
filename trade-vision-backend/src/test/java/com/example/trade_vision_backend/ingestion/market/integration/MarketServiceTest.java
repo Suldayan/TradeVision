@@ -6,12 +6,14 @@ import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class MarketServiceTest {
 
     @Autowired

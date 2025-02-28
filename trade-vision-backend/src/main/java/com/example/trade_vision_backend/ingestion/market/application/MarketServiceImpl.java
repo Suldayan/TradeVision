@@ -77,7 +77,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public Set<RawMarketModel> rawMarketDTOToModel(Set<RawMarketDTO> marketDTOS) {
-        return mapper.dtoSetToEntitySet(marketDTOS);
+        return mapper.INSTANCE.dtoSetToEntitySet(marketDTOS);
     }
 
     private void validateMarketWrapper(@Nonnull MarketWrapperDTO marketHolder) {

@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.modulith.Modulith;
 
 @Modulith
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.example.trade_vision_backend")
 @ConfigurationPropertiesScan
 public class TradeVisionBackendApplication {
 
