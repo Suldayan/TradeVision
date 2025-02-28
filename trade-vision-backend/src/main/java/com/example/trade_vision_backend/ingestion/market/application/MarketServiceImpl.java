@@ -1,5 +1,6 @@
-package com.example.trade_vision_backend.ingestion.market.application.service;
+package com.example.trade_vision_backend.ingestion.market.application;
 
+import com.example.trade_vision_backend.ingestion.market.MarketService;
 import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;

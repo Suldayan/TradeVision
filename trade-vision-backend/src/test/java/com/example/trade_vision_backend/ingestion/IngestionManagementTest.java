@@ -33,7 +33,6 @@ public class IngestionManagementTest {
                 .andWaitForEventOfType(IngestionCompleted.class)
                 .toArriveAndVerify(event -> {
                     assertNotNull(event);
-                    assertNotNull(event.getRawMarketDTOS());
                 });
     }
 

@@ -8,5 +8,6 @@ import java.util.Set;
 
 @Mapper
 public interface RawMarketMapper {
+    RawMarketModel dtoToEntity(RawMarketDTO dto);
     Set<RawMarketModel> dtoSetToEntitySet(Set<RawMarketDTO> marketDTOS);
 }

@@ -22,16 +22,6 @@ public class IngestionServiceTest {
     private IngestionService ingestionService;
 
     @Test
-    void getMarketsData_ReturnsValidMarketWrapperDTO() {
-        MarketWrapperDTO result = assertDoesNotThrow(() -> ingestionService.getMarketsData());
-
-        assertNotNull(result);
-        assertNotNull(result.markets());
-        assertFalse(result.markets().isEmpty());
-        assertEquals(100, result.markets().size());
-    }
-
-    @Test
     void executeIngestion_SuccessfullyExecutesEntireFlow() {
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
     }

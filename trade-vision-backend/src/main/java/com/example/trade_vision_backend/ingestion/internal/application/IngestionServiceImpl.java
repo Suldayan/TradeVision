@@ -2,7 +2,7 @@ package com.example.trade_vision_backend.ingestion.internal.application;
 
 import com.example.trade_vision_backend.ingestion.IngestionManagement;
 import com.example.trade_vision_backend.ingestion.internal.application.exception.IngestionException;
-import com.example.trade_vision_backend.ingestion.market.application.service.MarketService;
+import com.example.trade_vision_backend.ingestion.market.MarketService;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;
 import com.example.trade_vision_backend.ingestion.market.infrastructure.model.RawMarketModel;
