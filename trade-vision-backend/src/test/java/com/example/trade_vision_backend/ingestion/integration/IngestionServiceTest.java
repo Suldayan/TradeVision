@@ -6,15 +6,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 public class IngestionServiceTest {
 
     @Autowired
@@ -23,6 +27,7 @@ public class IngestionServiceTest {
     @Test
     void executeIngestion_SuccessfullyExecutesEntireFlow() {
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
+        verify(ingestionService, times(1)).executeIngestion();
     }
 
     private static Set<RawMarketDTO> createValidMarketDTOs() {

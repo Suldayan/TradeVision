@@ -31,7 +31,7 @@ public class IngestionServiceImpl implements IngestionService {
         ingestionManagement.complete(marketDTOS);
     }
 
-    @Scheduled(fixedRate = 900000)
+    @Scheduled@Scheduled(cron = "0 */15 * * * *")
     @Override
     @Transactional
     public void executeIngestion() {
