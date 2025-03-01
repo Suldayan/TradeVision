@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.market.infrastructure.model;
+package com.example.trade_vision_backend.ingestion.market;
 
 import jakarta.persistence.*;
 import java.util.UUID;

@@ -1,7 +1,7 @@
 package com.example.trade_vision_backend.ingestion.market.domain.mapper;
 
-import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;
-import com.example.trade_vision_backend.ingestion.market.infrastructure.model.RawMarketModel;
+import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

@@ -1,4 +1,4 @@
-package com.example.trade_vision_backend.ingestion.market.domain.dto;
+package com.example.trade_vision_backend.ingestion.market;
 
 
 import jakarta.annotation.Nonnull;

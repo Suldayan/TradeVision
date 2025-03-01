@@ -3,7 +3,7 @@ package com.example.trade_vision_backend.ingestion.market.unit;
 import com.example.trade_vision_backend.ingestion.market.application.MarketServiceImpl;
 import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.market.domain.dto.RawMarketDTO;
+import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
