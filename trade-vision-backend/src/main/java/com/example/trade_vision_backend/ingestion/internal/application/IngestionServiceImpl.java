@@ -73,20 +73,10 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     @Nonnull
-    private Map<String, RawMarketModel> createMapForLatestData(@Nonnull Set<RawMarketModel> data) {
+    private <T extends RawMarketModel> Map<String, T> createDataMap(@Nonnull Collection<T> data) {
         return data.stream()
                 .collect(Collectors.toMap(
-                        RawMarketModel::getBaseId,
-                        model -> model,
-                        (existing, replacement) -> replacement
-                ));
-    }
-
-    @Nonnull
-    private Map<String, RawMarketModel> createMapForRepositoryModelData(@Nonnull List<RawMarketModel> data) {
-        return data.stream()
-                .collect(Collectors.toMap(
-                        RawMarketModel::getBaseId,
+                        T::getBaseId,
                         model -> model,
                         (existing, replacement) -> replacement
                 ));
@@ -97,19 +87,21 @@ public class IngestionServiceImpl implements IngestionService {
             @Nonnull Set<RawMarketModel> latestFetchedData,
             @Nonnull List<RawMarketModel> repositoryModels
     ) {
-        Map<String, RawMarketModel> mapForLatestData = createMapForLatestData(latestFetchedData);
-        Map<String, RawMarketModel> mapForRepositoryData = createMapForRepositoryModelData(repositoryModels);
+        Map<String, RawMarketModel> mapForLatestData = createDataMap(latestFetchedData);
+        Map<String, RawMarketModel> mapForRepositoryData = createDataMap(repositoryModels);
         List<RawMarketModel> updatedData = new ArrayList<>();
 
         for (Map.Entry<String, RawMarketModel> entry : mapForLatestData.entrySet()) {
             String baseId = entry.getKey();
-            RawMarketModel existingModel = entry.getValue();
+            RawMarketModel latestModel = entry.getValue();
 
             if (mapForRepositoryData.containsKey(baseId)) {
-                updateModelFields(existingModel, mapForLatestData.get(baseId));
+                RawMarketModel existingModel = mapForRepositoryData.get(baseId);
+                updateModelFields(existingModel, latestModel);
+                updatedData.add(existingModel);
+            } else {
+                updatedData.add(latestModel);
             }
-
-            updatedData.add(existingModel);
         }
 
         return updatedData;
