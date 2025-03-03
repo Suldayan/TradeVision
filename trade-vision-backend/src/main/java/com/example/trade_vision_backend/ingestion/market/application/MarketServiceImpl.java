@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class MarketServiceImpl implements MarketService {
         try {
             MarketWrapperDTO marketHolder = marketClient.getMarkets();
             validateMarketWrapper(marketHolder);
+            log.info("Successfully fetched and validated all markets");
             return marketHolder;
         } catch (RestClientResponseException ex) {
             throw ex;
@@ -71,12 +73,12 @@ public class MarketServiceImpl implements MarketService {
         if (marketSet.size() != 100) {
             throw new RestClientException("Market set fetched but set size is not 100");
         }
-        log.info("Successfully fetched {} markets.", marketSet.size());
+        log.info("Converted wrapper data to record set of size: {}", marketSet.size());
         return marketSet;
     }
 
     @Override
-    public Set<RawMarketModel> rawMarketDTOToModel(Set<RawMarketDTO> marketDTOS) {
+    public List<RawMarketModel> rawMarketDTOToModel(Set<RawMarketDTO> marketDTOS) {
         return mapper.INSTANCE.dtoSetToEntitySet(marketDTOS);
     }
 

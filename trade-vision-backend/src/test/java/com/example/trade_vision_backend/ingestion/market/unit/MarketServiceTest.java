@@ -15,6 +15,7 @@ import org.springframework.web.client.RestClientException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,7 +123,7 @@ public class MarketServiceTest {
     void rawMarketDTOToModel_ConvertsDTOToModelSuccessfully() {
         Set<RawMarketDTO> marketDTOS = createValidMarketDTOs();
 
-        Set<RawMarketModel> result = assertDoesNotThrow(
+        List<RawMarketModel> result = assertDoesNotThrow(
                 () -> marketService.rawMarketDTOToModel(marketDTOS));
 
         assertNotNull(result);

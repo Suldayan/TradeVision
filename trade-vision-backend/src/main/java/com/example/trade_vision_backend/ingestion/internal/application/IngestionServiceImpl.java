@@ -39,7 +39,7 @@ public class IngestionServiceImpl implements IngestionService {
         try {
             MarketWrapperDTO marketWrapper = marketService.getMarketsData();
             Set<RawMarketDTO> rawMarketDTOS = marketService.convertWrapperDataToRecord(marketWrapper);
-            Set<RawMarketModel> rawMarketModels = marketService.rawMarketDTOToModel(rawMarketDTOS);
+            List<RawMarketModel> rawMarketModels = marketService.rawMarketDTOToModel(rawMarketDTOS);
             saveMarketData(rawMarketModels);
             sendEvent(rawMarketDTOS);
             log.info("Successfully completed market ingestion flow");
@@ -50,7 +50,7 @@ public class IngestionServiceImpl implements IngestionService {
 
     // TODO configure a retry
     @Transactional
-    private void saveMarketData(@Nonnull Set<RawMarketModel> latestFetchedData) throws IngestionException {
+    private void saveMarketData(@Nonnull List<RawMarketModel> latestFetchedData) throws IngestionException {
         try {
             List<RawMarketModel> repositoryModels = ingestionRepository.findAll();
             if (repositoryModels.isEmpty()) {
@@ -84,7 +84,7 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Nonnull
     private List<RawMarketModel> createNewUpdatedModelSet(
-            @Nonnull Set<RawMarketModel> latestFetchedData,
+            @Nonnull List<RawMarketModel> latestFetchedData,
             @Nonnull List<RawMarketModel> repositoryModels
     ) {
         Map<String, RawMarketModel> mapForLatestData = createDataMap(latestFetchedData);
