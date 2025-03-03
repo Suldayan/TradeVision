@@ -73,7 +73,7 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     @Nonnull
-    private <T extends RawMarketModel> Map<String, T> createDataMap(@Nonnull Collection<T> data) {
+    private static <T extends RawMarketModel> Map<String, T> createDataMap(@Nonnull Collection<T> data) {
         return data.stream()
                 .collect(Collectors.toMap(
                         T::getBaseId,
@@ -107,18 +107,17 @@ public class IngestionServiceImpl implements IngestionService {
         return updatedData;
     }
 
-        private void updateModelFields (
-                @Nonnull RawMarketModel existingModel,
-                @Nonnull RawMarketModel newModel
-        ) {
-            existingModel.setRank(newModel.getRank());
-            existingModel.setPriceQuote(newModel.getPriceQuote());
-            existingModel.setPriceUsd(newModel.getPriceUsd());
-            existingModel.setVolumeUsd24Hr(newModel.getVolumeUsd24Hr());
-            existingModel.setPercentExchangeVolume(newModel.getPercentExchangeVolume());
-            existingModel.setTradesCount24Hr(newModel.getTradesCount24Hr());
-            existingModel.setUpdated(newModel.getUpdated());
-            existingModel.setTimestamp(newModel.getTimestamp());
-        }
+    private void updateModelFields (
+            @Nonnull RawMarketModel existingModel,
+            @Nonnull RawMarketModel newModel
+    ) {
+        existingModel.setRank(newModel.getRank());
+        existingModel.setPriceQuote(newModel.getPriceQuote());
+        existingModel.setPriceUsd(newModel.getPriceUsd());
+        existingModel.setVolumeUsd24Hr(newModel.getVolumeUsd24Hr());
+        existingModel.setPercentExchangeVolume(newModel.getPercentExchangeVolume());
+        existingModel.setTradesCount24Hr(newModel.getTradesCount24Hr());
+        existingModel.setUpdated(newModel.getUpdated());
+        existingModel.setTimestamp(newModel.getTimestamp());
     }
 }
