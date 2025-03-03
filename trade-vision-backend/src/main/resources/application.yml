@@ -2,6 +2,11 @@ spring:
   application:
     name: trade-vision-backend
 
+  task:
+    scheduling:
+      pool:
+        size: 1
+
   modulith:
     events:
       completion:

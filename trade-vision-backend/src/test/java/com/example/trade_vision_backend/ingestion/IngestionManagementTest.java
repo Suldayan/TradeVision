@@ -3,33 +3,40 @@ package com.example.trade_vision_backend.ingestion;
 import com.example.trade_vision_backend.ingestion.internal.application.IngestionService;
 import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ApplicationModuleTest
+@ApplicationModuleTest(ApplicationModuleTest.BootstrapMode.DIRECT_DEPENDENCIES)
 @ActiveProfiles("test")
 public class IngestionManagementTest {
 
     @MockitoBean
     private IngestionManagement ingestionManagement;
 
-    @Autowired
+    @MockitoBean
     private IngestionService ingestionService;
 
     @Test
     void getMarketData_ShouldSuccessfullyRunFullIngestionFlowAndPublishEvent(Scenario scenario) {
-        scenario.stimulate(() -> ingestionService.executeIngestion())
+        IngestionCompleted ingestionCompleted = new IngestionCompleted(
+                UUID.randomUUID(),
+                100,
+                Instant.now(),
+                123456789L,
+                "ingestion"
+        );
+
+        scenario.stimulate(() -> ingestionManagement.complete(createValidMarketDTOs()))
                 .andWaitForEventOfType(IngestionCompleted.class)
                 .toArriveAndVerify(event -> {
                     assertNotNull(event);

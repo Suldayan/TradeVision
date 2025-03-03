@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Table(name = "raw_market_data")
 @EqualsAndHashCode
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

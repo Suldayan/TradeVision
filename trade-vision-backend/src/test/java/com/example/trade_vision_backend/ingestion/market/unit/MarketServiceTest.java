@@ -1,5 +1,6 @@
 package com.example.trade_vision_backend.ingestion.market.unit;
 
+import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.ingestion.market.application.MarketServiceImpl;
 import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
@@ -117,6 +118,19 @@ public class MarketServiceTest {
         assertEquals(100, result.size());
     }
 
+    @Test
+    void rawMarketDTOToModel_ConvertsDTOToModelSuccessfully() {
+        Set<RawMarketDTO> marketDTOS = createValidMarketDTOs();
+
+        Set<RawMarketModel> result = assertDoesNotThrow(
+                () -> marketService.rawMarketDTOToModel(marketDTOS));
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(100, result.size());
+
+    }
+
     private static Set<RawMarketDTO> createValidMarketDTOs() {
         Set<RawMarketDTO> set = new HashSet<>();
         for (int i = 0; i < 100; i++) {
@@ -127,12 +141,12 @@ public class MarketServiceTest {
                     "bitcoin",
                     "USDT",
                     "tether",
-                    new BigDecimal("65000.00"),
+                    new BigDecimal("65000.00").add(new BigDecimal(i)),
                     new BigDecimal("65000.00"),
                     new BigDecimal("1500000000.00"),
                     new BigDecimal("5.25"),
-                    1200,
-                    1696252800000L,
+                    1200 + i,
+                    1696252800000L + i,
                     null
             ));
         }

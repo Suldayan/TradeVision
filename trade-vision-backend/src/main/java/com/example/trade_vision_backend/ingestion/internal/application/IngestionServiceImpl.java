@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,7 +32,7 @@ public class IngestionServiceImpl implements IngestionService {
         ingestionManagement.complete(marketDTOS);
     }
 
-    @Scheduled@Scheduled(cron = "0 */15 * * * *")
+    @Scheduled(cron = "0 */15 * * * *")
     @Override
     @Transactional
     public void executeIngestion() {
@@ -49,14 +50,83 @@ public class IngestionServiceImpl implements IngestionService {
 
     // TODO configure a retry
     @Transactional
-    private void saveMarketData(@Nonnull Set<RawMarketModel> data) throws IngestionException {
+    private void saveMarketData(@Nonnull Set<RawMarketModel> latestFetchedData) throws IngestionException {
         try {
-            ingestionRepository.saveAll(data);
+            List<RawMarketModel> repositoryModels = ingestionRepository.findAll();
+            if (repositoryModels.isEmpty()) {
+                log.info("No data available to update. Saved all models successfully");
+                ingestionRepository.saveAll(latestFetchedData);
+                return;
+            }
+
+            // The goal is to save if the models don't exist, and update the fields if the models do exist
+            // This allows us to not have to constantly INSERT and DELETE all the time
+            List<RawMarketModel> updatedData = createNewUpdatedModelSet(latestFetchedData, repositoryModels);
+
             log.info("Successfully saved all data entries");
+            ingestionRepository.saveAll(updatedData);
         } catch (DataAccessException ex) {
             throw new IngestionException("Database error occurred while saving market data", ex);
         } catch (Exception ex) {
             throw new IngestionException("An unexpected error occurred while saving raw market data", ex);
+        }
+    }
+
+    @Nonnull
+    private Map<String, RawMarketModel> createMapForLatestData(@Nonnull Set<RawMarketModel> data) {
+        return data.stream()
+                .collect(Collectors.toMap(
+                        RawMarketModel::getBaseId,
+                        model -> model,
+                        (existing, replacement) -> replacement
+                ));
+    }
+
+    @Nonnull
+    private Map<String, RawMarketModel> createMapForRepositoryModelData(@Nonnull List<RawMarketModel> data) {
+        return data.stream()
+                .collect(Collectors.toMap(
+                        RawMarketModel::getBaseId,
+                        model -> model,
+                        (existing, replacement) -> replacement
+                ));
+    }
+
+    @Nonnull
+    private List<RawMarketModel> createNewUpdatedModelSet(
+            @Nonnull Set<RawMarketModel> latestFetchedData,
+            @Nonnull List<RawMarketModel> repositoryModels
+    ) {
+        Map<String, RawMarketModel> mapForLatestData = createMapForLatestData(latestFetchedData);
+        Map<String, RawMarketModel> mapForRepositoryData = createMapForRepositoryModelData(repositoryModels);
+        List<RawMarketModel> updatedData = new ArrayList<>();
+
+        for (Map.Entry<String, RawMarketModel> entry : mapForLatestData.entrySet()) {
+            String baseId = entry.getKey();
+            RawMarketModel existingModel = entry.getValue();
+
+            if (mapForRepositoryData.containsKey(baseId)) {
+                updateModelFields(existingModel, mapForLatestData.get(baseId));
+            }
+
+            updatedData.add(existingModel);
+        }
+
+        return updatedData;
+    }
+
+        private void updateModelFields (
+                @Nonnull RawMarketModel existingModel,
+                @Nonnull RawMarketModel newModel
+        ) {
+            existingModel.setRank(newModel.getRank());
+            existingModel.setPriceQuote(newModel.getPriceQuote());
+            existingModel.setPriceUsd(newModel.getPriceUsd());
+            existingModel.setVolumeUsd24Hr(newModel.getVolumeUsd24Hr());
+            existingModel.setPercentExchangeVolume(newModel.getPercentExchangeVolume());
+            existingModel.setTradesCount24Hr(newModel.getTradesCount24Hr());
+            existingModel.setUpdated(newModel.getUpdated());
+            existingModel.setTimestamp(newModel.getTimestamp());
         }
     }
 }

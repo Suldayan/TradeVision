@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -27,7 +25,6 @@ public class IngestionServiceTest {
     @Test
     void executeIngestion_SuccessfullyExecutesEntireFlow() {
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
-        verify(ingestionService, times(1)).executeIngestion();
     }
 
     private static Set<RawMarketDTO> createValidMarketDTOs() {

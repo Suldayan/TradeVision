@@ -2,6 +2,7 @@ package com.example.trade_vision_backend.ingestion.unit;
 
 import com.example.trade_vision_backend.ingestion.IngestionManagement;
 import com.example.trade_vision_backend.ingestion.internal.application.IngestionServiceImpl;
+import com.example.trade_vision_backend.ingestion.internal.infrastructure.repository.IngestionRepository;
 import com.example.trade_vision_backend.ingestion.market.MarketService;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
@@ -25,6 +26,9 @@ public class IngestionServiceTest {
 
     @Mock
     private MarketService marketService;
+
+    @Mock
+    private IngestionRepository ingestionRepository;
 
     @Mock
     private IngestionManagement ingestionManagement;
