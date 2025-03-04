@@ -1,9 +1,6 @@
-package com.example.trade_vision_backend.ingestion.market.integration;
+package com.example.trade_vision_backend.ingestion.market;
 
-import com.example.trade_vision_backend.ingestion.market.MarketService;
-import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +13,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class MarketServiceTest {
+public class MarketServiceIntegrationTest {
 
     @Autowired
     private MarketService marketService;
 
     @Test
-    void getMarketsData_SuccessfullyReturnsMarketWrapperDTO() {
+    public void getMarketsData_SuccessfullyReturnsMarketWrapperDTO() {
         MarketWrapperDTO result = assertDoesNotThrow(
                 () -> marketService.getMarketsData()
         );
@@ -35,7 +32,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void convertWrapperDataToRecord_SuccessfullyConvertsWrapperSetToRecordSet() {
+    public void convertWrapperDataToRecord_SuccessfullyConvertsWrapperSetToRecordSet() {
         MarketWrapperDTO wrapperDTO = assertDoesNotThrow(
                 () -> marketService.getMarketsData()
         );
@@ -50,7 +47,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void  rawMarketDTOToModel_SuccessfullyConvertsDTOSetToModelList() {
+    public void  rawMarketDTOToModel_SuccessfullyConvertsDTOSetToModelList() {
         MarketWrapperDTO wrapperDTO = assertDoesNotThrow(
                 () -> marketService.getMarketsData()
         );

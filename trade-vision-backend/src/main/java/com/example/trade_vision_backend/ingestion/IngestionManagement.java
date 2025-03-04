@@ -17,6 +17,7 @@ import java.util.UUID;
 public class IngestionManagement {
     private final ApplicationEventPublisher eventPublisher;
 
+    @Transactional
     public void complete(Set<RawMarketDTO> data) {
         eventPublisher.publishEvent(new IngestionCompleted(
                 UUID.randomUUID(),

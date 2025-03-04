@@ -20,8 +20,6 @@ public class RawMarketModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID batchId;
-
     private String exchangeId;
     private Integer rank;
     private String baseSymbol;

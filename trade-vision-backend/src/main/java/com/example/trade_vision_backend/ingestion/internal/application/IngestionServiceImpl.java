@@ -50,7 +50,8 @@ public class IngestionServiceImpl implements IngestionService {
 
     // TODO configure a retry
     @Transactional
-    private void saveMarketData(@Nonnull List<RawMarketModel> latestFetchedData) throws IngestionException {
+    @Override
+    public void saveMarketData(@Nonnull List<RawMarketModel> latestFetchedData) throws IngestionException {
         try {
             List<RawMarketModel> repositoryModels = ingestionRepository.findAll();
             if (repositoryModels.isEmpty()) {

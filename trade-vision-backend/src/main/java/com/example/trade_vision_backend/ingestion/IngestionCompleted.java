@@ -8,7 +8,7 @@ public record IngestionCompleted(
         int marketCount,
         Instant completedAt,
         Long ingestedTimestamp,
-        String source
+        Object source
 ) {
     public IngestionCompleted(
             UUID ingestionId,

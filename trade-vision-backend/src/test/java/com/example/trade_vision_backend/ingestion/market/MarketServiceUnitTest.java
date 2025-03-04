@@ -1,10 +1,8 @@
-package com.example.trade_vision_backend.ingestion.market.unit;
+package com.example.trade_vision_backend.ingestion.market;
 
-import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.ingestion.market.application.MarketServiceImpl;
 import com.example.trade_vision_backend.ingestion.market.domain.client.MarketClient;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
-import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class MarketServiceTest {
+public class MarketServiceUnitTest {
     @Mock
     private MarketClient marketClient;
 
@@ -32,7 +30,7 @@ public class MarketServiceTest {
     private static final Long TIMESTAMP = 123456789L;
 
     @Test
-    void getMarketsData_ReturnsValidMarketWrapperDTO() {
+    public void getMarketsData_ReturnsValidMarketWrapperDTO() {
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(
                 createValidMarketDTOs(),
                 TIMESTAMP
@@ -49,7 +47,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void getMarketsData_ThrowsRestClientExceptionOnEmptyData() {
+    public void getMarketsData_ThrowsRestClientExceptionOnEmptyData() {
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(
                 Collections.emptySet(),
                 TIMESTAMP
@@ -64,7 +62,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void getMarketsData_ThrowsRestClientExceptionOnInvalidDataSize() {
+    public void getMarketsData_ThrowsRestClientExceptionOnInvalidDataSize() {
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(
                 Set.of(new RawMarketDTO(
                         "binance",
@@ -93,7 +91,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void getMarketsData_ThrowsRestClientExceptionOnNullData() {
+    public void getMarketsData_ThrowsRestClientExceptionOnNullData() {
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(null, TIMESTAMP);
 
         when(marketClient.getMarkets()).thenReturn(wrapperDTO);
@@ -105,7 +103,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void convertWrapperDataToRecord_ReturnsValidRawMarketDTOSet() {
+    public void convertWrapperDataToRecord_ReturnsValidRawMarketDTOSet() {
         MarketWrapperDTO wrapperDTO = new MarketWrapperDTO(createValidMarketDTOs(), TIMESTAMP);
 
         Set<RawMarketDTO> result = assertDoesNotThrow(
@@ -120,7 +118,7 @@ public class MarketServiceTest {
     }
 
     @Test
-    void rawMarketDTOToModel_ConvertsDTOToModelSuccessfully() {
+    public void rawMarketDTOToModel_ConvertsDTOToModelSuccessfully() {
         Set<RawMarketDTO> marketDTOS = createValidMarketDTOs();
 
         List<RawMarketModel> result = assertDoesNotThrow(
