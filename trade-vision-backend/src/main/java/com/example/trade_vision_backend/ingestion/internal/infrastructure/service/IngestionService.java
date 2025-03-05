@@ -1,6 +1,6 @@
-package com.example.trade_vision_backend.ingestion.internal.application;
+package com.example.trade_vision_backend.ingestion.internal.infrastructure.service;
 
-import com.example.trade_vision_backend.ingestion.internal.application.exception.IngestionException;
+import com.example.trade_vision_backend.ingestion.internal.infrastructure.exception.IngestionException;
 import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 

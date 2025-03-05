@@ -1,6 +1,6 @@
 package com.example.trade_vision_backend.ingestion.internal;
 
-import com.example.trade_vision_backend.ingestion.internal.application.IngestionService;
+import com.example.trade_vision_backend.ingestion.internal.infrastructure.service.IngestionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

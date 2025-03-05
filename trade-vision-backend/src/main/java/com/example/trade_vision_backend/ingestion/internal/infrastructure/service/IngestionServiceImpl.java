@@ -1,7 +1,7 @@
-package com.example.trade_vision_backend.ingestion.internal.application;
+package com.example.trade_vision_backend.ingestion.internal.infrastructure.service;
 
 import com.example.trade_vision_backend.ingestion.IngestionManagement;
-import com.example.trade_vision_backend.ingestion.internal.application.exception.IngestionException;
+import com.example.trade_vision_backend.ingestion.internal.infrastructure.exception.IngestionException;
 import com.example.trade_vision_backend.ingestion.market.MarketService;
 import com.example.trade_vision_backend.ingestion.market.domain.dto.MarketWrapperDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
@@ -64,8 +64,8 @@ public class IngestionServiceImpl implements IngestionService {
             // This allows us to not have to constantly INSERT and DELETE all the time
             List<RawMarketModel> updatedData = createNewUpdatedModelSet(latestFetchedData, repositoryModels);
 
-            log.info("Successfully saved all data entries");
             ingestionRepository.saveAll(updatedData);
+            log.info("Successfully saved all data entries");
         } catch (DataAccessException ex) {
             throw new IngestionException("Database error occurred while saving market data", ex);
         } catch (Exception ex) {

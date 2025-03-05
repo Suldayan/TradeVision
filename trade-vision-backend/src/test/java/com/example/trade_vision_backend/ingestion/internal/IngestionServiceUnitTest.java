@@ -1,7 +1,7 @@
 package com.example.trade_vision_backend.ingestion.internal;
 
 import com.example.trade_vision_backend.ingestion.IngestionManagement;
-import com.example.trade_vision_backend.ingestion.internal.application.IngestionServiceImpl;
+import com.example.trade_vision_backend.ingestion.internal.infrastructure.service.IngestionServiceImpl;
 import com.example.trade_vision_backend.ingestion.internal.infrastructure.repository.IngestionRepository;
 import com.example.trade_vision_backend.ingestion.market.MarketService;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
