@@ -10,14 +10,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 public class ProcessingServiceUnitTest {
 
     @Mock
@@ -51,6 +56,23 @@ public class ProcessingServiceUnitTest {
 
         assertDoesNotThrow(
                 () -> processingService.executeProcessing(validSet, MOCK_TIMESTAMP));
+    }
+
+    @Test
+    public void saveProcessedData_SuccessfullySavesData() {
+        List<ProcessedMarketModel> processedMarketModels = createValidMarketModelList();
+
+        when(repository.saveAll(processedMarketModels)).thenReturn(processedMarketModels);
+        when(repository.findAll()).thenReturn(processedMarketModels);
+
+        assertDoesNotThrow(() -> processingService.saveProcessedData(processedMarketModels));
+
+        verify(repository, times(1)).saveAll(processedMarketModels);
+        
+        List<ProcessedMarketModel> savedData = repository.findAll();
+        assertFalse(savedData.isEmpty());
+        assertEquals(100, savedData.size());
+        assertEquals(processedMarketModels, savedData);
     }
 
     @Test
@@ -95,6 +117,24 @@ public class ProcessingServiceUnitTest {
         }
 
         return set;
+    }
+
+    private static List<ProcessedMarketModel> createValidMarketModelList() {
+        List<ProcessedMarketModel> list = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            list.add(new ProcessedMarketModel(
+                    UUID.randomUUID(),
+                    "binance",
+                    "bitcoin",
+                    "tether",
+                    new BigDecimal("65000.00").add(new BigDecimal(i)),
+                    1696252800000L + i,
+                    ZonedDateTime.now(),
+                    Instant.now()
+            ));
+        }
+
+        return list;
     }
 
     private static Set<RawMarketModel> createInvalidMarketModels() {

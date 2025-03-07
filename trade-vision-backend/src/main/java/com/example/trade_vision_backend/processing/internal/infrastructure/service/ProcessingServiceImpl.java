@@ -68,6 +68,7 @@ public class ProcessingServiceImpl implements ProcessingService {
     public void saveProcessedData(List<ProcessedMarketModel> processedData) throws ProcessingException {
         try {
             processingRepository.saveAll(processedData);
+            log.info("Successfully saved data list of size: {}", processedData.size());
         } catch (DataAccessException ex) {
             throw new ProcessingException("", ex);
         } catch (Exception ex) {
