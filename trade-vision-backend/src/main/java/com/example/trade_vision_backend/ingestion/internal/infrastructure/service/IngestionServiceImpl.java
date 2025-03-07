@@ -29,7 +29,7 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Override
     public void sendEvent(@Nonnull Set<RawMarketDTO> marketDTOS) {
-        ingestionManagement.complete(marketDTOS);
+        ingestionManagement.processFieldsForEvent(marketDTOS);
     }
 
     @Scheduled(cron = "0 */15 * * * *")

@@ -41,5 +41,4 @@ public class ProcessedMarketModel {
 
         @Column(name = "createdAt")
         private Instant createdAt;
-    }
 }

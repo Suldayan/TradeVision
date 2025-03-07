@@ -7,20 +7,14 @@ public record IngestionCompleted(
         UUID id,
         int marketCount,
         Instant completedAt,
-        Long ingestedTimestamp,
-        Object source
+        Long ingestedTimestamp
 ) {
-    public IngestionCompleted(
-            UUID ingestionId,
-            int marketCount,
-            Long ingestedTimestamp,
-            Object source) {
+    public IngestionCompleted(UUID ingestionId, int marketCount, Long ingestedTimestamp) {
         this(
                 ingestionId,
                 marketCount,
                 Instant.now(),
-                ingestedTimestamp,
-                source.getClass().getSimpleName()
+                ingestedTimestamp
         );
     }
 }

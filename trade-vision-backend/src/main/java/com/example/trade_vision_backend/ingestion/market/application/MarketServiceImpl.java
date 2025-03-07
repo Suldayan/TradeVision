@@ -92,5 +92,8 @@ public class MarketServiceImpl implements MarketService {
         if (marketHolder.markets().size() != EXPECTED_MARKET_SIZE) {
             throw new RestClientException("Market set from wrapper is not equal to 100");
         }
+        if (marketHolder.timestamp() < 0) {
+            throw new RestClientException("Market data contains an invalid timestamp");
+        }
     }
 }

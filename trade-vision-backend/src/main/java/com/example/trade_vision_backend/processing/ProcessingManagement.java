@@ -1,7 +1,7 @@
 package com.example.trade_vision_backend.processing;
 
 import com.example.trade_vision_backend.ingestion.IngestionCompleted;
-import com.example.trade_vision_backend.ingestion.internal.infrastructure.repository.IngestionRepository;
+import com.example.trade_vision_backend.ingestion.IngestionDataService;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.processing.internal.infrastructure.exception.ProcessingException;
 import com.example.trade_vision_backend.processing.internal.infrastructure.mapper.ProcessingMapper;
@@ -21,7 +21,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class ProcessingManagement {
-    private final IngestionRepository ingestionRepository;
+    private final IngestionDataService ingestionDataService;
     private final ProcessingService processingService;
     private final ProcessingMapper mapper;
 
@@ -29,12 +29,12 @@ public class ProcessingManagement {
 
     @ApplicationModuleListener
     public void activateProcessing(@Nonnull IngestionCompleted ingestionCompleted) throws ProcessingException {
-        List<RawMarketModel> unprocessedData = ingestionRepository.findAll();
+        List<RawMarketModel> unprocessedData = ingestionDataService.getAllData();
+        final Long timestamp = ingestionCompleted.ingestedTimestamp();;
         validateMarkets(unprocessedData);
-        log.info("Processing has been triggered for data of timestamp: {}",
-                ingestionCompleted.ingestedTimestamp());
+        log.info("Processing has been triggered for data of timestamp: {}", timestamp);
         Set<RawMarketModel> unprocessedSet = mapper.INSTANCE.listToSet(unprocessedData);
-        processingService.executeProcessing(unprocessedSet, ingestionCompleted.ingestedTimestamp());
+        processingService.executeProcessing(unprocessedSet, timestamp);
     }
 
     private void validateMarkets(@Nonnull List<RawMarketModel> unprocessedData) {

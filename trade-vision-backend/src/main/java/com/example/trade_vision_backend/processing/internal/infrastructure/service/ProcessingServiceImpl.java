@@ -31,17 +31,14 @@ public class ProcessingServiceImpl implements ProcessingService {
     ) throws IllegalArgumentException {
         try {
             return rawMarketModels.stream()
-                    .map(field -> {
-                        assert field.getTimestamp() != null;
-                        return ProcessedMarketModel.builder()
-                                .baseId(field.getBaseId())
-                                .quoteId(field.getQuoteId())
-                                .exchangeId(field.getExchangeId())
-                                .priceUsd(field.getPriceUsd())
-                                .updated(field.getUpdated())
-                                .timestamp(transformTimestamp(field.getTimestamp()))
-                                .build();
-                    })
+                    .map(field -> ProcessedMarketModel.builder()
+                            .baseId(field.getBaseId())
+                            .quoteId(field.getQuoteId())
+                            .exchangeId(field.getExchangeId())
+                            .priceUsd(field.getPriceUsd())
+                            .updated(field.getUpdated())
+                            .timestamp(transformTimestamp(timestamp))
+                            .build())
                     .collect(Collectors.toSet());
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
@@ -58,8 +55,10 @@ public class ProcessingServiceImpl implements ProcessingService {
             validateRawMarketModels(rawMarketModels, timestamp);
             Set<ProcessedMarketModel> processedData = transformToMarketModel(rawMarketModels, timestamp);
             saveProcessedData(processedData);
+        } catch (IllegalArgumentException ex) {
+            throw new ProcessingException("Failed to process due to invalid data", ex);
         } catch (Exception ex) {
-            throw new ProcessingException("", ex);
+            throw new ProcessingException("An unexpected error occurred while executing processing", ex);
         }
     }
 
