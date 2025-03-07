@@ -68,8 +68,9 @@ public class ProcessingServiceUnitTest {
         assertDoesNotThrow(() -> processingService.saveProcessedData(processedMarketModels));
 
         verify(repository, times(1)).saveAll(processedMarketModels);
-        
+
         List<ProcessedMarketModel> savedData = repository.findAll();
+
         assertFalse(savedData.isEmpty());
         assertEquals(100, savedData.size());
         assertEquals(processedMarketModels, savedData);

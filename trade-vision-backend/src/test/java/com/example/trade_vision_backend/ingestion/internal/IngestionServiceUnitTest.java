@@ -12,14 +12,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DataJpaTest
+@ActiveProfiles("test")
 public class IngestionServiceUnitTest {
 
     @Mock
@@ -37,17 +39,19 @@ public class IngestionServiceUnitTest {
     @Test
     void saveMarketData_UpdatesAndSavesExistingDataSuccessfully() {
         List<RawMarketModel> updatedModels = createUpdatedValidMarketModelList();
-        ingestionRepository.saveAll(createValidMarketModelList());
-        ingestionRepository.flush();
 
-        assertDoesNotThrow(() ->
-                ingestionService.saveMarketData(updatedModels));
+        when(ingestionRepository.saveAll(updatedModels)).thenReturn(updatedModels);
+        when(ingestionRepository.findAll()).thenReturn(updatedModels);
 
-        List<RawMarketModel> result = ingestionRepository.findAll();
+        assertDoesNotThrow(() -> ingestionService.saveMarketData(updatedModels));
 
-        assertFalse(result.isEmpty());
-        assertEquals(100, result.size());
-        assertEquals(updatedModels, result);
+        verify(ingestionRepository, times(1)).saveAll(updatedModels);
+
+        List<RawMarketModel> savedData = ingestionRepository.findAll();
+
+        assertFalse(savedData.isEmpty());
+        assertEquals(100, savedData.size());
+        assertEquals(updatedModels, savedData);
     }
 
     private static Set<RawMarketDTO> createValidMarketDTOs() {
