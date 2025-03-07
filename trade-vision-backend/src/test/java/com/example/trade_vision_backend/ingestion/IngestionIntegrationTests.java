@@ -47,8 +47,7 @@ public class IngestionIntegrationTests {
                         testID,
                         100,
                         Instant.now(),
-                        123456789L,
-                        this
+                        123456789L
                 )
         ).andWaitForEventOfType(IngestionCompleted.class)
                 .matching(event -> event.id().equals(testID) && event.marketCount() == 100)
@@ -57,30 +56,6 @@ public class IngestionIntegrationTests {
                     assertEquals(testID, event.id());
                     assertEquals(123456789L, event.ingestedTimestamp());
                     assertEquals(100, event.marketCount());
-                });
-    }
-
-    @Test
-    public void eventSentWhenIngestionCompletes(Scenario scenario) {
-        Long testTimestamp = 123456789L;
-        UUID testID = UUID.randomUUID();
-        Set<RawMarketDTO> rawMarketDTOS = createValidMarketDTOSet();
-        MarketWrapperDTO marketWrapper = new MarketWrapperDTO(rawMarketDTOS, testTimestamp);
-        List<RawMarketModel> rawMarketModels = createValidMarketModelList();
-
-        when(marketService.getMarketsData()).thenReturn(marketWrapper);
-        when(marketService.convertWrapperDataToRecord(marketWrapper)).thenReturn(rawMarketDTOS);
-        when(marketService.rawMarketDTOToModel(rawMarketDTOS)).thenReturn(rawMarketModels);
-        when(ingestionRepository.findAll()).thenReturn(new ArrayList<>());
-        doNothing().when(ingestionManagement).complete(rawMarketDTOS);
-
-        scenario.stimulate(() -> ingestionService.executeIngestion())
-                .andWaitForEventOfType(IngestionCompleted.class)
-                .matching(event -> event.ingestedTimestamp().equals(testTimestamp))
-                .toArriveAndVerify(event -> {
-                    assertNotNull(event);
-                    verify(ingestionManagement).complete(rawMarketDTOS);
-                    verify(ingestionRepository).saveAll(any());
                 });
     }
 

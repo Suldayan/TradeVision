@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,7 @@ public class ProcessingServiceImpl implements ProcessingService {
 
     @Nonnull
     @Override
-    public Set<ProcessedMarketModel> transformToMarketModel(
+    public List<ProcessedMarketModel> transformToMarketModel(
             @Nonnull Set<RawMarketModel> rawMarketModels,
             @Nonnull Long timestamp
     ) throws IllegalArgumentException {
@@ -39,7 +40,7 @@ public class ProcessingServiceImpl implements ProcessingService {
                             .updated(field.getUpdated())
                             .timestamp(transformTimestamp(timestamp))
                             .build())
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
                     timestamp), ex);
@@ -53,7 +54,7 @@ public class ProcessingServiceImpl implements ProcessingService {
     ) throws ProcessingException {
         try {
             validateRawMarketModels(rawMarketModels, timestamp);
-            Set<ProcessedMarketModel> processedData = transformToMarketModel(rawMarketModels, timestamp);
+            List<ProcessedMarketModel> processedData = transformToMarketModel(rawMarketModels, timestamp);
             saveProcessedData(processedData);
         } catch (IllegalArgumentException ex) {
             throw new ProcessingException("Failed to process due to invalid data", ex);
@@ -64,7 +65,7 @@ public class ProcessingServiceImpl implements ProcessingService {
 
     @Transactional
     @Override
-    public void saveProcessedData(Set<ProcessedMarketModel> processedData) throws ProcessingException {
+    public void saveProcessedData(List<ProcessedMarketModel> processedData) throws ProcessingException {
         try {
             processingRepository.saveAll(processedData);
         } catch (DataAccessException ex) {

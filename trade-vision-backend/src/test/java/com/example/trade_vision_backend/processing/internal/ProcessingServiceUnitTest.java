@@ -1,6 +1,5 @@
 package com.example.trade_vision_backend.processing.internal;
 
-import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.processing.ProcessedMarketModel;
 import com.example.trade_vision_backend.processing.internal.infrastructure.db.ProcessingRepository;
@@ -14,10 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,7 +32,7 @@ public class ProcessingServiceUnitTest {
     public void transformToMarketModel_SuccessfullyReturnsMarketModelSet() {
         Set<RawMarketModel> rawMarketModels = createValidMarketModels();
 
-        Set<ProcessedMarketModel> result = assertDoesNotThrow(
+        List<ProcessedMarketModel> result = assertDoesNotThrow(
                 () -> processingService.transformToMarketModel(rawMarketModels, MOCK_TIMESTAMP));
 
         assertNotNull(result);
