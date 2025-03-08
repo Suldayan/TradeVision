@@ -1,5 +1,6 @@
 package com.example.trade_vision_backend.processing.internal;
 
+import com.example.trade_vision_backend.ingestion.ProcessableMarketDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.processing.ProcessedMarketModel;
 import com.example.trade_vision_backend.processing.internal.infrastructure.db.ProcessingRepository;
@@ -35,10 +36,10 @@ public class ProcessingServiceUnitTest {
 
     @Test
     public void transformToMarketModel_SuccessfullyReturnsMarketModelSet() {
-        Set<RawMarketModel> rawMarketModels = createValidMarketModels();
+        Set<ProcessableMarketDTO> processableMarketDTOS = createValidMarketModels();
 
         List<ProcessedMarketModel> result = assertDoesNotThrow(
-                () -> processingService.transformToMarketModel(rawMarketModels, MOCK_TIMESTAMP));
+                () -> processingService.transformToMarketModel(processableMarketDTOS, MOCK_TIMESTAMP));
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -52,7 +53,7 @@ public class ProcessingServiceUnitTest {
     @Transactional
     @Test
     public void executeProcessing_SuccessfullyExecutesFullProcessingFlow() {
-        Set<RawMarketModel> validSet = createValidMarketModels();
+        Set<ProcessableMarketDTO> validSet = createValidMarketModels();
 
         assertDoesNotThrow(
                 () -> processingService.executeProcessing(validSet, MOCK_TIMESTAMP));
@@ -87,7 +88,7 @@ public class ProcessingServiceUnitTest {
 
     @Test
     public void executeProcessing_ThrowsProcessingExceptionOnInvalidDataSize() {
-        Set<RawMarketModel> invalidSet = createInvalidMarketModels();
+        Set<ProcessableMarketDTO> invalidSet = createInvalidMarketModels();
 
         ProcessingException exception = assertThrows(
                 ProcessingException.class, () -> processingService.executeProcessing(invalidSet, MOCK_TIMESTAMP));
@@ -96,11 +97,10 @@ public class ProcessingServiceUnitTest {
         assertTrue(exception.getMessage().contains("Failed to process due to invalid data"));
     }
 
-    private static Set<RawMarketModel> createValidMarketModels() {
-        Set<RawMarketModel> set = new HashSet<>();
+    private static Set<ProcessableMarketDTO> createValidMarketModels() {
+        Set<ProcessableMarketDTO> set = new HashSet<>();
         for (int i = 0; i < 100; i++) {
-            set.add(new RawMarketModel(
-                    UUID.randomUUID(),
+            set.add(new ProcessableMarketDTO(
                     "binance",
                     i + 1,
                     "BTC",
@@ -113,7 +113,7 @@ public class ProcessingServiceUnitTest {
                     new BigDecimal("5.25"),
                     1200 + i,
                     1696252800000L + i,
-                    null
+                    123456789L
             ));
         }
 
@@ -138,11 +138,10 @@ public class ProcessingServiceUnitTest {
         return list;
     }
 
-    private static Set<RawMarketModel> createInvalidMarketModels() {
-        Set<RawMarketModel> set = new HashSet<>();
+    private static Set<ProcessableMarketDTO> createInvalidMarketModels() {
+        Set<ProcessableMarketDTO> set = new HashSet<>();
         for (int i = 0; i < 10; i++) {
-            set.add(new RawMarketModel(
-                    UUID.randomUUID(),
+            set.add(new ProcessableMarketDTO(
                     "binance",
                     i + 1,
                     "BTC",
@@ -155,7 +154,7 @@ public class ProcessingServiceUnitTest {
                     new BigDecimal("5.25"),
                     1200 + i,
                     1696252800000L + i,
-                    null
+                    123456789L
             ));
         }
 

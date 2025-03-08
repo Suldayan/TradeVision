@@ -1,5 +1,6 @@
 package com.example.trade_vision_backend.processing.internal.infrastructure.service;
 
+import com.example.trade_vision_backend.ingestion.ProcessableMarketDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.processing.ProcessedMarketModel;
 import com.example.trade_vision_backend.processing.internal.infrastructure.db.ProcessingRepository;
@@ -27,17 +28,17 @@ public class ProcessingServiceImpl implements ProcessingService {
     @Nonnull
     @Override
     public List<ProcessedMarketModel> transformToMarketModel(
-            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Set<ProcessableMarketDTO> processableMarketDTOS,
             @Nonnull Long timestamp
     ) throws IllegalArgumentException {
         try {
-            return rawMarketModels.stream()
+            return processableMarketDTOS.stream()
                     .map(field -> ProcessedMarketModel.builder()
-                            .baseId(field.getBaseId())
-                            .quoteId(field.getQuoteId())
-                            .exchangeId(field.getExchangeId())
-                            .priceUsd(field.getPriceUsd())
-                            .updated(field.getUpdated())
+                            .baseId(field.baseId())
+                            .quoteId(field.quoteId())
+                            .exchangeId(field.exchangeId())
+                            .priceUsd(field.priceUsd())
+                            .updated(field.updated())
                             .timestamp(transformTimestamp(timestamp))
                             .build())
                     .collect(Collectors.toList());
@@ -49,12 +50,12 @@ public class ProcessingServiceImpl implements ProcessingService {
 
     @Override
     public void executeProcessing(
-            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Set<ProcessableMarketDTO> processableMarketDTOS,
             @Nonnull Long timestamp
     ) throws ProcessingException {
         try {
-            validateRawMarketModels(rawMarketModels, timestamp);
-            List<ProcessedMarketModel> processedData = transformToMarketModel(rawMarketModels, timestamp);
+            validateRawMarketModels(processableMarketDTOS, timestamp);
+            List<ProcessedMarketModel> processedData = transformToMarketModel(processableMarketDTOS, timestamp);
             saveProcessedData(processedData);
         } catch (IllegalArgumentException ex) {
             throw new ProcessingException("Failed to process due to invalid data", ex);
@@ -85,15 +86,15 @@ public class ProcessingServiceImpl implements ProcessingService {
     }
 
     private void validateRawMarketModels(
-            @Nonnull Set<RawMarketModel> rawMarketModels,
+            @Nonnull Set<ProcessableMarketDTO> processableMarketDTOS,
             @Nonnull Long timestamp) throws IllegalArgumentException {
-        if (rawMarketModels.isEmpty()) {
+        if (processableMarketDTOS.isEmpty()) {
             // We throw an exception here because it's expected that there is data available at the given timestamp
             throw new IllegalArgumentException(String.format("Unable to push data forward due to empty market set for timestamp: %s", timestamp));
         }
-        if (rawMarketModels.size() != 100) {
+        if (processableMarketDTOS.size() != 100) {
             throw new IllegalArgumentException(String.format("Market models with timestamp: %s fetched but is missing data with size: %s of expected size: 100",
-                    timestamp, rawMarketModels.size()));
+                    timestamp, processableMarketDTOS.size()));
         }
     }
 }

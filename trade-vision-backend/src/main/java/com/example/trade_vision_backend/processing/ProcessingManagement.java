@@ -2,6 +2,7 @@ package com.example.trade_vision_backend.processing;
 
 import com.example.trade_vision_backend.ingestion.IngestionCompleted;
 import com.example.trade_vision_backend.ingestion.IngestionDataService;
+import com.example.trade_vision_backend.ingestion.ProcessableMarketDTO;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
 import com.example.trade_vision_backend.processing.internal.infrastructure.exception.ProcessingException;
 import com.example.trade_vision_backend.processing.internal.infrastructure.mapper.ProcessingMapper;
@@ -29,15 +30,15 @@ public class ProcessingManagement {
 
     @ApplicationModuleListener
     public void activateProcessing(@Nonnull IngestionCompleted ingestionCompleted) throws ProcessingException {
-        List<RawMarketModel> unprocessedData = ingestionDataService.getAllData();
+        List<ProcessableMarketDTO> unprocessedData = ingestionDataService.getAllData();
         final Long timestamp = ingestionCompleted.ingestedTimestamp();;
         validateMarkets(unprocessedData);
         log.info("Processing has been triggered for data of timestamp: {}", timestamp);
-        Set<RawMarketModel> unprocessedSet = mapper.INSTANCE.listToSet(unprocessedData);
+        Set<ProcessableMarketDTO> unprocessedSet = mapper.INSTANCE.listToSet(unprocessedData);
         processingService.executeProcessing(unprocessedSet, timestamp);
     }
 
-    private void validateMarkets(@Nonnull List<RawMarketModel> unprocessedData) {
+    private void validateMarkets(@Nonnull List<ProcessableMarketDTO> unprocessedData) {
         if (unprocessedData.isEmpty()) {
             throw new IllegalArgumentException("Expected data to be in the repository but nothing is available");
         }
