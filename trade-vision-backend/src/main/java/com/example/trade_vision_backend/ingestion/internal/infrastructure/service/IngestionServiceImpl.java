@@ -65,7 +65,7 @@ public class IngestionServiceImpl implements IngestionService {
             List<RawMarketModel> updatedData = createNewUpdatedModelSet(latestFetchedData, repositoryModels);
 
             ingestionRepository.saveAll(updatedData);
-            log.info("Successfully saved all data entries");
+            log.info("Successfully updated and saved all data entries");
         } catch (DataAccessException ex) {
             throw new IngestionException("Database error occurred while saving market data", ex);
         } catch (Exception ex) {
