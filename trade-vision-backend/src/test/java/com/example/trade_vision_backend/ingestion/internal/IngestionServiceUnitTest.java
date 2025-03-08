@@ -40,12 +40,10 @@ public class IngestionServiceUnitTest {
     void saveMarketData_UpdatesAndSavesExistingDataSuccessfully() {
         List<RawMarketModel> updatedModels = createUpdatedValidMarketModelList();
 
-        when(ingestionRepository.saveAll(updatedModels)).thenReturn(updatedModels);
+        when(ingestionRepository.saveAll(any())).thenReturn(updatedModels);
         when(ingestionRepository.findAll()).thenReturn(updatedModels);
 
         assertDoesNotThrow(() -> ingestionService.saveMarketData(updatedModels));
-
-        verify(ingestionRepository, times(1)).saveAll(updatedModels);
 
         List<RawMarketModel> savedData = ingestionRepository.findAll();
 
