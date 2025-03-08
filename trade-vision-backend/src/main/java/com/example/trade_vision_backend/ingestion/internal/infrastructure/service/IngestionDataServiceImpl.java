@@ -19,4 +19,6 @@ public class IngestionDataServiceImpl implements IngestionDataService {
     public List<RawMarketModel> getAllData() {
         return ingestionRepository.findAll();
     }
+
+
 }
