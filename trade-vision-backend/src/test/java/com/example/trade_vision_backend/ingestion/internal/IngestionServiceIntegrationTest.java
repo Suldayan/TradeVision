@@ -30,12 +30,17 @@ public class IngestionServiceIntegrationTest {
     }
 
     @Test
-    public void executeIngestion_SuccessfullyExecutesEntireFlowAndUpdatesDataOnExistingData() {
+    public void executeIngestion_SuccessfullyExecutesEntireFlowAndUpdatesDataOnExistingData() throws InterruptedException {
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
+        List<RawMarketModel> oldData = repository.findAll();
+
+        Thread.sleep(5000);
+
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
+        List<RawMarketModel> updatedData = repository.findAll();
 
-        List<RawMarketModel> data = repository.findAll();
-
-        assertEquals(100, data.size());
+        assertEquals(100, oldData.size());
+        assertEquals(100, updatedData.size());
+        assertNotEquals(oldData, updatedData);
     }
 }

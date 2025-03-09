@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "markets")
+@Table(name = "processed_markets")
 @EqualsAndHashCode(of = {"baseId", "quoteId", "exchangeId"})
 public class ProcessedMarketModel {
         @Id
