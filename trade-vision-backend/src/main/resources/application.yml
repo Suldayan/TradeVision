@@ -11,6 +11,8 @@ spring:
     events:
       completion:
         mode: delete
+      jdbc-schema-initialization:
+        enabled: true
 
   datasource:
     url: ${DB_URL}
