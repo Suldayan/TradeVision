@@ -19,18 +19,19 @@ import java.util.UUID;
 public class ProcessedMarketModel {
         @Id
         @GeneratedValue(strategy = GenerationType.UUID)
+        @Column(name = "id")
         private UUID id;
 
-        @Column(name = "baseId", nullable = false)
+        @Column(name = "base_id", nullable = false)
         private String baseId;
 
-        @Column(name = "quoteId", nullable = false)
+        @Column(name = "quote_id", nullable = false)
         private String quoteId;
 
-        @Column(name = "exchangeId", nullable = false)
+        @Column(name = "exchange_id", nullable = false)
         private String exchangeId;
 
-        @Column(name = "priceUsd", nullable = false)
+        @Column(name = "price_usd", nullable = false)
         private BigDecimal priceUsd;
 
         @Column(name = "updated", nullable = false)
@@ -39,6 +40,6 @@ public class ProcessedMarketModel {
         @Column(name = "timestamp", nullable = false)
         private ZonedDateTime timestamp;
 
-        @Column(name = "createdAt")
+        @Column(name = "created_at")
         private Instant createdAt;
 }
