@@ -17,6 +17,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,14 +34,16 @@ public class ProcessingServiceImpl implements ProcessingService {
     ) throws IllegalArgumentException {
         try {
             return processableMarketDTOS.stream()
-                    .map(field -> ProcessedMarketModel.builder()
-                            .baseId(field.baseId())
-                            .quoteId(field.quoteId())
-                            .exchangeId(field.exchangeId())
-                            .priceUsd(field.priceUsd())
-                            .updated(field.updated())
-                            .timestamp(transformTimestamp(timestamp))
-                            .build())
+                    .map(field -> new ProcessedMarketModel(
+                            UUID.randomUUID(),
+                            field.baseId(),
+                            field.quoteId(),
+                            field.exchangeId(),
+                            field.priceUsd(),
+                            field.updated(),
+                            transformTimestamp(timestamp),
+                            Instant.now()
+                    ))
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(String.format("Failed to transform model from raw to processed for timestamped data: %s",
