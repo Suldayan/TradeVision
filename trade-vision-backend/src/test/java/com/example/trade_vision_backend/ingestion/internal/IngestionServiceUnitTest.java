@@ -5,13 +5,11 @@ import com.example.trade_vision_backend.ingestion.internal.infrastructure.servic
 import com.example.trade_vision_backend.ingestion.internal.infrastructure.repository.IngestionRepository;
 import com.example.trade_vision_backend.ingestion.market.MarketService;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
-import com.example.trade_vision_backend.ingestion.market.RawMarketDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -52,53 +50,6 @@ public class IngestionServiceUnitTest {
         assertEquals(updatedModels, savedData);
     }
 
-    private static Set<RawMarketDTO> createValidMarketDTOs() {
-        Set<RawMarketDTO> set = new HashSet<>();
-        for (int i = 0; i < 100; i++) {
-            set.add(new RawMarketDTO(
-                    "binance",
-                    i + 1,
-                    "BTC",
-                    "bitcoin",
-                    "USDT",
-                    "tether",
-                    new BigDecimal("65000.00"),
-                    new BigDecimal("65000.00"),
-                    new BigDecimal("1500000000.00"),
-                    new BigDecimal("5.25"),
-                    1200,
-                    1696252800000L,
-                    null
-            ));
-        }
-
-        return set;
-    }
-
-    private static List<RawMarketModel> createValidMarketModelList() {
-        List<RawMarketModel> list = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            list.add(new RawMarketModel(
-                    UUID.randomUUID(),
-                    "binance",
-                    i + 1,
-                    "BTC",
-                    "bitcoin",
-                    "USDT",
-                    "tether",
-                    new BigDecimal("65000.00").add(new BigDecimal(i)),
-                    new BigDecimal("65000.00"),
-                    new BigDecimal("1500000000.00"),
-                    new BigDecimal("5.25"),
-                    1200 + i,
-                    1696252800000L + i,
-                    null
-            ));
-        }
-
-        return list;
-    }
-
     private static List<RawMarketModel> createUpdatedValidMarketModelList() {
         List<RawMarketModel> list = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -115,8 +66,7 @@ public class IngestionServiceUnitTest {
                     new BigDecimal("9500000000.00"),
                     new BigDecimal("10.25"),
                     3200 + i,
-                    1732252800000L + i,
-                    null
+                    1732252800000L + i
             ));
         }
 

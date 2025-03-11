@@ -59,4 +59,28 @@ public class RawMarketModel {
 
     @Column(name = "timestamp")
     private Long timestamp;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
+
+    public RawMarketModel(UUID id, String exchangeId, Integer rank, String baseSymbol, String baseId,
+                          String quoteSymbol, String quoteId, BigDecimal priceQuote, BigDecimal priceUsd,
+                          BigDecimal volumeUsd24Hr, BigDecimal percentExchangeVolume, Integer tradesCount24Hr,
+                          Long updated) {
+        this.id = id;
+        this.exchangeId = exchangeId;
+        this.rank = rank;
+        this.baseSymbol = baseSymbol;
+        this.baseId = baseId;
+        this.quoteSymbol = quoteSymbol;
+        this.quoteId = quoteId;
+        this.priceQuote = priceQuote;
+        this.priceUsd = priceUsd;
+        this.volumeUsd24Hr = volumeUsd24Hr;
+        this.percentExchangeVolume = percentExchangeVolume;
+        this.tradesCount24Hr = tradesCount24Hr;
+        this.updated = updated;
+    }
 }
+

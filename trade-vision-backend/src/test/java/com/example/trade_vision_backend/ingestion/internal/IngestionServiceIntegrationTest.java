@@ -3,7 +3,6 @@ package com.example.trade_vision_backend.ingestion.internal;
 import com.example.trade_vision_backend.ingestion.internal.infrastructure.repository.IngestionRepository;
 import com.example.trade_vision_backend.ingestion.internal.infrastructure.service.IngestionService;
 import com.example.trade_vision_backend.ingestion.market.RawMarketModel;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,13 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 public class IngestionServiceIntegrationTest {
 
     @Autowired
@@ -32,7 +29,6 @@ public class IngestionServiceIntegrationTest {
         assertDoesNotThrow(() -> ingestionService.executeIngestion());
     }
 
-    @Transactional
     @Test
     public void executeIngestion_SuccessfullyExecutesEntireFlowAndUpdatesDataOnExistingData() {
         List<RawMarketModel> dummyData = generateDummyRawMarketModels();
@@ -66,6 +62,7 @@ public class IngestionServiceIntegrationTest {
                     .tradesCount24Hr(i * 2)
                     .updated(System.currentTimeMillis())
                     .timestamp(System.currentTimeMillis())
+                    .version(1)
                     .build();
             models.add(model);
         }
