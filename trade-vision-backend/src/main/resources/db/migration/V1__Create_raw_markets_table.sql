@@ -13,5 +13,6 @@ CREATE TABLE IF NOT EXISTS raw_markets (
     trades_count_24hr INTEGER,
     updated BIGINT NOT NULL,
     timestamp BIGINT,
+    version INTEGER,
     CONSTRAINT uk_raw_markets_identifiers UNIQUE (base_id, quote_id, exchange_id)
 );
