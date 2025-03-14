@@ -32,7 +32,6 @@ public class IngestionServiceImpl implements IngestionService {
         ingestionManagement.processFieldsForEvent(marketDTOS);
     }
 
-    @Scheduled(cron = "0 */15 * * * *")
     @Override
     @Transactional
     public void executeIngestion() {
