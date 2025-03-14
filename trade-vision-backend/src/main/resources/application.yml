@@ -15,6 +15,7 @@ spring:
         enabled: true
 
   datasource:
+    # url: jdbc:postgresql://db.wnwrnwiwmlwhlfzocmpo.supabase.co:5432/postgres?user=postgres&password=[YOUR-PASSWORD]
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
