@@ -4,6 +4,7 @@ import com.example.trade_vision_backend.ingestion.internal.infrastructure.servic
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,9 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class IngestionController {
     private final IngestionService ingestionService;
 
+    // TODO: configure controller advice
     @GetMapping("/activate")
-    public String activateIngestionService() {
+    public ResponseEntity<String> activateIngestionService() {
         ingestionService.executeIngestion();
-        return "Successfully executed ingestion service";
+        return ResponseEntity.ok("Successfully executed ingestion service");
     }
 }
