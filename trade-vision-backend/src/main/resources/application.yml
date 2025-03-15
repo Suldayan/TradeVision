@@ -15,17 +15,16 @@ spring:
         enabled: true
 
   datasource:
-    # url: jdbc:postgresql://db.wnwrnwiwmlwhlfzocmpo.supabase.co:5432/postgres?user=postgres&password=[YOUR-PASSWORD]
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${SUPA_DB_URL}
+    username: ${SUPA_DB_USERNAME}
+    password: ${SUPA_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
 
   flyway:
-    enabled: true
+    enabled: false
     baseline-on-migration: true
     locations: classpath:db/migration
 
